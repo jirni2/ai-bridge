@@ -1,0 +1,9 @@
+AI BRIDGE v3.3 — CHATGPT WORK CONTROLLER
+
+• Added /work deterministic control UI for ChatGPT Work / Cloud Browser.
+• Added /api/work/run private authenticated endpoint.
+• Work mode is hard-locked to Gemini + Groq Free + OpenRouter Free.
+• Paid OpenAI / Claude / xAI Grok cannot be called by Work Controller.
+• Parallel free-team execution with free-only Judge/Synthesis.
+• Exact per-provider results/errors and retry-failed-only flow.
+• Stable element IDs and simple controls for browser automation.

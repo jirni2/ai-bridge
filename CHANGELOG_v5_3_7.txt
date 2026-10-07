@@ -1,0 +1,8 @@
+AI BRIDGE v5.3.7
+
+- Replaced blocking ZIP/file alert dialogs with an accessible in-page progress and error region.
+- Added incremental ZIP extraction progress and preserved Safari event-loop yielding.
+- Empty/unsupported ZIP archives now fail visibly without freezing the browser tab.
+- Multi-file selection keeps valid files even when another selected file fails.
+- Added bounded adaptive Agent outcome memory: successful task type, tool route and helper providers are reused as advisory context on later goals.
+- Adaptive memory stores no raw task text, answer text, attached-file contents, credentials or hidden reasoning, and never overrides the current user goal.

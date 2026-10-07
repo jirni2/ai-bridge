@@ -1,0 +1,24 @@
+import fs from "node:fs";
+const worker=fs.readFileSync(new URL("../_worker.js",import.meta.url),"utf8");
+const client=fs.readFileSync(new URL("../work-controller.js",import.meta.url),"utf8");
+const html=fs.readFileSync(new URL("../work.html",import.meta.url),"utf8");
+function ok(v,msg){if(!v)throw new Error("FAIL: "+msg);console.log("✓",msg)}
+ok(/const VERSION="(?:3\.[789]\.\d+|[4-9]\.\d+\.\d+)";/.test(worker),"v3.7+ worker version");
+ok(worker.includes('"/api/work/provider"'),"progressive provider endpoint exists");
+ok(worker.includes('"/api/work/synthesize"'),"separate synthesis endpoint exists");
+ok(worker.includes("withRetry(")&&worker.includes("callGroqFree")&&worker.includes("callOpenRouter"),"temporary error retry is available to Groq/OpenRouter");
+ok(worker.includes("groqSampleContext"),"Groq gets cross-file sampled partial context");
+ok(worker.includes("PARTIAL GROQ REVIEW"),"Groq partial-review labeling exists");
+ok(worker.includes("conservativeJudge"),"conservative synthesis metadata exists");
+ok(worker.includes('msg.method==="tools/call"'),"public MCP execution auth gate exists");
+ok(worker.includes("Authorization code already used"),"authorization-code replay check exists");
+ok(worker.includes("Refresh token already used"),"refresh-token rotation/replay check exists");
+ok(worker.includes("MCP_FILE_HOST_ALLOWLIST"),"public file-host allowlist support exists");
+ok(worker.includes("Bridge Review Panel v${VERSION}"),"support page uses dynamic version");
+ok(client.includes("mergeResults"),"retry merge helper exists");
+ok(client.includes("lastFilePayload"),"retry preserves extracted file payload");
+ok(client.includes('"/api/work/provider-stream"'),"client runs providers independently through the live stream endpoint");
+ok(client.includes("workHeadTail"),"ZIP context preserves head and tail");
+ok(client.includes("<project_manifest>"),"ZIP context includes file manifest");
+ok(html.includes('id="workFile"'),"upload input retained");
+console.log("All v3.7 orchestration tests passed.");

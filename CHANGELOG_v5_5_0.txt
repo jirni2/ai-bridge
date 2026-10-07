@@ -1,0 +1,11 @@
+AI Bridge v5.5.0
+================
+
+- Added Search First for ordinary Chat questions.
+- Simple low-risk facts can be answered from web results without an AI API call.
+- Added official Google Programmable Search, Yandex Search API v2, and Brave Search adapters.
+- Added no-key DuckDuckGo and Bing fallbacks.
+- Added source cards, explicit NO AI USED / AI + SOURCES labels, and live search progress.
+- Added query privacy guards that prevent likely passwords, tokens, API keys, files, and transformation tasks from being sent to search engines.
+- Added AI fallback with bounded, untrusted web evidence when search alone is insufficient.
+- Refreshed the Chat hero and composer with a responsive Search First glass design.

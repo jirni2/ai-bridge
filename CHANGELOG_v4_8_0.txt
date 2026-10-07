@@ -1,0 +1,8 @@
+AI Bridge v4.8.0
+
+- Removed the local greeting stub: normal greetings now traverse a real configured AI provider.
+- Added same-origin HttpOnly/Secure/SameSite=Strict 14-day Bridge sessions via /api/session/login and /api/session/logout.
+- Main UI and Work UI no longer persist BRIDGE_ACCESS_TOKEN in localStorage/sessionStorage.
+- Private REST routes accept either the legacy Authorization: Bearer token or the HttpOnly session cookie.
+- Reduced stale-PWA risk by no longer precaching HTML/JS runtime assets in the service worker.
+- Preserved provider fallback, retry diagnostics, OAuth/MCP, Work Controller and full project/test files.

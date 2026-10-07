@@ -1,0 +1,57 @@
+AI BRIDGE v4.5.2 — INDEPENDENT ADVERSARIAL AUDIT FIXES
+
+Five confirmed, code-verified bugs found and fixed. Each was reproduced
+against real crafted input before being fixed (not accepted on a model's
+claim alone), and each has a regression test in
+tests/run_v452_adversarial_audit_tests.mjs.
+
+1. [SECURITY/CRITICAL] Server-side ZIP-bomb / unbounded decompression.
+   _worker.js's extractZipText() (used by the public review_project_files
+   MCP tool) had its own duplicate ZIP parser that did not use the existing
+   zip-safety-core.js hardening library, and only checked the ZIP's
+   *declared* uncompressed size (attacker-controlled metadata) before fully
+   decompressing. Verified: a 48KB crafted ZIP that lies about its size
+   forced ~140MB of real memory allocation. Fixed by adding entry-count,
+   per-entry compression-ratio, and total-decompressed-budget caps, and by
+   replacing the unbounded inflate with a true bounded/streaming decompressor
+   that aborts once real output exceeds the limit, independent of any
+   declared metadata.
+
+2. [SECURITY/CRITICAL] MCP file-host allowlist silently bypassed.
+   callMcpTool() invoked buildFilesContext(args.files) without forwarding
+   `env`, so safeDownload()'s allowedMcpFileHost() check (gated on `env`
+   being truthy) never ran. Verified live: with PUBLIC_PLUGIN_MODE=1 and no
+   MCP_FILE_HOST_ALLOWLIST configured (which should default to deny-all),
+   review_project_files fetched an arbitrary untrusted public host anyway.
+   Fixed by passing `env` through.
+
+3. [SECURITY] Cross-file spoofing via missing fileName.
+   extractSourceFile()'s single-attachment fallback treated an unknown real
+   file name as automatic permission to accept ANY model-claimed file name,
+   so a hallucinated/nonexistent file could still get a "Quote matched: YES"
+   badge as long as the quoted text existed anywhere in the attached blob.
+   Verified via direct reproduction. Fixed by requiring the real fileName to
+   be known and to exactly match the claim; when it isn't known, verification
+   now fails safe instead of trusting the claim.
+
+4. [DATA INTEGRITY] Work page "retry failed providers" could mix results
+   computed against two different attached files. Swapping the file input
+   after a run and before clicking retry only reset the cached file payload,
+   not the prior run's results, so a retry could silently merge stale
+   provider results (from the old file) with fresh ones (from the new file)
+   into one "merged" result set with no indication anything changed. Fixed
+   by invalidating the prior run when the attached file changes.
+
+5. [SECURITY/MINOR] authOK() compared the bearer token with plain ===,
+   which short-circuits on the first differing byte and is a (low-severity,
+   theoretical over a network) timing side-channel for the private-mode
+   access token. Switched to a constant-time comparison.
+
+Also hardened app.js's client-side ZIP handling (same unbounded-decompression
+class of bug as #1, reachable via the main upload UI) to use the shared,
+already-tested zip-safety-core.js bounded streamer instead of its own
+unhardened duplicate parser — the same fix pattern work-controller.js already
+used correctly.
+
+No behavioral changes beyond the fixes above. All pre-existing tests
+(29 files) plus the new regression suite (1 file, 12 assertions) pass.

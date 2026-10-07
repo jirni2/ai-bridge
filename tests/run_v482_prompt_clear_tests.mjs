@@ -1,0 +1,16 @@
+import fs from "node:fs";
+import path from "node:path";
+import assert from "node:assert/strict";
+const root=path.resolve(new URL("..",import.meta.url).pathname);
+const app=fs.readFileSync(path.join(root,"app.js"),"utf8");
+const start=app.indexOf("async function sendTask(options={})");
+const end=app.indexOf("function setBusy",start);
+assert.ok(start>=0&&end>start,"sendTask implementation missing");
+const fn=app.slice(start,end);
+assert.ok(fn.includes('const rawPrompt=(options.promptText??promptEl?.value??"").trim()')&&fn.includes('const prompt=rawPrompt||'),"submitted prompt must be captured before clearing");
+assert.ok(fn.includes('if(promptEl)promptEl.value="";'),"active composer must be cleared after validation");
+assert.ok(fn.indexOf('if(promptEl)promptEl.value="";') > fn.indexOf('if(prompt.length+context.length>430000)'),"composer must not clear before prompt/context validation");
+assert.ok(fn.indexOf('if(promptEl)promptEl.value="";') < fn.indexOf('await streamingRunRequest(payload,setState)'),"composer should clear before streaming network wait");
+assert.ok(fn.includes('displayPrompt:prompt'),"request must retain the submitted prompt after composer clear");
+assert.ok(fn.includes('created:Date.now(),prompt,mode'),"history/error record must retain submitted prompt");
+console.log("v4.8.2 prompt-clear regression tests passed");

@@ -1,0 +1,24 @@
+AI BRIDGE v4.2 — DIRECTED EVIDENCE + LIVE JUDGE
+
+1. Stronger meaningful-provider gate:
+   - Rejects OK / yes / Looks good / done / thanks / other canned short replies.
+   - Rejects replies under 80 characters and low-information short text.
+
+2. Claim-directed verification context:
+   - Extracts file names and code identifiers from peer reviews.
+   - Prioritizes exact source excerpts around referenced symbols.
+   - Evidence validation still uses the original ZIP-derived project context.
+
+3. Gemini RetryInfo support:
+   - HTTP Retry-After remains supported.
+   - Parses google.rpc.RetryInfo.retryDelay from JSON error bodies.
+   - Falls back to "Please retry in ...s".
+   - Caps server-directed delay at 60 seconds.
+
+4. Live Judge diagnostics:
+   - New /api/work/synthesize-stream NDJSON endpoint.
+   - Streams judge_start, context-ready, network-attempt, retry-wait, repair/fallback and final-attempt events.
+   - UI shows active Judge, Retry-After wait and delay source before synthesis finishes.
+
+5. Expanded Judge diagnostics:
+   - networkCalls, retryCount, retryStatusesSeen, retryAfterMs, retryDelaySource and currentPhase.

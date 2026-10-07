@@ -1,0 +1,5 @@
+AI Bridge v5.7.4
+
+- Keeps the v5.7.3 progress-phase fallback that removes agentPhase_undefined.
+- Replaces raw HTTP 404 after stale job recovery with the bounded explanatory server message or a clear retry instruction.
+- Adds regression coverage for both production issues found during the v5.7.2 live smoke test.

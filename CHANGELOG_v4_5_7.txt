@@ -1,0 +1,8 @@
+AI Bridge v4.5.7
+
+- Rejects malformed ZIP central-directory entries whose variable-length fields
+  extend past the EOCD, including a forged oversized final entry.
+- Requires the parsed central directory to end exactly at the EOCD.
+- Rejects additional long Ukrainian omission/limitation essays observed during
+  the live v4.5.6 Free Team run.
+- Adds regression tests derived from the production responses and malformed ZIP.

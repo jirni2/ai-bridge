@@ -1,0 +1,24 @@
+AI Bridge v5.8.1 — Full ZIP reliability hardening
+
+FIXED
+- Files & ZIP now accepts the complete v5.8.x production package. The old scan
+  stopped at 8,001,430 bytes; a complete scan with the corrected budget proves
+  the package's declared expanded size is 14,342,742 bytes.
+- The bounded total ZIP budget is now 16,000,000 bytes in the Files UI, ZIP
+  worker, server Worker, Work Controller, and shared ZIP safety core.
+- ZIP-bomb protection remains active: 512-entry limit, 2 MB per-entry declared
+  limit, 120:1 compression-ratio limit, bounded streaming decompression, path
+  normalization, and total-budget rejection above 16 MB.
+
+IMPROVED
+- Search First uses the reliable Bing RSS public fallback before DuckDuckGo
+  HTML, while preserving DuckDuckGo as an independent fallback.
+- DuckDuckGo Instant Answer timeout is 3.5 seconds instead of 7 seconds, which
+  prevents a failed public endpoint from doubling ordinary search latency.
+- Removed the unused local greeting response helper. Greetings continue through
+  real provider routing and fallback; no fake local chat response is possible.
+
+TESTED
+- Added v5.8.1 regression coverage for the exact 14,342,742-byte full-package
+  boundary, over-budget ZIP rejection, synchronized caps, search fallback order,
+  and removal of the local greeting shortcut.

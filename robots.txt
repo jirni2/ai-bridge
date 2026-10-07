@@ -1,0 +1,3 @@
+# AI Bridge is a private workspace — please do not index it.
+User-agent: *
+Disallow: /

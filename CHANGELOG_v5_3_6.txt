@@ -1,0 +1,10 @@
+AI BRIDGE v5.3.6
+
+- Fixes Files & ZIP appearing to hang after a valid 200+ entry project is picked
+  on iPhone/mobile Safari.
+- Root cause: the client inflated every text entry, then sorted the results and
+  discarded everything beyond the 350k context limit.
+- ZIP extraction now scans metadata first, prioritizes likely source/config
+  files, and inflates only until the context or decompressed-byte budget is full.
+- The loop yields between bounded batches so mobile rendering remains responsive.
+- All v5.3.5 ZIP-bomb protections and the 512-entry cap remain enabled.

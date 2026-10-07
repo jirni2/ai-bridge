@@ -1,0 +1,8 @@
+AI Bridge v4.9.1
+
+- Fixed a fatal UI status regression in refreshStatus(): `run.status` was referenced even though only `r` exists. The resulting ReferenceError was caught as a network failure, which falsely reset the UI to "Bridge offline" and zero providers even while AI requests worked.
+- `/api/status` now uses the same-origin session cookie explicitly and safe JSON parsing.
+- A transient status-probe failure no longer erases known-good provider state.
+- A successful AI response immediately marks the Bridge/provider path online, then refreshes the full status in the background.
+- Status HTTP errors are distinguished from true offline state.
+- Added regression coverage for the v4.9.0 false-offline bug.

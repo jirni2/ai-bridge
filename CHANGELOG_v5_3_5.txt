@@ -1,0 +1,9 @@
+AI BRIDGE v5.3.5
+
+- Fixes Files & ZIP rejecting the complete AI Bridge package because its 203
+  central-directory entries exceeded the legacy 180-entry cap.
+- Raises the bounded entry cap to 512 consistently in the main UI, shared ZIP
+  scanner, Worker extraction, and Work Controller.
+- Keeps ZIP-bomb defenses enabled: 2 MB per entry, 8 MB declared total, 120:1
+  maximum compression ratio, bounded streaming inflation, and path filtering.
+- Adds regression coverage proving 203 entries are accepted and 513 rejected.

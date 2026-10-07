@@ -1,0 +1,1210 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#121014" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f6f7fb" media="(prefers-color-scheme: light)">
+<meta name="color-scheme" content="dark light">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="AI Bridge">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<script src="theme-boot.js"></script>
+<link rel="stylesheet" href="styles.css?v=5.11.100">
+<title>AI Bridge v5.11.100 — Work Controller</title>
+</head>
+<body>
+  <!-- design-evolver v5.11.92 (доступність): skip-link — перший Tab веде до вмісту -->
+  <a class="skipLink" href="#mainContent" data-i18n="skipLink">Пропустити до вмісту</a>
+<div class="app">
+  <!-- REBUILD «Тиша»: верхній рядок — маленький орб, AI Bridge, статус провайдерів, «···».
+       Службові кнопки (пошук/тема/мова/оновлення) переїхали в праву колонку-меню. -->
+  <header class="topbar chatTopbar" id="appTopbar">
+    <div class="brand">
+      <div class="miniOrb" aria-hidden="true"></div>
+      <span id="connDot" class="connDot checking" role="status" aria-label="Перевірка з'єднання…" title="Перевірка з'єднання…"></span>
+      <span class="brandText"><b>AI Bridge</b><span class="heroVersion">v5.11.100</span></span>
+    </div>
+    <div class="topbarRight">
+      <span class="netPill" id="netPill" role="status"><span class="netDot" aria-hidden="true"></span><span id="netCount">–/–</span></span>
+      <!-- 2026-10-01: вибір мови повернуто в шапку, біля версії — тільки значок -->
+      <label class="languageControl topbarLang" id="languageControl" title="Мова" data-i18n-title="language">
+        <svg class="languageGlobe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M4 12h16M12 4c2.5 2.4 3.8 5 3.8 8s-1.3 5.6-3.8 8c-2.5-2.4-3.8-5-3.8-8S9.5 6.4 12 4z"/></svg>
+        <span id="languageCode">UA</span>
+        <select id="languageSelect" class="languageSelect" aria-label="Мова" data-i18n-aria="language"></select>
+      </label>
+      <button id="navDrawerBtn" class="iconBtn" type="button" data-i18n-aria="navMenu" aria-label="Меню"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="19" cy="12" r="1.7"/></svg></button>
+      <div id="miniProviderStatus" class="miniProviders" role="status" aria-label="Статус провайдерів"></div>
+    </div>
+    <p id="topStatus" class="srOnly" aria-live="polite" data-i18n="statusChecking">Перевіряю Bridge…</p>
+  </header>
+
+  <div id="updateBanner" class="updateBanner hidden" role="status">
+    <span id="updateBannerText" data-i18n="updateAvailable">Доступна нова версія AI Bridge.</span>
+    <button id="updateBannerBtn" class="tinyBtn" type="button" data-i18n="updateNow">Оновити</button>
+  </div>
+  <div id="budgetBanner" class="updateBanner budgetBanner hidden" role="alert">
+    <span id="budgetBannerText"></span>
+    <button id="budgetBannerClose" class="tinyBtn" type="button" data-i18n="close">Закрити</button>
+  </div>
+  <div id="offlineBar" class="offlineBar hidden" role="alert">
+    <span aria-hidden="true">📡</span><span data-i18n="offlineMsg">Немає з’єднання — повідомлення стануть у чергу</span><span id="offlineQueueCount" class="qCount hidden"></span>
+  </div>
+  <div id="deepScanBanner" class="updateBanner dsBanner hidden" role="alert">
+    <span id="deepScanBannerText"></span>
+    <span class="dsBannerBtns">
+      <button id="deepScanResumeBtn" class="tinyBtn" type="button" data-i18n="deepScanResumeBtn">Продовжити</button>
+      <button id="deepScanDismissBtn" class="tinyBtn" type="button" data-i18n="deepScanDismissBtn">Скасувати</button>
+    </span>
+  </div>
+
+  <main id="mainContent" tabindex="-1">
+    <section class="page active" id="page-chat">
+      <!-- REBUILD «Тиша»: верхній рядок тепер один — у шапці застосунку (#appTopbar).
+           Дублі навігації (modeSwitch, другий топбар) прибрано; навігація — через праву колонку-меню. -->
+      <div id="installCard" class="card hidden">
+        <div class="mcpHead"><div><div class="eyebrow" data-i18n="installEyebrow">INSTALL</div><b data-i18n="installCardTitle">Встановити AI Bridge на iPhone</b></div><button id="installCardClose" class="tinyBtn" type="button" data-i18n="installCardClose">Закрити</button></div>
+        <ol style="margin:8px 0 8px 20px;padding:0;font-size:14px;line-height:1.7">
+          <li data-i18n="installCardStep1">1. Відкрий AI Bridge у Safari</li>
+          <li data-i18n="installCardStep2">2. Натисни кнопку «Поділитися»</li>
+          <li data-i18n="installCardStep3">3. Обери «Додати на головний екран»</li>
+        </ol>
+        <small style="opacity:.8" data-i18n="installCardPushNote">Для push-сповіщень потрібні iOS 16.4+ і встановлення на головний екран.</small>
+      </div>
+
+
+      <div class="chatScroll" id="chatScroll">
+      <!-- v5.11.43: дискретний статус-регіон для екранного читця — оголошує
+           лише переходи («Генерація…» → «Відповідь готова» / «Помилка»),
+           текст відповіді не авто-оголошується -->
+      <p id="a11yStatus" class="srOnly" role="status" aria-live="polite"></p>
+      <!-- D2 («Тиша»): порожній екран — тільки орб і одне речення, жодних карток -->
+      <div id="starterWrap" class="starterWrap">
+        <div class="orbWrap" id="chatOrbWrap" role="button" tabindex="0" aria-label="Написати повідомлення" data-i18n-aria="orbHint">
+          <div class="orb" id="chatOrb" aria-hidden="true"></div>
+          <b class="orbTitle" data-i18n="orbTitle">Про що думаєш?</b>
+          <span class="orbHint" data-i18n="orbHint">Торкнись, щоб написати</span>
+        </div>
+      </div>
+
+      <div id="runProgress" class="card progressCard hidden" aria-live="polite">
+        <div class="progressMain">
+          <div class="orbRow"><div class="orb breathing" id="genOrb" aria-hidden="true"></div>
+          <div>
+            <b id="progressTitle" data-i18n="working">AI Team працює…</b>
+            <p id="progressText" data-i18n="sendingTask">Відправляю завдання.</p>
+          </div></div>
+          <span id="progressElapsed" class="progressElapsed" aria-hidden="true"></span>
+        </div>
+        <div id="pipeline" class="pipeline hidden" role="list" aria-label="Execution pipeline"></div>
+        <ol id="progressLog" class="progressLog" aria-label="AI activity"></ol>
+        <div id="pushHint" class="hidden" style="margin-top:8px;font-size:13px;opacity:.85" aria-live="polite">🔔 <span data-i18n="pushHintAfterSend">Можеш закрити застосунок — сповіщу, коли буде готово</span></div>
+      </div>
+
+      <div id="answerArea" class="answerArea hidden">
+        <div class="ansHead">
+          <span class="ansModel"><span class="mdot" aria-hidden="true"></span><span id="finalTitle">AI Team</span></span>
+          <span class="ansScore hidden" id="ansScore"></span>
+        </div>
+        <div class="ansBadges"><span id="modeBadge" class="modeBadge hidden"></span> <span id="roleBadge" class="roleBadge hidden" role="button" tabindex="0"></span> <span id="routeBadge" class="routeBadge hidden"></span> <span id="pinnedBadge" class="pinnedBadge hidden"></span> <span id="tempBadge" class="tempBadge hidden"></span></div>
+        <div id="finalAnswer" class="card finalAnswer md"></div>
+        <!-- v5.11.64: жива швидкість генерації (ток/с · токени · час) -->
+        <div id="speedRow" class="speedRow hidden" aria-live="off"></div>
+        <div id="answerActions" class="answerActions" role="toolbar" aria-label="Answer actions">
+          <button id="copyFinalBtn" class="actBtn" type="button"><svg class="uiIcon" viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2.5"></rect><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"></path></svg><span data-i18n="copy">Копіювати</span></button>
+          <button id="copyRichBtn" class="actBtn" type="button" data-i18n-title="copyRich" data-i18n-aria="copyRich"><svg class="uiIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 10h16M4 14h11M4 18h8"></path></svg><span data-i18n="copyRich">Копіювати з форматуванням</span></button>
+          <!-- v5.11.69: переклад відповіді одним тапом (дешева фонова модель) -->
+          <button id="translateBtn" class="actBtn" type="button" data-i18n-title="translateBtn" data-i18n-aria="translateBtn"><span aria-hidden="true">🌐</span><span data-i18n="translateBtn">Перекласти</span></button>
+          <button id="regenBtn" class="actBtn" type="button"><svg class="uiIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7"></path><path d="M20 5v6h-6"></path></svg><span data-i18n="regenerate">Ще раз</span></button>
+          <!-- v5.11.5: спрощення — другорядні дії прибрано в меню "•••" -->
+          <details class="moreActions">
+            <summary class="actBtn moreBtn" aria-label="Більше дій"><span aria-hidden="true">•••</span></summary>
+            <div class="moreMenu">
+          <button id="editPromptBtn" class="actBtn" type="button" aria-label="Змінити питання" title="Змінити питання" data-i18n-aria="editPrompt" data-i18n-title="editPrompt"><svg class="uiIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16z"></path><path d="M13.5 6.5l4 4"></path></svg><span data-i18n="editPrompt">Змінити питання</span></button>
+          <button id="otherModelBtn" class="actBtn" type="button" aria-controls="otherModelBox" aria-label="Інша модель" title="Інша модель" data-i18n-aria="otherModel" data-i18n-title="otherModel"><svg class="uiIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h11l-3-3M17 17H6l3 3"></path></svg><span data-i18n="otherModel">Інша модель</span></button>
+          <button id="exportMdBtn" class="actBtn" type="button"><svg class="uiIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"></path></svg><span data-i18n="exportMd">.md</span></button>
+          <!-- v5.11.63: копіювати діалог як чистий текст для ШІ (AI handoff) -->
+          <button id="handoffBtn" class="actBtn" type="button" data-i18n-title="handoffBtn" data-i18n-aria="handoffBtn"><span aria-hidden="true">⇄</span><span data-i18n="handoffBtn">Копіювати для ШІ</span></button>
+          <button id="exportChatBtn" class="actBtn" type="button" data-i18n-title="exportChat" data-i18n-aria="exportChat"><span aria-hidden="true">📤</span><span data-i18n="exportChat">Експорт</span></button>
+          <button id="forkBtn" class="actBtn" type="button" data-i18n-title="forkBtn" data-i18n-aria="forkBtn"><span aria-hidden="true">⑂</span><span data-i18n="forkBtn">⑂ Fork</span></button>
+          <!-- v5.11.19: цитата-відповідь (quote-reply) -->
+          <button id="quoteFinalBtn" class="actBtn" type="button" data-i18n-title="quoteBtn" data-i18n-aria="quoteBtn"><svg class="uiIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.5 15.5c-1.6 0-2.8-1.2-2.8-2.8V9.2c0-2.3 1.7-4 4-4v2.2c-1.1 0-1.8.7-1.8 1.8v.6h1.6v5.7H6.5zm7.5 0c-1.6 0-2.8-1.2-2.8-2.8V9.2c0-2.3 1.7-4 4-4v2.2c-1.1 0-1.8.7-1.8 1.8v.6H15v5.7H14z"></path></svg><span data-i18n="quoteBtn">Цитувати</span></button>
+          <!-- v5.11.28: картка-цитата PNG для соцмереж -->
+          <button id="quoteCardBtn" class="actBtn" type="button" data-i18n-title="quoteCardBtn" data-i18n-aria="quoteCardBtn"><span aria-hidden="true">🖼️</span><span data-i18n="quoteCardBtn">Картка PNG</span></button>
+          <!-- v5.11.65: зберегти відповідь у нотатки (+ «Створити список» з переліку) -->
+          <button id="saveNoteBtn" class="actBtn" type="button" data-i18n-title="saveNoteBtn" data-i18n-aria="saveNoteBtn"><span aria-hidden="true">📝</span><span data-i18n="saveNoteBtn">Зберегти в нотатки</span></button>
+          <!-- v5.11.40: запустити як завдання команди -->
+          <button id="taskFromAnswerBtn" class="actBtn" type="button" data-i18n-title="runAsTask" data-i18n-aria="runAsTask"><span aria-hidden="true">🚀</span><span data-i18n="runAsTask">Запустити як завдання</span></button>
+          <button id="ttsBtn" class="actBtn" type="button" data-i18n-title="readAloud" data-i18n-aria="readAloud"><span aria-hidden="true">🔊</span><span data-i18n="readAloud">Прочитати вголос</span></button>
+            </div>
+          </details>
+          <span class="actSpacer"></span>
+          <button id="feedbackUpBtn" class="actBtn fbBtn" type="button" aria-pressed="false" aria-label="Корисна відповідь" data-i18n-aria="feedbackUp"><svg class="uiIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 11v9H4v-9zM7 11l4-7a2 2 0 0 1 3 2l-1 4h6a2 2 0 0 1 2 2.3l-1.2 6A2 2 0 0 1 17.8 20H7"></path></svg></button>
+          <button id="feedbackDownBtn" class="actBtn fbBtn" type="button" aria-pressed="false" aria-label="Погана відповідь" data-i18n-aria="feedbackDown"><svg class="uiIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 13V4H4v9zM7 13l4 7a2 2 0 0 0 3-2l-1-4h6a2 2 0 0 0 2-2.3l-1.2-6A2 2 0 0 0 17.8 4H7"></path></svg></button>
+          <!-- v5.11.30: закладка на діалог -->
+          <button id="bookmarkBtn" class="actBtn fbBtn" type="button" aria-pressed="false" data-i18n-aria="bookmarkAdd" data-i18n-title="bookmarkAdd"><svg class="uiIcon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.9L12 16.9l-5.2 2.8 1-5.9L3.5 9.7l5.9-.9z"></path></svg></button>
+        </div>
+        <div id="otherModelBox" class="otherModelBox hidden" aria-live="polite"></div>
+        <!-- v5.11.69: переклад відповіді — інлайн-бокс під відповіддю -->
+        <div id="translationBox" class="translationBox hidden" aria-live="polite"></div>
+        <details id="compareBox" class="compareBox hidden"></details>
+        <div id="feedbackPanel" class="feedbackPanel hidden" aria-live="polite">
+          <b data-i18n="feedbackWhy">Що не так? Bridge врахує це в наступних відповідях.</b>
+          <div class="reasonRow">
+            <button class="reasonChip" type="button" data-reason="wrong" data-i18n="reasonWrong">Неправильно</button>
+            <button class="reasonChip" type="button" data-reason="sources" data-i18n="reasonSources">Погані джерела</button>
+            <button class="reasonChip" type="button" data-reason="long" data-i18n="reasonLong">Задовго</button>
+            <button class="reasonChip" type="button" data-reason="short" data-i18n="reasonShort">Замало деталей</button>
+            <button class="reasonChip" type="button" data-reason="offtopic" data-i18n="reasonOfftopic">Не по темі</button>
+            <button class="reasonChip" type="button" data-reason="language" data-i18n="reasonLanguage">Не та мова</button>
+          </div>
+        </div>
+        <div id="feedbackStatus" class="feedbackStatus" aria-live="polite"></div>
+        <details id="activitySummary" class="activitySummary hidden"><summary id="activitySummaryTitle" data-i18n="activitySummaryTitle">Що робив AI</summary><ol id="activitySummaryList" class="progressLog"></ol></details>
+        <div id="verificationPanel" class="card verificationPanel hidden" aria-live="polite"></div>
+        <div id="webSources" class="webSources hidden"></div>
+        <div id="followUps" class="followUps" aria-label="Follow-up"></div>
+
+        <details class="peerDetails">
+          <summary data-i18n="compareAnswers">Порівняти відповіді окремих AI</summary>
+          <div id="peerAnswers" class="peerAnswers"></div>
+        </details>
+      </div>
+
+      </div>
+
+      <div class="card composer" id="chatComposer">
+        <!-- v5.11.23: @згадки моделей — автодоповнення назв провайдерів -->
+        <div id="mentionBox" class="mentionBox hidden" role="listbox" aria-label="Підказки моделей" data-i18n-aria="mentionBoxAria"></div>
+        <!-- v5.11.68: @@згадки минулих чатів — пошук по історії діалогів -->
+        <div id="ctxMentionBox" class="mentionBox hidden" role="listbox" aria-label="Підказки діалогів" data-i18n-aria="ctxMentionBoxAria"></div>
+        <!-- v5.11.73: розумне поле вводу — проактивні підказки режиму за наміром (чиста евристика, текст нікуди не йде) -->
+        <div id="intentChips" class="intentChips hidden" aria-live="polite"></div>
+        <!-- REBUILD «Тиша»: композер — одна чиста округла смуга: поле вводу, вкладення, ↑.
+             Шапка-картка прибрана; роль/шаблони/очищення/режим — у «Налаштуваннях» нижче. -->
+        <div id="callEstimate" class="callEstimate" data-i18n="callAutoFirst">Auto: перша справна відповідь перемагає.</div>
+        <div class="composerStrip">
+          <textarea id="prompt" rows="2" placeholder="Написати…" data-i18n-placeholder="promptPlaceholder" aria-label="Поле вводу"></textarea>
+          <div class="composerTools" aria-label="Додати фото або використати голосовий ввід" data-i18n-aria="composerAria">
+            <button id="cameraBtn" class="composerToolBtn cameraTool" type="button" aria-label="Зробити фото" title="Зробити фото" data-i18n-aria="cameraAria" data-i18n-title="cameraAria">
+              <span class="toolIcon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 8.5h3l1.5-2h7l1.5 2h3v10H4z"></path><circle cx="12" cy="13.5" r="3.2"></circle></svg></span><span class="toolLabel" data-i18n="camera">Камера</span>
+            </button>
+            <button id="photoBtn" class="composerToolBtn photoTool" type="button" aria-label="Додати фото" title="Додати фото" data-i18n-aria="photoAria" data-i18n-title="photoAria">
+              <span class="toolIcon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14" rx="3"></rect><circle cx="9" cy="10" r="1.4"></circle><path d="m6.5 17 4-4 2.8 2.7 2.2-2.2 2 2"></path></svg></span><span class="toolLabel" data-i18n="photo">Фото</span>
+            </button>
+            <button id="voiceBtn" class="composerToolBtn voiceTool" type="button" aria-label="Голосовий ввід" title="Голосовий ввід" aria-pressed="false" data-i18n-aria="voiceAria" data-i18n-title="voiceAria">
+              <span class="toolIcon voiceToolIcon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="9" y="4" width="6" height="10" rx="3"></rect><path d="M6.5 11.5a5.5 5.5 0 0 0 11 0M12 17v3M9 20h6"></path></svg></span><span class="toolLabel" id="voiceBtnLabel" data-i18n="voice">Голос</span>
+            </button>
+            <!-- v5.11.69: «Покращити запит» — дешева фонова модель переписує чернетку чіткіше -->
+            <button id="improveBtn" class="composerToolBtn" type="button" aria-label="Покращити запит" title="Покращити запит" data-i18n-aria="improveBtn" data-i18n-title="improveBtn">
+              <span class="toolIcon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"></path><path d="M18.5 14.5l.9 2.1 2.1.9-2.1.9-.9 2.1-.9-2.1-2.1-.9 2.1-.9z"></path></svg></span><span class="toolLabel" data-i18n="improveBtn">Покращити</span>
+            </button>
+            <input id="cameraInput" class="nativeMediaInput" type="file" accept="image/*" capture="environment">
+            <input id="photoInput" class="nativeMediaInput" type="file" accept="image/*" multiple>
+          </div>
+          <button id="sendBtn" class="primary sendBtn" data-state="idle" aria-label="Надіслати"><svg class="sb-ic sb-send" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"/></svg><svg class="sb-ic sb-busy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path class="sb-arc" d="M12 3.5a8.5 8.5 0 1 1-8.5 8.5"/></svg><svg class="sb-ic sb-done" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12.5l5 5L20 6.5"/></svg><svg class="sb-ic sb-err" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+        </div>
+        <div id="attachChips" class="attachChips" aria-live="polite"></div>
+        <div id="voiceStatus" class="voiceStatus" aria-live="polite"></div>
+        <div id="imagePreviewStrip" class="imagePreviewStrip" aria-live="polite"></div>
+        <div id="attachedStrip" class="attachedStrip"></div>
+
+        <!-- v5.11.5: спрощення чату — другорядне прибрано в "Налаштування".
+             Видно лишається тільки поле вводу, вкладення/голос і Надіслати. -->
+        <details class="composerOpts" id="composerOpts">
+          <summary class="composerOptsSummary"><span data-i18n="crewConfig">Налаштування</span></summary>
+          <div class="composerOptsBody">
+            <div class="modeLine"><span data-i18n="modeLabel">Режим</span>: <b id="modeTitle">Auto Team</b></div>
+            <div class="composerHeadActions">
+              <button class="tinyBtn roleChip" type="button" data-role-open aria-haspopup="dialog"><span aria-hidden="true">🎭</span> <span class="roleChipName">Без ролі</span></button>
+              <button id="promptLibBtn" class="tinyBtn" type="button" data-i18n="promptLibBtn">📚 Шаблони</button>
+              <button id="clearPromptBtn" class="tinyBtn" data-i18n="clear">Очистити</button>
+            </div>
+            <div class="modeChips" id="modeChips" role="tablist" aria-label="Mode">
+              <button type="button" role="tab" class="modeChip active" data-modechip="auto"><span class="dot"></span>⚡ <span data-i18n="modeChipAuto">Auto</span></button>
+              <button type="button" role="tab" class="modeChip" data-modechip="askall"><span class="dot"></span>◉ <span data-i18n="modeChipTeam">Team</span></button>
+              <button type="button" role="tab" class="modeChip" data-modechip="debate"><span class="dot"></span>⚖ <span data-i18n="modeChipDebate">Debate</span></button>
+              <button type="button" role="tab" class="modeChip" data-modechip="agent"><span class="dot"></span>✦ <span data-i18n="modeChipAgent">Agent</span></button>
+              <button type="button" role="tab" class="modeChip" data-modechip="god"><span class="dot"></span>◆ <span data-i18n="modeChipGod">God</span></button>
+              <button type="button" role="tab" class="modeChip" data-modechip="research"><span class="dot"></span>🔬 <span data-i18n="modeChipResearch">Дослідження</span></button>
+            </div>
+            <div class="effortRow" role="radiogroup" aria-labelledby="effortLabel">
+              <span class="effortLabel" id="effortLabel" data-i18n="effortLabel" data-i18n-title="effortTitle" title="">Глибина мислення</span>
+              <div class="effortChips" id="effortChips">
+                <button type="button" class="effortChip" data-effort="fast" role="radio" aria-checked="false" data-i18n-title="effortFastHint">⚡ <span data-i18n="effortFast">Швидко</span></button>
+                <button type="button" class="effortChip" data-effort="standard" role="radio" aria-checked="true" data-i18n-title="effortStandardHint">◉ <span data-i18n="effortStandard">Стандарт</span></button>
+                <button type="button" class="effortChip" data-effort="deep" role="radio" aria-checked="false" data-i18n-title="effortDeepHint">🧠 <span data-i18n="effortDeep">Глибоко</span></button>
+              </div>
+            </div>
+            <label id="researchDepthWrap" class="researchDepth hidden"><span data-i18n="researchDepth">Глибина</span>
+              <select id="researchDepth">
+                <option value="quick" data-i18n="researchDepthQuick">⚡ Швидко</option>
+                <option value="standard" selected data-i18n="researchDepthStandard">🔬 Стандарт</option>
+                <option value="deep" data-i18n="researchDepthDeep">🧠 Глибоко</option>
+              </select>
+            </label>
+            <div class="quickActions" id="quickActions" aria-label="Quick actions">
+              <button type="button" class="quickAction" data-quickaction="research"><span class="qaIcon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"></circle><path d="m16 16 4.5 4.5"></path></svg></span><span data-i18n="qaResearch">Дослідження</span></button>
+              <button type="button" class="quickAction" data-quickaction="generate"><span class="qaIcon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 4l1.7 4.3L18 10l-4.3 1.7L12 16l-1.7-4.3L6 10l4.3-1.7z"></path><path d="M18.5 15.5l.9 2.1 2.1.9-2.1.9-.9 2.1-.9-2.1-2.1-.9 2.1-.9z"></path></svg></span><span data-i18n="qaGenerate">Згенерувати</span></button>
+              <button type="button" class="quickAction" data-quickaction="schedules"><span class="qaIcon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"></circle><path d="M12 7.5V12l3 2"></path></svg></span><span data-i18n="qaSchedules">Регулярні</span></button>
+              <button type="button" class="quickAction" data-quickaction="export"><span class="qaIcon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 15V4M7.5 8.5 12 4l4.5 4.5"></path><path d="M5 15v4.5h14V15"></path></svg></span><span data-i18n="qaExport">Експорт</span></button>
+              <button type="button" class="quickAction" data-quickaction="url"><span class="qaIcon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"></path><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"></path></svg></span><span data-i18n="qaUrl">URL-сторінка</span></button>
+            </div>
+        <label class="searchFirstToggle">
+          <input id="searchFirst" type="checkbox" checked>
+          <span class="searchFirstIcon" aria-hidden="true">⌕</span>
+          <span><b data-i18n="searchFirstTitle">Search First</b><small data-i18n="searchFirstDesc">Прості факти — з вебджерел без AI. Якщо даних замало, Bridge передасть джерела AI.</small></span>
+          <em data-i18n="searchFirstAuto">AUTO</em>
+        </label>
+        <!-- v5.11.39: тимчасовий діалог (інкогніто) — не зберігається в історії -->
+        <label class="tempToggleRow">
+          <input id="tempChatToggle" type="checkbox">
+          <span class="tempToggleIcon" aria-hidden="true">🕵</span>
+          <span><b data-i18n="tempChatTitle">Тимчасовий діалог</b><small data-i18n="tempChatHint">Не зберігається в історії — живе лише в пам'яті вкладки</small></span>
+        </label>
+
+        <div class="quickRow">
+          <button class="chip active" data-quick="auto">⚡ Auto</button>
+          <button class="chip" data-quick="code">⌘ Code</button>
+          <button class="chip" data-quick="review">✓ Review</button>
+          <button class="chip" data-quick="all">◉ Ask All</button>
+          <button class="chip agentChip" data-quick="agent">✦ Agent</button>
+          <button class="chip godChip" data-quick="god">◆ <span data-i18n="godChip">God</span></button>
+        </div>
+
+        <div class="projectRow">
+          <label class="projectSelectWrap"><span data-i18n="projLabel">Проєкт</span>
+            <select id="projectSelect" aria-label="Project"></select>
+          </label>
+          <button id="projectManageBtn" class="tinyBtn" type="button" data-i18n-title="projManage" data-i18n="projManage">Проєкти</button>
+          <span id="projectChip" class="projectChip hidden"><b id="projectChipName"></b><button id="projectClearBtn" type="button" aria-label="✕">✕</button></span>
+        </div>
+
+        <div class="composerHint"><kbd>Enter</kbd> <span data-i18n="hintSend">надіслати</span> · <kbd>Shift+Enter</kbd> <span data-i18n="hintNewline">новий рядок</span> · <kbd>Ctrl+K</kbd> <span data-i18n="hintCommands">команди</span></div>
+          </div>
+        </details>
+      </div>
+    </section>
+
+    <section class="page" id="page-agent">
+      <div class="modeSwitch" role="tablist" aria-label="Mode"><button type="button" role="tab" data-switch="chat" data-i18n="navChat">Чат</button><button type="button" role="tab" data-switch="agent" data-i18n="navAgent">Агент</button><button type="button" role="tab" data-switch="team" data-i18n="navTeam">Команда</button></div>
+      <div class="agentHero card">
+        <div class="agentHeroTop">
+          <div>
+            <div class="eyebrow" data-i18n="agentEyebrow">AUTONOMOUS AI</div>
+            <h2 data-i18n="agentPageTitle">AI Agent</h2>
+            <p data-i18n="agentPageDesc">AI Bridge сам керує ціллю, пам’яттю, кроками та інструментами й автоматично вибирає підключену модель для кожного рішення.</p>
+          </div>
+          <span class="agentLiveBadge"><i></i><span data-i18n="agentLive">AGENT READY</span></span>
+        </div>
+        <div class="agentCapabilityRow">
+          <span>🧠 <b data-i18n="agentCapPlan">План</b></span>
+          <span>🌐 <b data-i18n="agentCapWeb">Web</b></span>
+          <span>🤝 <b data-i18n="agentCapDelegate">Sub‑AI</b></span>
+          <span>🧾 <b data-i18n="agentCapMemory">Пам’ять</b></span>
+          <span>📁 <b data-i18n="agentCapFiles">Files</b></span>
+          <span>🎨 <b data-i18n="agentCapImage">Фото</b></span>
+        </div>
+      </div>
+
+      <!-- v5.11.14: зміст діалогу — чипи тем повідомлень зі стрибком до місця -->
+      <div id="tocWrap" class="tocWrap hidden">
+        <button type="button" class="tinyBtn" id="tocToggle" aria-expanded="false"><span aria-hidden="true">☰</span> <span data-i18n="tocTitle">Зміст</span></button>
+        <div id="tocChips" class="tocChips hidden" role="list"></div>
+      </div>
+
+      <div id="agentThread" class="agentThread" aria-live="polite"></div>
+
+      <div class="card agentComposer">
+        <div class="agentComposerHead">
+          <div><div class="eyebrow" data-i18n="agentGoal">ЦІЛЬ АГЕНТА</div><b data-i18n="agentTellGoal">Скажи, що треба зробити</b></div>
+<div class="composerHeadActions"><span id="ctxMeter" class="ctxMeter" role="status" aria-live="polite"></span><button id="ctxCompactBtn" class="tinyBtn hidden" type="button" data-i18n="ctxCompact" data-i18n-title="ctxCompact">Стиснути контекст</button><span id="ctxCompactHint" class="ctxCompactHint hidden" aria-live="polite"></span><button id="dlgInstrBtn" class="tinyBtn" type="button" data-i18n-title="dlgInstrBtn" aria-haspopup="dialog" aria-pressed="false"><span aria-hidden="true">📋</span> <span data-i18n="dlgInstrBtn">Інструкції</span><span class="instrDot" aria-hidden="true"></span></button><button class="tinyBtn roleChip" type="button" data-role-open aria-haspopup="dialog"><span aria-hidden="true">🎭</span> <span class="roleChipName">Без ролі</span></button><button id="agentClearBtn" class="tinyBtn" type="button" data-i18n="agentNewChat">Новий діалог</button></div>
+        </div>
+        <textarea id="agentPrompt" rows="6" data-i18n-placeholder="agentPromptPlaceholder" placeholder="Наприклад: перевір мій сайт, знайди причину помилки, прочитай потрібні сторінки і дай готове рішення…"></textarea>
+
+        <div class="composerTools agentTools" aria-label="Agent tools">
+          <button id="agentPhotoBtn" class="composerToolBtn photoTool" type="button"><span class="toolIcon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14" rx="3"></rect><circle cx="9" cy="10" r="1.4"></circle><path d="m6.5 17 4-4 2.8 2.7 2.2-2.2 2 2"></path></svg></span><span data-i18n="photo">Фото</span></button>
+          <button id="agentVoiceBtn" class="composerToolBtn voiceTool" type="button" aria-pressed="false"><span class="toolIcon voiceToolIcon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="9" y="4" width="6" height="10" rx="3"></rect><path d="M6.5 11.5a5.5 5.5 0 0 0 11 0M12 17v3M9 20h6"></path></svg></span><span id="agentVoiceBtnLabel" data-i18n="voice">Голос</span></button>
+          <button id="agentFilesBtn" class="composerToolBtn" type="button"><span class="toolIcon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6z"></path><path d="M14 3v4h4"></path></svg></span><span data-i18n="agentFilesButton">Files / ZIP</span></button>
+        </div>
+        <div id="agentVoiceStatus" class="voiceStatus" aria-live="polite"></div>
+        <div id="agentImagePreviewStrip" class="imagePreviewStrip" aria-live="polite"></div>
+
+        <div class="agentConfigGrid">
+          <label><span data-i18n="agentBrain">AI помічники</span><select id="agentProvider"><option value="auto" data-i18n="agentAutoBrain">Auto — використовувати інші AI лише коли потрібно</option></select></label>
+          <label><span data-i18n="agentSteps">Макс. кроків</span><select id="agentMaxSteps"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4" selected>4</option></select></label>
+        </div>
+        <label class="agentFilesToggle"><input id="agentUseFiles" type="checkbox"><span><b data-i18n="agentUseFiles">Використовувати файли / ZIP з вкладки Files</b><small id="agentAttachmentSummary" data-i18n="agentNoFiles">Файли ще не додані.</small></span></label>
+
+        <button id="agentStartBtn" class="primary agentStartBtn" type="button"><span>✦</span><span data-i18n="agentStart">Запустити AI Agent</span></button>
+        <div id="agentRunStatus" class="agentRunStatus" aria-live="polite"></div>
+        <div id="agentLiveTrace" class="agentLiveTrace hidden"></div>
+      </div>
+    </section>
+
+    <section class="page" id="page-team">
+      <div class="modeSwitch" role="tablist" aria-label="Mode"><button type="button" role="tab" data-switch="chat" data-i18n="navChat">Чат</button><button type="button" role="tab" data-switch="agent" data-i18n="navAgent">Агент</button><button type="button" role="tab" data-switch="team" data-i18n="navTeam">Команда</button></div>
+      <div class="pageTitle">
+        <div class="eyebrow" data-i18n="routing">ROUTING</div>
+        <h2>AI Team</h2>
+        <p data-i18n="teamDesc">Обери, як кілька моделей мають працювати над одним завданням.</p>
+      </div>
+
+      <div class="card modeCard">
+        <label><span data-i18n="mode">Режим</span>
+          <select id="teamMode">
+            <option value="auto" selected data-i18n="modeAuto">Auto Router — швидка перша справна відповідь</option>
+            <option value="askall" data-i18n="modeAskAll">Ask All — запитати всіх вибраних</option>
+            <option value="code" data-i18n="modeCode">Code Review — незалежний аудит коду</option>
+            <option value="debate" data-i18n="modeDebate">Debate — відповіді + критика + фінальний Judge</option>
+            <option value="single" data-i18n="modeSingle">Single AI — тільки одна модель</option>
+            <option value="agent" data-i18n="modeAgent">Agent — автономні кроки + інструменти</option>
+            <option value="god" data-i18n="modeGod">God Mode — Search + Agent + Verify + Learn</option>
+            <option value="research" data-i18n="modeResearch">🔬 Дослідження — план, кроки і джерела</option>
+          </select>
+        </label>
+        <label class="toggleRow">
+          <input id="synthesize" type="checkbox" checked>
+          <span><b data-i18n="finalJudgeTitle">Final Judge / Synthesis</b><small data-i18n="synthesisDesc">Зібрати відповіді в одну фінальну версію</small></span>
+        </label>
+        <label><span data-i18n="judge">Judge</span>
+          <select id="judgeProvider">
+            <option value="auto" selected data-i18n="judgeAuto">Auto — найкращий доступний</option>
+            <option value="openai">OpenAI (optional)</option>
+            <option value="claude">Claude</option>
+            <option value="gemini">Gemini</option>
+            <option value="grok">Grok (xAI)</option>
+            <option value="groqfree">Groq Free</option>
+            <option value="openrouter">OpenRouter Free</option>
+          </select>
+        </label>
+        <div class="routingPrefs">
+          <div class="eyebrow" data-i18n="routingEyebrow">ПРІОРИТЕТИ МАРШРУТИЗАЦІЇ</div>
+          <div class="policySeg" id="routingPolicySeg" role="radiogroup" data-i18n-aria="routingPolicyLabel">
+            <button type="button" class="policyBtn" role="radio" data-policy="economy"><b data-i18n="policyEconomy">Економно</b><small data-i18n="policyEconomyDesc">Безкоштовні й найдешевші моделі</small></button>
+            <button type="button" class="policyBtn" role="radio" data-policy="speed"><b data-i18n="policySpeed">Швидко</b><small data-i18n="policySpeedDesc">Найшвидша відповідь</small></button>
+            <button type="button" class="policyBtn" role="radio" data-policy="balanced"><b data-i18n="policyBalanced">Збалансовано</b><small data-i18n="policyBalancedDesc">Розумний вибір за задачею</small></button>
+            <button type="button" class="policyBtn" role="radio" data-policy="quality"><b data-i18n="policyQuality">Якість</b><small data-i18n="policyQualityDesc">Найсильніші моделі</small></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- v5.11.50: фонова модель для службових задач (ідея scout) -->
+      <div class="card">
+        <div class="mcpHead"><div><div class="eyebrow" data-i18n="bgModelEyebrow">BACKGROUND TASKS</div><b data-i18n="bgModelTitle">Фонова модель</b></div></div>
+        <label><span data-i18n="bgModelTitle">Фонова модель</span>
+          <select id="bgModel">
+            <option value="auto" data-i18n="bgModelAuto">Авто — найкраща доступна</option>
+            <option value="groqfree">Groq Free</option>
+            <option value="openrouter">OpenRouter Free</option>
+            <option value="gemini">Gemini</option>
+            <option value="claude">Claude</option>
+            <option value="grok">Grok (xAI)</option>
+            <option value="openai">OpenAI (optional)</option>
+          </select>
+        </label>
+        <p class="smallMuted" data-i18n="bgModelDesc">Дешева швидка модель для службових задач: оцінки Judge й фонові виклики. Преміум-моделі — лише для відповідей.</p>
+      </div>
+
+      <div class="sectionHead"><h3 data-i18n="teamModels">Моделі команди</h3><span class="smallMuted" data-i18n="teamModelsSub">для Ask All / Code / Debate</span></div>
+      <!-- v5.11.46: пошук моделей з групуванням за провайдером -->
+      <div class="modelSearchWrap"><input id="modelSearch" type="search" autocomplete="off" data-i18n-placeholder="modelSearchPh" placeholder="Пошук моделі…" data-i18n-aria="modelSearchPh" aria-label="Пошук моделі"></div>
+      <div id="providerSelector" class="providerSelector"></div>
+      <div id="singleModeHint" class="singleModeHint hidden" data-i18n="singlePickHelp">Single AI: вибери одну модель. Запит піде тільки їй — без тихої підміни іншою.</div>
+      <div id="agentModeHint" class="singleModeHint hidden" data-i18n="agentPickHelp">Agent: сам планує до 4 кроків, може шукати в інтернеті, читати публічні HTTPS-сторінки та делегувати іншим AI. Зовнішні дії не виконує без окремого інструмента.</div>
+      <div id="godModeHint" class="singleModeHint godModeHint hidden" data-i18n="godPickHelp">God Mode: максимальний контрольований режим — веб, Agent, незалежна перевірка і навчання на результатах.</div>
+
+      <div class="card routerInfo">
+        <b data-i18n="autoHow">Як працює Auto</b>
+        <p id="routerDescription" data-i18n="autoDesc">Auto працює reliability-first: для звичайного чату Bridge паралельно пробує пріоритетні free‑провайдери, бере першу справну відповідь і скасовує повільнішу. Для Code Review / Ask All / Debate / файлів залишаються багатомодельні режими. Платний OpenAI, Claude або Grok використовується як fallback лише якщо ти сам його вибрав, або якщо free‑провайдери взагалі не налаштовані.</p>
+      </div>
+    </section>
+
+    <section class="page" id="page-files">
+      <div class="pageTitle">
+        <div class="eyebrow" data-i18n="contextEyebrow">CONTEXT</div>
+        <h2 data-i18n="filesZipTitle">Files & ZIP</h2>
+        <p data-i18n="filesDesc">Файли обробляються на твоєму iPhone і надсилаються AI тільки коли ти натискаєш Send.</p>
+      </div>
+
+      <div class="uploadBox" id="fileDropZone" tabindex="0" role="group" aria-label="Додавання файлів" data-i18n-aria="addFilesAria">
+        <button id="addFilesPlusBtn" class="uploadIcon uploadIconBtn" type="button" aria-label="Додати файли" title="Додати файли">＋</button>
+        <b data-i18n="addFilesZip">Додати файли або ZIP</b>
+        <span data-i18n="supportedFiles">Код, TXT, MD, JSON, HTML, CSS, Python, ZIP-проєкти</span>
+        <div class="filePickerActions">
+          <button id="chooseFilesBtn" class="primary filePickerBtn" type="button" data-i18n="chooseFiles">Вибрати файли</button>
+          <button id="pasteFilesBtn" class="secondary filePickerBtn" type="button" data-i18n="pasteFile">Вставити файл</button>
+        </div>
+        <small class="filePickerHint" data-i18n="filePickerHint">На iPhone відкриється системний Files picker. На комп’ютері також можна перетягнути файл сюди.</small>
+        <input id="fileInput" class="nativeFileInput" type="file" multiple>
+      </div>
+      <div id="fileProcessingStatus" class="fileProcessingStatus" role="status" aria-live="polite"></div>
+
+      <div class="card fileStats">
+        <div><b id="fileCount">0</b><span data-i18n="filesLabel">файлів</span></div>
+        <div><b id="fileChars">0</b><span data-i18n="charsContext">символів context</span></div>
+        <div><b id="zipCount">0</b><span>ZIP</span></div>
+      </div>
+      <div id="fileCoverage" class="fileCoverage" role="status" hidden></div>
+
+      <div class="card fileTaskCard">
+        <div class="composerHead">
+          <div>
+            <div class="eyebrow" data-i18n="fileTask">ЗАВДАННЯ ДО ФАЙЛІВ</div>
+            <b data-i18n="fileTaskQuestion">Що AI має зробити з цими файлами?</b>
+          </div>
+          <button id="clearFilePromptBtn" class="tinyBtn" type="button" data-i18n="clear">Очистити</button>
+        </div>
+        <div class="fileComposer">
+          <textarea id="filePrompt" rows="4" placeholder="Наприклад: Проведи аудит цього ZIP, знайди помилки, виправ код і поясни, що змінив." data-i18n-placeholder="filePromptPlaceholder"></textarea>
+          <div class="fileVoiceCol">
+            <button id="fileVoiceBtn" class="composerToolBtn voiceTool fileVoiceBtn" type="button" aria-label="Голосовий ввід" title="Голосовий ввід" aria-pressed="false" data-i18n-aria="voiceAria" data-i18n-title="voiceAria">
+              <span class="toolIcon voiceToolIcon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="9" y="4" width="6" height="10" rx="3"></rect><path d="M6.5 11.5a5.5 5.5 0 0 0 11 0M12 17v3M9 20h6"></path></svg></span><span class="toolLabel" id="fileVoiceBtnLabel" data-i18n="voice">Голос</span>
+            </button>
+            <button id="fileVoiceLangBtn" class="fileVoiceLangBtn" type="button">UA</button>
+          </div>
+        </div>
+        <div id="fileVoiceStatus" class="voiceStatus" aria-live="polite"></div>
+        <label class="toggleRow deepScanToggle"><input id="deepScan" type="checkbox"><span><b data-i18n="deepScanTitleToggle">Deep Scan — прочитати всі файли частинами</b><small data-i18n="deepScanDesc">Для великих ZIP: AI читає проєкт кількома частинами (до 5) і потім складає одну відповідь. Більше викликів AI, зате жоден файл не пропускається мовчки.</small></span></label>
+        <button id="fileSendBtn" class="primary" type="button" data-i18n="sendFilesTask">Надіслати файли + завдання</button>
+        <div id="fileSendHint" class="callEstimate" data-i18n="fileHint">Додай файл і напиши завдання.</div>
+      </div>
+
+      <div id="fileList" class="fileList"></div>
+
+      <button id="clearFilesBtn" class="secondary fileClearBtn" type="button" data-i18n="clearAllFiles">Прибрати всі файли</button>
+
+      <div class="notice">
+        <b data-i18n="zipMode">ZIP режим:</b> <span data-i18n="zipModeDesc">Bridge автоматично витягує текстові файли з ZIP, пропускає node_modules, .git, build/dist і бінарні файли. Загальний контекст обмежений, щоб не відправити гігантський проєкт випадково.</span>
+      </div>
+    </section>
+
+    <section class="page" id="page-brain">
+      <div class="pageTitle">
+        <div class="eyebrow" data-i18n="brainEyebrow">SELF-LEARNING</div>
+        <h2 data-i18n="brainTitle">Навчання і самовдосконалення</h2>
+        <p data-i18n="brainDesc">AI Bridge вчиться на кожному результаті: які маршрути та моделі працюють найкраще, які падають, що тобі подобається. Поведінка підлаштовується автоматично, а зміни коду лише пропонуються і проходять тести.</p>
+      </div>
+
+      <div class="card loopCard">
+        <div class="loopDiagram" aria-hidden="true">
+          <div class="loopNode"><i>1</i><b data-i18n="loopResult">Відповідь</b></div>
+          <div class="loopArrow">→</div>
+          <div class="loopNode"><i>2</i><b data-i18n="loopFeedback">Твоя оцінка + перевірка</b></div>
+          <div class="loopArrow">→</div>
+          <div class="loopNode"><i>3</i><b data-i18n="loopAdapt">Авто-адаптація маршрутів</b></div>
+          <div class="loopArrow">→</div>
+          <div class="loopNode"><i>4</i><b data-i18n="loopPropose">Пропозиції коду + тести</b></div>
+        </div>
+        <p class="loopNote" data-i18n="loopNote">Автоматично: порядок моделей, вибір маршруту, стиль відповідей. Тільки з твого дозволу: зміни в коді — через node tools/improvement-lab.mjs, який запускає всі тести.</p>
+      </div>
+
+      <div id="brainStats" class="brainStats"></div>
+
+      <div class="card brainCard">
+        <div class="brainCardHead"><div><div class="eyebrow" data-i18n="styleEyebrow">ПЕРСОНАЛІЗАЦІЯ</div><b data-i18n="styleTitle">Мій стиль відповідей</b></div></div>
+        <textarea id="styleInstructions" class="styleInstructions" rows="3" maxlength="600" data-i18n-placeholder="stylePlaceholder" placeholder="Наприклад: відповідай українською, коротко, з прикладами коду; я не програміст."></textarea>
+        <label class="toggleRow"><input id="styleAuto" type="checkbox" checked><span><b data-i18n="styleAutoTitle">Автоматично підлаштовуватись під мої оцінки</b><small data-i18n="styleAutoDesc">Якщо ти кілька разів позначиш «Задовго» чи «Замало деталей», Bridge сам додасть відповідну підказку.</small></span></label>
+        <div id="adaptiveHints" class="adaptiveHints"></div>
+      </div>
+
+      <div class="card brainCard">
+        <div class="brainCardHead"><div><div class="eyebrow" data-i18n="routesEyebrow">ВИВЧЕНІ МАРШРУТИ</div><b data-i18n="routesTitle">Що працює найкраще</b></div><button id="brainRefreshBtn" class="tinyBtn" type="button" data-i18n="refresh">Оновити</button></div>
+        <div id="brainRoutes" class="brainList"></div>
+      </div>
+
+      <div class="card brainCard">
+        <div class="brainCardHead"><div><div class="eyebrow" data-i18n="healthEyebrow">ЗДОРОВ’Я МОДЕЛЕЙ</div><b data-i18n="healthTitle">Швидкість і надійність провайдерів</b></div></div>
+        <div id="brainProviders" class="brainList"></div>
+      </div>
+
+      <div class="card brainCard">
+        <div class="brainCardHead"><div><div class="eyebrow" data-i18n="labEyebrow">IMPROVEMENT LAB</div><b data-i18n="labTitle">Що варто покращити в коді</b></div></div>
+        <div id="brainLab" class="brainList"></div>
+        <button id="askAiFixBtn" class="secondary" type="button" data-i18n="labAskAi">Попросити AI Team запропонувати виправлення</button>
+      </div>
+
+      <div class="card brainCard">
+        <div class="brainCardHead"><div><div class="eyebrow" data-i18n="diagEyebrow">САМОДІАГНОСТИКА</div><b data-i18n="diagTitle">Помилки інтерфейсу на цьому пристрої</b></div><button id="diagCopyBtn" class="tinyBtn" type="button" data-i18n="copy">Копіювати</button></div>
+        <div id="diagLog" class="diagLog"></div>
+        <button id="diagClearBtn" class="tinyBtn" type="button" data-i18n="diagClear">Очистити журнал</button>
+      </div>
+
+      <button id="brainResetBtn" class="danger" type="button" data-i18n="brainReset">Скинути все навчання</button>
+      <p class="smallMuted brainPrivacy" data-i18n="brainPrivacy">Модуль навчання зберігає лише числа: успіхи, помилки, швидкість і оцінки — без текстів завдань, відповідей, файлів і ключів. Історія завдань синхронізується окремо і лише тоді, коли ви ввімкнули синхронізацію.</p>
+    </section>
+
+    <section class="page" id="page-connections">
+      <div class="pageTitle">
+        <div class="eyebrow" data-i18n="secureConnections">SECURE CONNECTIONS</div>
+        <h2 data-i18n="connectionsTitle">Підключення</h2>
+        <p data-i18n="connectionsDesc">Серверні ключі зберігаються як Cloudflare Secrets. Токени, додані з телефону, шифруються сервером і залишаються у HttpOnly Secure cookie цього пристрою.</p>
+      </div>
+
+      <div class="card accessCard">
+        <div class="eyebrow">BRIDGE ACCESS TOKEN</div>
+        <input id="accessToken" type="password" autocomplete="off" placeholder="Введи токен авторизації" data-i18n-placeholder="accessPlaceholder">
+        <div class="authLangRow"><span data-i18n="authLangLabel">Мова інтерфейсу</span><select id="authLangSelect" class="authLangSelect" aria-label="Мова інтерфейсу" data-i18n-aria="authLangLabel"></select></div>
+        <button id="saveTokenBtn" class="secondary" data-i18n="authorizeDevice">Підключити</button>
+        <button id="forgetTokenBtn" class="danger smallBtn" type="button" data-i18n="removeBridgeToken">Видалити Bridge Token</button>
+        <small data-i18n="accessDesc">Після авторизації Bridge створює захищену HttpOnly/Secure сесію на 14 днів. Сам BRIDGE_ACCESS_TOKEN не зберігається в JavaScript/localStorage.</small>
+      </div>
+
+      <div class="card selfCheckCard" id="selfCheckCard">
+        <div class="mcpHead"><div><div class="eyebrow" data-i18n="selfCheckEyebrow">SITE SELF-CHECK</div><b data-i18n="selfCheckTitle">Перевірка живого сайту</b></div><span id="selfCheckPill" class="statusPill">CHECK</span></div>
+        <p class="selfCheckDesc" data-i18n="selfCheckDesc">Перевіряє цей сайт прямо з твого браузера: версії, файли, захист, вхід, провайдерів і Studio. Токен нікуди не передається — звіт не містить секретів, його можна скопіювати й надіслати.</p>
+        <label class="toggleRow"><input id="selfCheckAi" type="checkbox"><span><b data-i18n="selfCheckAiTitle">Також реальний тест AI</b><small data-i18n="selfCheckAiDesc">Один короткий запит до кожного безкоштовного провайдера і один тестовий чат. Витрачає трохи ліміту.</small></span></label>
+        <button id="selfCheckBtn" class="secondary" type="button" data-i18n="selfCheckRun">Запустити перевірку</button>
+        <div id="selfCheckResults" class="selfCheckResults" aria-live="polite"></div>
+        <button id="selfCheckCopyBtn" class="tinyBtn hidden" type="button" data-i18n="selfCheckCopy">Копіювати звіт</button>
+      </div>
+
+      <div class="card pushCard">
+        <div class="mcpHead"><div><div class="eyebrow" data-i18n="pushEyebrow">PUSH NOTIFICATIONS</div><b data-i18n="pushTitle">Сповіщення</b></div><span id="pushPill" class="statusPill">OFF</span></div>
+        <label class="toggleRow"><input id="pushToggle" type="checkbox"><span><b data-i18n="pushToggle">Сповіщати про готовність завдань</b><small data-i18n="pushToggleDesc">Web Push на цей пристрій, коли завдання буде готове</small></span></label>
+        <div id="pushStatus" class="mcpStatusText" aria-live="polite"></div>
+      </div>
+
+      <div class="card costCard">
+        <div class="mcpHead"><div><div class="eyebrow" data-i18n="costEyebrow">ВИТРАТИ</div><b data-i18n="costTitle">Витрати</b></div><button id="costRefreshBtn" class="tinyBtn" type="button" data-i18n="costRefresh">Оновити</button></div>
+        <p class="selfCheckDesc" data-i18n="costDesc">Токени й долари, спожиті через цей сервер.</p>
+        <div id="costBody" class="costBody" aria-live="polite"></div>
+        <div class="budgetRow">
+          <label><span data-i18n="budgetLabel">Місячний бюджет ($)</span><input id="budgetInput" type="number" min="0" step="0.5" inputmode="decimal" autocomplete="off"></label>
+          <button id="budgetSaveBtn" class="tinyBtn" type="button" data-i18n="saveBtn">Зберегти</button>
+        </div>
+        <div id="budgetStatus" class="mcpStatusText" aria-live="polite"></div>
+      </div>
+
+      <div class="card gatewayCard">
+        <div class="mcpHead"><div><div class="eyebrow" data-i18n="gwEyebrow">AI GATEWAY</div><b data-i18n="gwTitle">Cloudflare AI Gateway</b></div></div>
+        <label class="toggleRow"><input id="gatewayToggle" type="checkbox"><span><b data-i18n="gwToggle">Увімкнути AI Gateway</b><small data-i18n="gwToggleDesc">Логування, аналітика й кешування запитів через Cloudflare.</small></span></label>
+        <div class="gatewayFields">
+          <label><span data-i18n="gwAccountId">Account ID</span><input id="gatewayAccountId" type="text" autocomplete="off" autocapitalize="none" spellcheck="false"></label>
+          <label><span data-i18n="gwGatewayId">Gateway ID (назва)</span><input id="gatewayGatewayId" type="text" autocomplete="off" autocapitalize="none" spellcheck="false"></label>
+        </div>
+        <small class="smallMuted" data-i18n="gwTokenNote">Token тут не вводиться — він залишається Cloudflare Secret на сервері.</small>
+        <div class="budgetRow"><button id="gatewaySaveBtn" class="tinyBtn" type="button" data-i18n="saveBtn">Зберегти</button><span id="gatewayStatus" class="mcpStatusText" aria-live="polite"></span></div>
+      </div>
+
+      <div id="connectionCards" class="connectionCards"></div>
+
+      <div class="card mcpCard">
+        <div class="mcpHead"><div><div class="eyebrow" data-i18n="liveProviderTest">LIVE PROVIDER TEST</div><b data-i18n="liveProviderTitle">Перевірити, чи AI реально відповідають</b></div><span class="statusPill">API</span></div>
+        <p data-i18n-html="liveProviderDesc">Статус <b>KEY SET</b> означає лише, що секрет існує. Цей тест робить по одному короткому реальному запиту до трьох безкоштовних провайдерів і показує помилку ключа, моделі, квоти або API.</p>
+        <button id="testProvidersBtn" class="secondary" data-i18n="testFreeAI">Перевірити Free AI реальним API-викликом</button>
+        <div id="providerDiagResults" class="mcpStatusText" data-i18n="notTested">Ще не перевірено.</div>
+      </div>
+
+      <div class="card mcpCard">
+        <div class="mcpHead">
+          <div><div class="eyebrow" data-i18n="chatgptConnector">CHATGPT CONNECTOR</div><b data-i18n="connectBridgeChatGPT">Підключити цей Bridge до ChatGPT</b></div>
+          <span id="mcpReadyPill" class="statusPill">CHECK</span>
+        </div>
+        <p data-i18n="connectorDesc">Після deploy цей URL можна додати в ChatGPT як приватний MCP server.</p>
+        <label>MCP URL
+          <div class="copyField">
+            <input id="mcpUrl" readonly value="">
+            <button id="copyMcpBtn" class="tinyCopy">Copy</button>
+          </div>
+        </label>
+        <div id="mcpStatusText" class="mcpStatusText" data-i18n="mcpChecking">Перевіряю готовність…</div>
+        <button id="testMcpBtn" class="secondary" data-i18n="testConnector">Перевірити Connector</button>
+        <details class="mcpSteps">
+          <summary data-i18n="howAddChatGPT">Як додати в ChatGPT</summary>
+          <div>
+            <p data-i18n-html="mcpStep1">1. Відкрий <b>ChatGPT у вебверсії</b> → Settings → Apps → Advanced Settings і увімкни <b>Developer mode</b>. Для Business це також доступно через Workspace Settings → Apps → Create.</p>
+            <p data-i18n-html="mcpStep2">2. Відкрий Settings / Workspace Settings → <b>Apps → Create</b>, встав MCP URL вище та вибери <b>OAuth</b>.</p>
+            <p data-i18n-html="mcpStep3">3. Натисни <b>Scan tools</b>. Коли відкриється AI Bridge Login, введи свій <b>BRIDGE_ACCESS_TOKEN</b> і заверши авторизацію.</p>
+            <p data-i18n-html="mcpStep4">4. Після сканування створи app. ChatGPT має побачити: <b>Review task</b>, <b>Review code</b>, <b>Review attached project files</b> та <b>Review panel status</b>.</p>
+            <p data-i18n-html="mcpStep5">5. <b>Важливо:</b> повна підтримка custom MCP apps зараз доступна для Business та Enterprise/Edu у вебверсії ChatGPT; Pro може підключати MCP з read/fetch у developer mode. На Plus AI Bridge працює як окремий веб‑додаток, але цей custom MCP connector підключити не можна.</p>
+          </div>
+        </details>
+      </div>
+
+      <details class="setup card" open>
+        <summary data-i18n="phoneProviders">AI‑провайдери з телефону</summary>
+        <div class="setupBody">
+          <p data-i18n-html="phoneProvidersDesc">Встав token прямо тут і натисни <b>Зберегти</b>. AI Bridge шифрує його на сервері та зберігає у HttpOnly Secure cookie цього пристрою. Token назад у сторінку не повертається.</p>
+          <div class="providerTokenVault">
+            <div class="providerTokenCard" data-token-card="claude"><div class="providerTokenHead"><b>Claude</b><span data-token-status="claude" data-i18n="checking">Перевіряю…</span></div><div class="providerTokenRow"><input id="providerToken-claude" type="password" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="ANTHROPIC_API_KEY"><button class="tinyBtn" data-save-provider-token="claude" data-i18n="saveVerify">Зберегти й перевірити</button></div><button class="tokenDelete" data-delete-provider-token="claude" data-i18n="deleteToken">Видалити token</button></div>
+            <div class="providerTokenCard" data-token-card="grok"><div class="providerTokenHead"><b>Grok / xAI</b><span data-token-status="grok" data-i18n="checking">Перевіряю…</span></div><div class="providerTokenRow"><input id="providerToken-grok" type="password" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="XAI_API_KEY"><button class="tinyBtn" data-save-provider-token="grok" data-i18n="saveVerify">Зберегти й перевірити</button></div><button class="tokenDelete" data-delete-provider-token="grok" data-i18n="deleteToken">Видалити token</button></div>
+            <div class="providerTokenCard" data-token-card="gemini"><div class="providerTokenHead"><b>Gemini</b><span data-token-status="gemini" data-i18n="checking">Перевіряю…</span></div><div class="providerTokenRow"><input id="providerToken-gemini" type="password" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="GOOGLE / GEMINI API KEY"><button class="tinyBtn" data-save-provider-token="gemini" data-i18n="saveVerify">Зберегти й перевірити</button></div><button class="tokenDelete" data-delete-provider-token="gemini" data-i18n="deleteToken">Видалити token</button></div>
+            <div class="providerTokenCard" data-token-card="groqfree"><div class="providerTokenHead"><b>Groq Free</b><span data-token-status="groqfree" data-i18n="checking">Перевіряю…</span></div><div class="providerTokenRow"><input id="providerToken-groqfree" type="password" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="GROQ_API_KEY"><button class="tinyBtn" data-save-provider-token="groqfree" data-i18n="saveVerify">Зберегти й перевірити</button></div><button class="tokenDelete" data-delete-provider-token="groqfree" data-i18n="deleteToken">Видалити token</button></div>
+            <div class="providerTokenCard" data-token-card="openrouter"><div class="providerTokenHead"><b>OpenRouter Free</b><span data-token-status="openrouter" data-i18n="checking">Перевіряю…</span></div><div class="providerTokenRow"><input id="providerToken-openrouter" type="password" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="OPENROUTER_API_KEY"><button class="tinyBtn" data-save-provider-token="openrouter" data-i18n="saveVerify">Зберегти й перевірити</button></div><button class="tokenDelete" data-delete-provider-token="openrouter" data-i18n="deleteToken">Видалити token</button></div>
+            <div class="providerTokenCard" data-token-card="openai"><div class="providerTokenHead"><b>OpenAI / Judge</b><span data-token-status="openai" data-i18n="checking">Перевіряю…</span></div><div class="providerTokenRow"><input id="providerToken-openai" type="password" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="OPENAI_API_KEY"><button class="tinyBtn" data-save-provider-token="openai" data-i18n="saveVerify">Зберегти й перевірити</button></div><button class="tokenDelete" data-delete-provider-token="openai" data-i18n="deleteToken">Видалити token</button></div>
+            <details class="advancedPaidProvider cloudflareRestProvider"><summary data-i18n="cloudflareRestSetup">Cloudflare Workers AI через REST (Agent Core + Free Photo AI)</summary>
+              <div class="providerTokenCard mediaTokenCard" data-token-card="cloudflare_account"><div class="providerTokenHead"><b>Cloudflare Account ID</b><span data-token-status="cloudflare_account" data-i18n="checking">Перевіряю…</span></div><div class="providerTokenRow"><input id="providerToken-cloudflare_account" type="text" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="32-char Account ID"><button class="tinyBtn" data-save-provider-token="cloudflare_account" data-i18n="saveVerify">Зберегти й перевірити</button></div><button class="tokenDelete" data-delete-provider-token="cloudflare_account" data-i18n="deleteToken">Видалити</button></div>
+              <div class="providerTokenCard mediaTokenCard" data-token-card="cloudflare_ai"><div class="providerTokenHead"><b>Workers AI API Token</b><span data-token-status="cloudflare_ai" data-i18n="checking">Перевіряю…</span></div><div class="providerTokenRow"><input id="providerToken-cloudflare_ai" type="password" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="Cloudflare Workers AI API Token"><button class="tinyBtn" data-save-provider-token="cloudflare_ai" data-i18n="saveVerify">Зберегти й перевірити</button></div><button class="tokenDelete" data-delete-provider-token="cloudflare_ai" data-i18n="deleteToken">Видалити token</button></div>
+              <small data-i18n="cloudflareRestHelp">Якщо binding AI не доданий у Cloudflare Pages, введи Account ID і Workers AI API Token тут. Agent Core і Free Photo AI працюватимуть через офіційний Cloudflare REST API.</small>
+            </details>
+            <details class="advancedPaidProvider"><summary data-i18n="paidProviderAdvanced">Advanced: платний fal.ai (необов’язково)</summary><div class="providerTokenCard mediaTokenCard" data-token-card="fal"><div class="providerTokenHead"><b>AI Studio / fal.ai</b><span data-token-status="fal" data-i18n="checking">Перевіряю…</span></div><div class="providerTokenRow"><input id="providerToken-fal" type="password" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="FAL_KEY"><button class="tinyBtn" data-save-provider-token="fal" data-i18n="saveVerify">Зберегти й перевірити</button></div><button class="tokenDelete" data-delete-provider-token="fal" data-i18n="deleteToken">Видалити token</button><small data-i18n="falKeyHelp">Потрібен лише для платних відео‑режимів або якщо ти сам увімкнеш Paid fallback.</small></div></details>
+          </div>
+          <p id="providerTokenMessage" class="warningText" data-i18n="providerTokenMessage">Якщо Cloudflare Secret уже існує, token з телефону тимчасово має пріоритет. «Видалити token» прибирає тільки mobile‑версію; Cloudflare Secret знову стане активним.</p>
+        </div>
+      </details>
+
+      <div class="notice">
+        <span data-i18n="providerNotice">Gemini, Groq Free та OpenRouter Free можуть працювати на безкоштовних API‑лімітах. Claude, OpenAI і Grok (xAI) мають окремий API billing. Auto режим ставить на перше місце працездатність: перша валідна free‑відповідь повертається одразу.</span>
+      </div>
+    </section>
+
+
+    <section class="page" id="page-studio">
+      <div class="pageTitle">
+        <div class="eyebrow" data-i18n="studioEyebrow">AI MEDIA LAB</div>
+        <h2 data-i18n="studioTitle">AI Studio</h2>
+        <p data-i18n="studioDesc">Створюй і редагуй зображення у Free Mode через Cloudflare Workers AI. Платні відео‑провайдери сховані в Advanced і вимкнені за замовчуванням.</p>
+      </div>
+
+      <div class="studioModeGrid" role="group" aria-label="AI Studio mode">
+        <button class="studioMode active" type="button" data-studio-mode="photo-edit"><span>✦</span><b data-i18n="studioPhotoEdit">Photo AI</b><small data-i18n="studioPhotoEditSub">редагування фото</small></button>
+        <button class="studioMode" type="button" data-studio-mode="photo-generate"><span>◫</span><b data-i18n="studioPhotoGenerate">Create Image</b><small data-i18n="studioPhotoGenerateSub">текст → зображення</small></button>
+        <button class="studioMode" type="button" data-studio-mode="photo-motion"><span>▶</span><b data-i18n="studioPhotoMotion">Free Motion</b><small data-i18n="studioPhotoMotionSub">оживити фото локально</small></button>
+      </div>
+
+      <div class="card studioComposer">
+        <div class="studioInputRow" id="studioUploadRow">
+          <button id="studioPickBtn" class="studioPickBtn" type="button"><span class="studioPickIcon">＋</span><span><b id="studioPickTitle" data-i18n="studioPickPhoto">Вибрати фото</b><small id="studioPickHint" data-i18n="studioPickPhotoHint">JPG, PNG або WebP</small></span></button>
+          <input id="studioFileInput" class="nativeMediaInput" type="file" accept="image/jpeg,image/png,image/webp">
+        </div>
+        <div id="studioPreview" class="studioPreview"></div>
+        <label class="studioPromptLabel">
+          <span class="studioPromptHead"><span data-i18n="studioInstruction">Що зробити?</span><button id="studioVoiceBtn" class="studioVoiceBtn" type="button" aria-pressed="false" data-i18n-aria="voiceAria" data-i18n-title="voiceAria"><span class="studioVoiceIcon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="9" y="4" width="6" height="10" rx="3"></rect><path d="M6.5 11.5a5.5 5.5 0 0 0 11 0M12 17v3M9 20h6"></path></svg></span><span id="studioVoiceBtnLabel" data-i18n="voice">Голос</span></button></span>
+          <textarea id="studioPrompt" rows="5" data-i18n-placeholder="studioPromptPlaceholder" placeholder="Наприклад: прибери фон, зроби студійне освітлення і збережи обличчя без змін…"></textarea>
+          <span id="studioVoiceStatus" class="studioVoiceStatus" aria-live="polite"></span>
+        </label>
+        <div class="studioOptions">
+          <label><span data-i18n="studioQuality">Якість</span><select id="studioQuality"><option value="standard" data-i18n="studioStandard">Standard</option><option value="high" data-i18n="studioHigh">High</option></select></label>
+          <div id="studioCostNote" class="studioCostNote" data-i18n="studioCostNote">Free Mode: зображення використовують Cloudflare Workers AI. Платний fallback вимкнений.</div>
+        </div>
+        <details class="studioPaidDetails">
+          <summary data-i18n="studioPaidAdvanced">Advanced / платні відео‑інструменти</summary>
+          <div class="studioPaidBody">
+            <label class="studioPaidToggle"><input id="studioPaidFallback" type="checkbox"><span data-i18n="studioAllowPaid">Дозволити платний fal.ai fallback на цьому пристрої</span></label>
+            <p data-i18n="studioAllowPaidHelp">Вимкнено за замовчуванням. У Free Mode AI Bridge ніколи сам не переходить на fal.ai.</p>
+            <div class="studioPaidModes">
+              <button class="studioMode" type="button" data-studio-mode="animate"><span>▶</span><b data-i18n="studioAnimate">Animate Photo</b><small data-i18n="studioAnimateSub">фото → відео</small></button>
+              <button class="studioMode" type="button" data-studio-mode="video-generate"><span>◇</span><b data-i18n="studioVideoGenerate">Video AI</b><small data-i18n="studioVideoGenerateSub">текст → відео</small></button>
+              <button class="studioMode" type="button" data-studio-mode="video-edit"><span>⌁</span><b data-i18n="studioVideoEdit">Video Edit AI</b><small data-i18n="studioVideoEditSub">змінити коротке відео</small></button>
+            </div>
+          </div>
+        </details>
+        <button id="studioRunBtn" class="primary studioRunBtn" type="button" data-i18n="studioRun">Запустити AI Studio</button>
+        <div id="studioStatus" class="studioStatus" aria-live="polite"></div>
+      </div>
+
+      <div id="studioResultCard" class="card studioResultCard hidden">
+        <div class="sectionHead"><div><div class="eyebrow" data-i18n="studioResult">RESULT</div><h3 id="studioResultTitle">AI Studio</h3></div><a id="studioOpenResult" class="tinyBtn studioResultLink" target="_blank" rel="noopener" data-i18n="studioOpen">Відкрити</a></div>
+        <div id="studioResult" class="studioResult"></div>
+        <p class="smallMuted" data-i18n="studioResultExpiry">Збережи результат собі: зовнішнє посилання може мати обмежений строк дії.</p>
+      </div>
+    </section>
+
+    <section class="page" id="page-history">
+      <div class="pageTitle">
+        <div class="eyebrow" data-i18n="localHistory">LOCAL HISTORY</div>
+        <h2 data-i18n="historyTitle">Історія</h2>
+        <p data-i18n="historyDesc">Останні завдання та відповіді зберігаються локально на цьому iPhone в IndexedDB.</p>
+      </div>
+      <details id="usageCard" class="usageCard" open>
+        <summary><span data-i18n="usageTitle">Використання AI</span><small id="usageTotals"></small></summary>
+        <div class="usageRange" role="group"><button type="button" data-usage-range="1" class="active" data-i18n="usageToday">Сьогодні</button><button type="button" data-usage-range="7" data-i18n="usageWeek">7 днів</button></div>
+        <div class="usageHead"><span data-i18n="usageProvider">Провайдер</span><span data-i18n="usageCols">Запити · Успіх · Швидкість</span></div>
+        <div id="usageTable" class="usageTable"></div>
+        <!-- v5.11.30: місячний бюджет витрат на моделі -->
+        <div class="spendCapBlock">
+          <label class="spendCapRow"><span data-i18n="spendCapTitle">Місячний бюджет</span><span class="spendCapInputWrap"><input id="spendCapInput" type="number" min="0" step="0.5" inputmode="decimal" data-i18n-aria="spendCapLabel" aria-label="Ліміт"><button id="spendCapSave" type="button" class="secondary smallBtn" data-i18n="saveBtn">Зберегти</button></span></label>
+          <div id="spendCapBar" class="spendCapBar" aria-hidden="true"><i id="spendCapBarFill"></i></div>
+          <p class="usageNote"><span id="spendCapStatus"></span> <span data-i18n="spendCapHint">Bridge відхилятиме нові запити, коли витрати сягнуть ліміту.</span></p>
+        </div>
+        <p class="usageNote" data-i18n="usageNote">Рахується на цьому пристрої. Точний залишок безкоштовного ліміту показує кабінет провайдера.</p>
+      </details>
+      <label class="syncToggle"><input type="checkbox" id="historySyncToggle"><span><b data-i18n="historySyncLabel">Синхронізувати історію між пристроями</b><small data-i18n="historySyncHint">Історія зберігається у вашому Cloudflare KV. Потрібен KV AI_BRIDGE_JOBS.</small></span></label>
+      <div id="historySyncStatus" class="syncStatus" role="status" aria-live="polite"></div>
+      <input id="historySearch" class="historySearch" type="search" autocomplete="off" placeholder="Пошук в історії…" data-i18n-placeholder="historySearch" aria-label="Пошук в історії" data-i18n-aria="historySearch">
+      <div class="historyActions">
+        <button id="refreshHistoryBtn" class="secondary smallBtn" data-i18n="refresh">Оновити</button>
+        <button id="bookmarksFilterBtn" class="secondary smallBtn" data-i18n="bookmarksFilter">Тільки закладки</button>
+        <button id="archiveFilterBtn" class="secondary smallBtn" data-i18n="archiveFilter">Архів</button>
+        <button id="clearHistoryBtn" class="danger smallBtn" data-i18n="historyClear">Очистити</button>
+      </div>
+      <div id="historyList" class="historyList"></div>
+    </section>
+    <!-- v5.11.14: журнал оновлень «Що нового» — кожен цикл збирача видно в застосунку -->
+    <section class="page" id="page-whatsnew">
+      <div class="pageTitle">
+        <div class="eyebrow">AI BRIDGE</div>
+        <h2 data-i18n="whatsNewTitle">Що нового</h2>
+        <p data-i18n="whatsNewDesc">Кожен цикл оновлень видно тут.</p>
+        <!-- v5.11.73: «Запропонувати ідею» — ідея Сергія падає в скриньку розвідника (через KV → pull-ideas.py) -->
+        <button id="suggestIdeaBtn" class="tinyBtn" type="button"><span aria-hidden="true">💡</span> <span data-i18n="ideaSuggest">Запропонувати ідею</span></button>
+      </div>
+      <div id="whatsNewList" class="whatsNewList" aria-live="polite"></div>
+    </section>
+    <section class="page" id="page-lotto">
+      <div class="pageTitle">
+        <div class="eyebrow">AI BRIDGE</div>
+        <h2 data-i18n="lottoTitle">Лотерейний аналізатор</h2>
+        <p data-i18n="lottoDesc">Офіційні тиражі WCLC, статистика збігів і твої комбінації.</p>
+      </div>
+      <div class="lottoTabs" id="lottoTabs" role="tablist"></div>
+      <div id="lottoBody" aria-live="polite"></div>
+    </section>
+    <!-- v5.11.58: АвтоКоди — база помилок авто + VIN-декодер -->
+    <section class="page" id="page-dtc">
+      <div class="pageTitle">
+        <div class="eyebrow">AI BRIDGE</div>
+        <h2 data-i18n="dtcTitle">АвтоКоди</h2>
+        <p data-i18n="dtcDesc">Коди помилок OBD-II усіх марок і розшифровка VIN.</p>
+      </div>
+      <div class="dtcTabs" id="dtcTabs" role="tablist">
+        <button type="button" role="tab" class="dtcTab on" data-dtctab="code" data-i18n="dtcTabCode">Код помилки</button>
+        <button type="button" role="tab" class="dtcTab" data-dtctab="vin" data-i18n="dtcTabVin">VIN</button>
+      </div>
+      <div id="dtcCodePane">
+        <div class="dtcSearch">
+          <input id="dtcCodeInput" maxlength="5" autocomplete="off" autocapitalize="characters" spellcheck="false"
+            placeholder="P0301" aria-label="Код помилки">
+          <button id="dtcCodeBtn" type="button" class="primary" data-i18n="dtcFind">Знайти</button>
+        </div>
+        <div id="dtcCodeResult" aria-live="polite"></div>
+      </div>
+      <div id="dtcVinPane" class="hidden">
+        <div class="dtcSearch">
+          <input id="dtcVinInput" maxlength="17" autocomplete="off" autocapitalize="characters" spellcheck="false"
+            placeholder="JTDBR32E612012345" aria-label="VIN">
+          <button id="dtcVinBtn" type="button" class="primary" data-i18n="dtcDecode">Розшифрувати</button>
+        </div>
+        <div id="dtcVinResult" aria-live="polite"></div>
+      </div>
+    </section>
+    <!-- v5.11.40: карта приватності «Де живуть твої дані» -->
+    <section class="page" id="page-datamap">
+      <div class="pageTitle">
+        <div class="eyebrow">AI BRIDGE</div>
+        <h2 data-i18n="navDataMap">Де живуть твої дані</h2>
+        <p data-i18n="dataMapDesc">Чесна правда про те, що Bridge зберігає і де.</p>
+      </div>
+      <div class="dataMapList" id="dataMapList" aria-live="polite"></div>
+    </section>
+    <!-- v5.11.67: Центр приватності — путівник по елементах керування -->
+    <section class="page" id="page-privacy">
+      <div class="pageTitle">
+        <div class="eyebrow">AI BRIDGE</div>
+        <h2 data-i18n="navPrivacy">Приватність</h2>
+        <p data-i18n="privacyDesc">Путівник по елементах керування приватністю: що кожен робить і як ним керувати. Цей екран сам нічого не змінює — лише показує й веде.</p>
+      </div>
+      <div class="dataMapList" id="privacyList" aria-live="polite"></div>
+    </section>
+    <!-- v5.11.50: екран доступності (ідея scout) -->
+    <section class="page" id="page-access">
+      <div class="pageTitle">
+        <div class="eyebrow" data-i18n="accessEyebrow">ACCESSIBILITY</div>
+        <h2 data-i18n="navAccess">Доступність</h2>
+        <p data-i18n="accessDesc">Читабельно для кожного: шрифт для дислексії й розмір тексту. Зберігається лише на цьому пристрої.</p>
+      </div>
+      <div class="card">
+        <label class="toggleRow"><input id="a11yDyslexic" type="checkbox"><span><b data-i18n="a11yDyslexicTitle">Шрифт для дислексії</b><small data-i18n="a11yDyslexicDesc">Читабельніші обриси літер по всьому застосунку.</small></span></label>
+        <div class="sectionHead"><h3 data-i18n="a11yTextSizeTitle">Розмір тексту</h3></div>
+        <p class="smallMuted" data-i18n="a11yTextSizeDesc">Масштабує текст інтерфейсу; мобайл 390px лишається першим.</p>
+        <div class="a11ySeg" id="a11ySizeSeg" role="radiogroup" data-i18n-aria="a11yTextSizeTitle">
+          <button type="button" class="policyBtn" role="radio" data-a11y-size="m" aria-checked="true"><b data-i18n="a11ySizeM">Звичайний</b></button>
+          <button type="button" class="policyBtn" role="radio" data-a11y-size="l" aria-checked="false"><b data-i18n="a11ySizeL">Великий</b></button>
+          <button type="button" class="policyBtn" role="radio" data-a11y-size="xl" aria-checked="false"><b data-i18n="a11ySizeXL">Дуже великий</b></button>
+        </div>
+      </div>
+    </section>
+    <!-- v5.11.47: нотатки з «Покращити ШІ» -->
+    <section class="page" id="page-notes">
+      <div class="pageTitle">
+        <div class="eyebrow" data-i18n="notesEyebrow">НОТАТКИ</div>
+        <h2 data-i18n="notesTitle">Нотатки</h2>
+        <p data-i18n="notesDesc">Швидкі нотатки на цьому пристрої. «✨ Покращити ШІ» переписує текст підключеним роутером.</p>
+      </div>
+      <div class="notesBar"><button type="button" class="primary" id="noteNewBtn" data-i18n="notesNew">+ Нова нотатка</button></div>
+      <div class="notesList" id="notesList" aria-live="polite"></div>
+    </section>
+    <!-- v5.11.74: гарячі клавіші (ідея scout) -->
+    <section class="page" id="page-hotkeys">
+      <div class="pageTitle">
+        <div class="eyebrow">AI BRIDGE</div>
+        <h2 data-i18n="navHotkeys">Гарячі клавіші</h2>
+        <p data-i18n="hotkeysDesc">Швидкі дії з клавіатури. Працюють на десктопі.</p>
+      </div>
+      <div class="dataMapList" id="hotkeysList" aria-live="polite"></div>
+    </section>
+    <!-- v5.11.47: панель статистики використання -->
+    <section class="page" id="page-stats">
+      <div class="pageTitle">
+        <div class="eyebrow" data-i18n="statsEyebrow">СТАТИСТИКА</div>
+        <h2 data-i18n="statsTitle">Статистика</h2>
+        <p data-i18n="statsDesc">Тільки з цього пристрою.</p>
+      </div>
+      <div class="statsCards" id="statsCards" aria-live="polite"></div>
+      <h3 class="statsH" data-i18n="statsTopModels">Топ моделей</h3>
+      <div class="statsModels" id="statsModels"></div>
+      <h3 class="statsH" data-i18n="statsDays7">Останні 7 днів</h3>
+      <div class="statsBars" id="statsBars"></div>
+      <div class="statsBar"><button type="button" class="secondary" id="statsExportBtn" data-i18n="statsExport">Завантажити CSV</button></div>
+    </section>
+    <section class="page" id="page-crew">
+
+      <div class="pageTitle crew-orgHead">
+        <div class="eyebrow" data-i18n="crewOrgEyebrow">ОРГАНІЗАТОР</div>
+        <h2 data-i18n="crewAgents">Агенти</h2>
+        <p data-i18n="crewOrgSub">Хто працює, що роблять, що чекає схвалення</p>
+      </div>
+
+      <div id="crewConn" class="crew-conn hidden" role="status">
+        <span data-i18n="crewNoConn">Немає зв’язку з сервером — дані невідомі.</span>
+        <button id="crewRetry" type="button" class="tinyBtn" data-i18n="refresh">Оновити</button>
+      </div>
+
+      <div class="crew-stats" role="status" aria-live="polite">
+        <div class="crew-stat"><div class="v"><span class="dot" aria-hidden="true"></span><span id="crewStatAgents">–</span></div><div class="l" data-i18n="crewStatOnline">Агенти онлайн</div></div>
+        <div class="crew-stat"><div class="v" id="crewStatTasks">–</div><div class="l" data-i18n="crewStatActive">Завдання активні</div></div>
+        <div class="crew-stat"><div class="v" id="crewStatBudget">–</div><div class="l" data-i18n="crewStatBudget">Бюджет</div></div>
+      </div>
+
+      <div class="crew-sec">
+        <div class="crew-secHead"><h3 data-i18n="crewAgents">Агенти</h3><span class="smallMuted" id="crewAgentSummary"></span></div>
+        <div id="crewAgents" class="crew-orgGrid" role="list"></div>
+      </div>
+
+      <div class="crew-sec">
+        <div class="crew-secHead"><h3 data-i18n="crewTasks">Завдання</h3></div>
+        <details class="card crew-new" id="crewNewTaskDetails">
+          <summary data-i18n="crewNewTask">＋ Нове завдання</summary>
+          <label><span data-i18n="crewTaskRole">Роль агента</span><select id="crewTaskRole"></select></label>
+          <label><span data-i18n="crewTaskTitle">Назва</span><input id="crewTaskTitle" maxlength="120" autocomplete="off"></label>
+          <label><span data-i18n="crewTaskInput">Деталі (необов’язково)</span><textarea id="crewTaskInput" rows="3" maxlength="2000"></textarea></label>
+          <div id="crewStarters" class="crew-chips" aria-live="polite"></div>
+          <button id="crewTaskCreate" type="button" class="primary" data-i18n="crewCreate">Створити завдання</button>
+        </details>
+        <div id="crewTaskFilters" class="crew-chips" role="group" aria-label="Фільтр завдань"></div>
+        <div id="crewTasks" class="crew-tasks"></div>
+      </div>
+
+      <div class="crew-sec">
+        <div class="crew-secHead"><h3 data-i18n="crewReleases">Релізи на схвалення</h3><span class="crew-badge" id="crewRelBadge" hidden></span></div>
+        <div id="crewReleases" class="crew-releases"></div>
+      </div>
+
+      <div class="crew-sec">
+        <div class="crew-secHead"><h3 data-i18n="crewEvents">Журнал подій</h3></div>
+        <div id="crewEvents" class="crew-events"></div>
+      </div>
+
+      <div class="crew-sec">
+        <details class="crew-cfg">
+          <summary><span data-i18n="crewConfig">Налаштування</span><span class="chev" aria-hidden="true">›</span></summary>
+          <div class="crew-cfgBody">
+            <label class="toggleRow"><input id="crewCfgEnabled" type="checkbox"><span><b data-i18n="crewCfgEnabled">Команда увімкнена</b></span></label>
+            <label class="toggleRow"><input id="crewCfgAuto" type="checkbox"><span><b data-i18n="crewCfgAuto">Авто-схвалення низького ризику</b></span></label>
+            <label><span data-i18n="crewCfgBudget">Денний бюджет, USD</span><input id="crewCfgBudget" type="number" min="0" step="0.5" inputmode="decimal"></label>
+            <p class="smallMuted" id="crewCfgNote"></p>
+            <div class="crew-configBtns">
+              <button id="crewCfgSave" type="button" class="primary" data-i18n="crewSave">Зберегти</button>
+              <button id="crewStopAll" type="button" class="danger" data-i18n="crewStopAll">Зупинити всіх</button>
+            </div>
+            <div class="crew-secHead" style="margin-top:14px"><h3 data-i18n="crewMedia">Медіа-можливості</h3></div>
+            <div class="card crew-media" id="crewMedia"></div>
+          </div>
+        </details>
+      </div>
+
+      <button type="button" class="crew-fab" id="crewFab" data-i18n="crewNewTask">＋ Нове завдання</button>
+    </section>
+
+  <footer class="appFooter">
+    <strong data-i18n="footerTagline">AI BRIDGE • PRIVATE MULTI‑MODEL WORKSPACE</strong>
+    <a href="/trade/" data-i18n="navBinanceBot">Binance Bot</a> · <a href="/work" data-i18n="navAdvController">Advanced Controller</a> · <a href="/plugin" data-i18n="navReviewPanel">Review Panel</a> · <a href="/privacy" data-i18n="navPrivacy">Privacy</a> · <a href="/terms" data-i18n="navTerms">Terms</a> · <a href="/support" data-i18n="navSupport">Support</a>
+  </footer>
+</main>
+
+  <!-- v5.11.29: плаваюча кнопка «Вниз» з лічильником нових повідомлень (ідея scout) -->
+  <button id="scrollFab" class="scrollFab hidden" type="button" data-i18n-aria="scrollFabLabel" aria-label="До нових повідомлень"><span aria-hidden="true">↓</span><span id="scrollFabCount" class="scrollFabBadge hidden" aria-hidden="true">0</span></button>
+
+  <nav class="tabs" aria-label="Navigation">
+    <div class="sideBrand" aria-hidden="true"><span class="brandMark small">↗</span><b>AI <span>Bridge</span></b></div>
+    <button class="tab active" data-page="chat" data-i18n-aria="navChat"><span><svg class="navIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v10H9l-5 4V5z"/></svg></span><b data-i18n="navChat">Chat</b></button>
+    <button class="tab agentTab navExtra" data-page="agent" data-i18n-aria="navAgent"><span><svg class="navIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/></svg></span><b data-i18n="navAgent">Agent</b></button>
+    <button class="tab navExtra" data-page="team" data-i18n-aria="navTeam"><span><svg class="navIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c.6-3.1 2.7-4.8 5.5-4.8s4.9 1.7 5.5 4.8"/><circle cx="16.8" cy="9" r="2.4"/><path d="M15.8 14.4c2.7.3 4.1 1.8 4.7 4.6"/></svg></span><b data-i18n="navTeam">Team</b></button>
+    <button class="tab navExtra" data-page="crew" data-i18n-aria="navCrew"><span><svg class="navIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="7" height="7" rx="2"/><rect x="13" y="4" width="7" height="7" rx="2"/><rect x="4" y="13" width="7" height="7" rx="2"/><rect x="13" y="13" width="7" height="7" rx="2"/></svg></span><b data-i18n="navCrew">Crew</b></button>
+    <button class="tab" data-page="files" data-i18n-aria="navFiles"><span><svg class="navIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/></svg></span><b data-i18n="navFiles">Files</b></button>
+    <button class="tab" data-page="studio" data-i18n-aria="navStudio"><span><svg class="navIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="5" width="16" height="14" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M4 16.5l5-4.5 3.5 3 3-2.5L20 16"/></svg></span><b data-i18n="navStudio">Studio</b></button>
+    <button class="tab navExtra" data-page="brain" data-i18n-aria="navBrain"><span><svg class="navIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="6" r="2"/><circle cx="18" cy="6" r="2"/><circle cx="12" cy="18" r="2"/><path d="M7.4 7.4l3.6 8.2M16.6 7.4l-3.6 8.2M8 6h8"/></svg></span><b data-i18n="navBrain">Learn</b></button>
+    <button class="tab navExtra" data-page="connections" data-i18n-aria="navConnect"><span><svg class="navIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 7V3M15 7V3M7 7h10v4a5 5 0 0 1-10 0V7zM12 16v5"/></svg></span><b data-i18n="navConnect">Connect</b></button>
+    <button class="tab" data-page="history" data-i18n-aria="navHistory"><span><svg class="navIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 7.5V12l3.5 2"/></svg></span><b data-i18n="navHistory">History</b></button>
+    <button class="tab moreTab" id="moreTab" type="button" data-i18n-aria="navMore" aria-haspopup="dialog" aria-controls="navDrawer"><span><svg class="navIcon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="5.5" cy="12" r="1.6"></circle><circle cx="12" cy="12" r="1.6"></circle><circle cx="18.5" cy="12" r="1.6"></circle></svg></span><b data-i18n="navMore">Більше</b></button>
+    <div class="sideFoot"><a href="/work" data-i18n="navAdvController">Advanced Controller</a><span>v5.11.100</span></div>
+  </nav>
+
+<div id="navDrawer" class="sheet drawer hidden" role="dialog" aria-modal="true" aria-labelledby="navDrawerTitle">
+    <div class="sheetBackdrop" data-sheet-close></div>
+    <div class="sheetPanel">
+      <div class="drawerHead"><b id="navDrawerTitle" data-i18n="navMenu">Меню</b><button type="button" class="tinyBtn" data-sheet-close data-i18n="close" data-i18n-aria="closeMenu">Закрити</button></div>
+      <nav class="drawerList" aria-label="Головна навігація">
+        <button type="button" class="drawerItem" data-more-page="agent" data-i18n-aria="navAgent"><span class="di" aria-hidden="true">✦</span><b><span data-i18n="navAgent">Агент</span><small data-i18n="moreAgent">Сам планує і виконує кроки</small></b><span class="chev" aria-hidden="true">›</span></button>
+        <button type="button" class="drawerItem" data-more-page="team" data-i18n-aria="navTeam"><span class="di" aria-hidden="true">⚯</span><b><span data-i18n="navTeam">Команда</span><small data-i18n="moreTeam">Вибір моделей і режимів</small></b><span class="chev" aria-hidden="true">›</span></button>
+        <button type="button" class="drawerItem" data-more-page="crew" data-i18n-aria="navCrew"><span class="di" aria-hidden="true">👥</span><b><span data-i18n="navCrew">Команда агентів</span><small data-i18n="moreCrew">Агенти, завдання, релізи</small></b><span class="chev" aria-hidden="true">›</span></button>
+        <button type="button" class="drawerItem" data-more-page="brain" data-i18n-aria="navBrain"><span class="di" aria-hidden="true">🧠</span><b><span data-i18n="navBrain">Мозок</span><small data-i18n="moreBrain">Що AI запам’ятав і вивчив</small></b><span class="chev" aria-hidden="true">›</span></button>
+        <button type="button" class="drawerItem" data-more-page="connections" data-i18n-aria="navConnect"><span class="di" aria-hidden="true">🔗</span><b><span data-i18n="navConnect">Зв’язок</span><small data-i18n="moreConnections">Ключі, самоперевірка, MCP</small></b><span class="chev" aria-hidden="true">›</span></button>
+        <button type="button" class="drawerItem" data-sched-open data-i18n-aria="schedTitle"><span class="di" aria-hidden="true">⏰</span><b><span data-i18n="schedTitle">Регулярні завдання</span><small data-i18n="moreSchedules">Розклад виконання промптів</small></b><span class="chev" aria-hidden="true">›</span></button>
+        <button type="button" class="drawerItem" data-more-page="whatsnew" data-i18n-aria="navWhatsNew"><span class="di" aria-hidden="true">📰</span><b><span data-i18n="navWhatsNew">Що нового</span><small data-i18n="moreWhatsNew">Версії та оновлення</small></b><span class="chev" aria-hidden="true">›</span></button>
+        <button type="button" class="drawerItem" data-more-page="lotto" data-i18n-aria="navLotto"><span class="di" aria-hidden="true">🎰</span><b><span data-i18n="navLotto">Лотерейний аналізатор</span><small data-i18n="moreLotto">Тиражі, збіги, мої комбінації</small></b><span class="chev" aria-hidden="true">›</span></button>
+        <!-- v5.11.58: база кодів помилок авто + VIN -->
+        <button type="button" class="drawerItem" data-more-page="dtc" data-i18n-aria="navDtc"><span class="di" aria-hidden="true">🔧</span><b><span data-i18n="navDtc">АвтоКоди</span><small data-i18n="moreDtc">Помилки авто, VIN-декодер</small></b><span class="chev" aria-hidden="true">›</span></button>
+        <!-- v5.11.40: карта приватності -->
+        <button type="button" class="drawerItem" data-more-page="notes" data-i18n-aria="navNotes"><span class="di" aria-hidden="true">📝</span><b><span data-i18n="navNotes">Нотатки</span><small data-i18n="moreNotes">Швидкі нотатки, «Покращити ШІ»</small></b><span class="chev" aria-hidden="true">›</span></button>
+        <button type="button" class="drawerItem" data-more-page="stats" data-i18n-aria="navStats"><span class="di" aria-hidden="true">📊</span><b><span data-i18n="navStats">Статистика</span><small data-i18n="moreStats">Діалоги, моделі, витрати</small></b><span class="chev" aria-hidden="true">›</span></button>
+        <button type="button" class="drawerItem" data-more-page="datamap" data-i18n-aria="navDataMap"><span class="di" aria-hidden="true">🗺️</span><b><span data-i18n="navDataMap">Де живуть твої дані</span><small data-i18n="moreDataMap">Що зберігається і де</small></b><span class="chev" aria-hidden="true">›</span></button>
+        <!-- v5.11.67: Центр приватності -->
+        <button type="button" class="drawerItem" data-more-page="privacy" data-i18n-aria="navPrivacy"><span class="di" aria-hidden="true">🛡️</span><b><span data-i18n="navPrivacy">Приватність</span><small data-i18n="morePrivacy">Путівник по елементах керування</small></b><span class="chev" aria-hidden="true">›</span></button>
+        <button type="button" class="drawerItem" data-more-page="access" data-i18n-aria="navAccess"><span class="di" aria-hidden="true">👁</span><b><span data-i18n="navAccess">Доступність</span><small data-i18n="moreAccess">Шрифт для дислексії, розмір тексту</small></b><span class="chev" aria-hidden="true">›</span></button>
+        <!-- v5.11.74: гарячі клавіші -->
+        <button type="button" class="drawerItem" data-more-page="hotkeys" data-i18n-aria="navHotkeys"><span class="di" aria-hidden="true">⌨️</span><b><span data-i18n="navHotkeys">Гарячі клавіші</span><small data-i18n="moreHotkeys">Швидкі дії з клавіатури</small></b><span class="chev" aria-hidden="true">›</span></button>
+        <a class="drawerItem" href="/trade/" data-i18n-aria="tradeBot"><span class="di" aria-hidden="true">◈</span><b><span>Binance Bot</span><small>Автоматичний режим і paper</small></b><span class="chev" aria-hidden="true">›</span></a>
+      </nav>
+      <!-- REBUILD «Тиша»: службове ховається за «···» — пошук, тема, мова, оновлення -->
+      <div class="drawerService" aria-label="Службові дії">
+        <button class="roundBtn cmdkBtn" id="cmdkBtn" type="button" aria-label="Команди (Ctrl+K)" title="Команди · Ctrl+K" data-i18n-aria="cmdkOpen" data-i18n-title="cmdkOpen">
+          <svg class="uiIcon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="m16 16 4 4"></path></svg><kbd class="cmdkKbd">⌘K</kbd>
+        </button>
+        <button class="roundBtn themeBtn" id="themeBtn" type="button" aria-label="Тема" title="Тема" data-i18n-aria="themeToggle" data-i18n-title="themeToggle">
+          <svg class="uiIcon themeSun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2.5v2M12 19.5v2M4.6 4.6l1.4 1.4M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4 6 18M18 6l1.4-1.4"></path></svg>
+          <svg class="uiIcon themeMoon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z"></path></svg>
+        </button>
+        <button class="roundBtn" id="statusRefreshBtn" type="button" aria-label="Оновити AI Bridge" title="Оновити сайт" data-i18n-aria="refreshSite" data-i18n-title="refreshTitle">
+          <span class="refreshGlyph" aria-hidden="true">↻</span>
+        </button>
+      </div>
+    </div>
+  </div>
+  <div id="roleSheet" class="sheet hidden" role="dialog" aria-modal="true" aria-labelledby="roleSheetTitle">
+    <div class="sheetBackdrop" data-sheet-close></div>
+    <div class="sheetPanel">
+      <div class="sheetHead"><b id="roleSheetTitle" data-i18n="roleTitle">Роль AI</b><button type="button" class="tinyBtn" data-sheet-close data-i18n="close">Закрити</button></div>
+      <p class="sheetHint" data-i18n="roleHint">Роль додає ваші інструкції до кожного запиту в Чаті та Агенті.</p>
+      <div id="roleList" class="roleList"></div>
+      <details class="roleNew">
+        <summary data-i18n="roleNew">＋ Нова роль</summary>
+        <label><span data-i18n="roleNameLabel">Назва</span><input id="roleName" maxlength="60" autocomplete="off"></label>
+        <label><span data-i18n="roleInstrLabel">Інструкції для AI</span><textarea id="roleInstr" rows="4" maxlength="1500"></textarea></label>
+        <label><span data-i18n="roleProviderLabel">Модель (для Чату в режимі Авто)</span><select id="roleProvider"></select></label>
+        <button id="roleAddBtn" type="button" class="primary" data-i18n="roleSave">Зберегти роль</button>
+      </details>
+    </div>
+  </div>
+
+  <div id="dlgInstrSheet" class="sheet hidden" role="dialog" aria-modal="true" aria-labelledby="dlgInstrSheetTitle">
+    <div class="sheetBackdrop" data-sheet-close></div>
+    <div class="sheetPanel">
+      <div class="sheetHead"><b id="dlgInstrSheetTitle" data-i18n="dlgInstrTitle">Інструкції для діалогу</b><button type="button" class="tinyBtn" data-sheet-close data-i18n="close">Закрити</button></div>
+      <textarea id="dlgInstrText" rows="4" maxlength="2000" data-i18n-placeholder="dlgInstrPh" placeholder="напр. відповідай коротко…"></textarea>
+      <div class="dlgInstrActions">
+        <button id="dlgInstrClearBtn" class="tinyBtn" type="button" data-i18n="clear">Очистити</button>
+        <button id="dlgInstrCancelBtn" class="tinyBtn" type="button" data-i18n="dlgInstrCancel">Скасувати</button>
+        <button id="dlgInstrSaveBtn" class="primary" type="button" data-i18n="dlgInstrSave">Зберегти</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="promptSheet" class="sheet hidden" role="dialog" aria-modal="true" aria-labelledby="promptSheetTitle">
+    <div class="sheetBackdrop" data-sheet-close></div>
+    <div class="sheetPanel">
+      <div class="sheetHead"><b id="promptSheetTitle" data-i18n="promptLibTitle">Бібліотека шаблонів</b><button type="button" class="tinyBtn" data-sheet-close data-i18n="close">Закрити</button></div>
+      <p class="sheetHint" data-i18n="promptHint">Шаблони з {{змінними}} для швидкого старту чату.</p>
+      <div id="promptVarForm" class="promptVarForm hidden"></div>
+      <div id="promptList" class="promptList"></div>
+      <details class="roleNew" id="promptNewBox">
+        <summary data-i18n="promptNew">＋ Новий шаблон</summary>
+        <label><span data-i18n="promptName">Назва</span><input id="promptName" maxlength="80" autocomplete="off"></label>
+        <label><span data-i18n="promptBody">Текст (змінні: {{var}})</span><textarea id="promptBody" rows="5" maxlength="6000"></textarea></label>
+        <div id="promptVarsPreview" class="smallMuted"></div>
+        <div class="promptNewBtns"><button id="promptSaveBtn" type="button" class="primary" data-i18n="saveBtn">Зберегти</button><button id="promptCancelEditBtn" type="button" class="tinyBtn hidden" data-i18n="cancelBtn">Скасувати</button></div>
+      </details>
+    </div>
+  </div>
+
+  <div id="editPromptSheet" class="sheet hidden" role="dialog" aria-modal="true" aria-labelledby="editPromptSheetTitle">
+    <div class="sheetBackdrop" data-sheet-close></div>
+    <div class="sheetPanel">
+      <div class="sheetHead"><b id="editPromptSheetTitle" data-i18n="editPromptTitle">Редагувати питання</b><button type="button" class="tinyBtn" data-sheet-close data-i18n="close">Закрити</button></div>
+      <p class="sheetHint" data-i18n="editPromptHint">Відредагуй питання — відповідь згенерується заново.</p>
+      <label class="editPromptLabel"><span data-i18n="editPromptLabel">Питання</span><textarea id="editPromptText" rows="6" maxlength="20000"></textarea></label>
+      <div class="promptNewBtns"><button id="editPromptSaveBtn" type="button" class="primary" data-i18n="editPromptSave">💾 Зберегти і оновити</button><button id="editPromptCancelBtn" type="button" class="tinyBtn" data-i18n="cancelBtn">Скасувати</button></div>
+    </div>
+  </div>
+
+  <div id="projectSheet" class="sheet hidden" role="dialog" aria-modal="true" aria-labelledby="projectSheetTitle">
+    <div class="sheetBackdrop" data-sheet-close></div>
+    <div class="sheetPanel">
+      <div class="sheetHead"><b id="projectSheetTitle" data-i18n="projSheetTitle">Проєкти</b><button type="button" class="tinyBtn" data-sheet-close data-i18n="close">Закрити</button></div>
+      <p class="sheetHint" data-i18n="projHint">Інструкції проєкту додаються до кожного нового чату; модель і режим обираються автоматично.</p>
+      <div id="projectList" class="promptList"></div>
+      <details class="roleNew" id="projectNewBox">
+        <summary data-i18n="projNew">＋ Новий проєкт</summary>
+        <label><span data-i18n="projName">Назва</span><input id="projectName" maxlength="80" autocomplete="off"></label>
+        <label><span data-i18n="projInstr">Інструкції (системний контекст)</span><textarea id="projectInstr" rows="4" maxlength="4000"></textarea></label>
+        <label><span data-i18n="projModel">Модель за замовчуванням</span><input id="projectModel" autocomplete="off" data-i18n-placeholder="projModelPh" placeholder="напр. groqfree"></label>
+        <label><span data-i18n="projMode">Режим за замовчуванням</span><select id="projectMode">
+          <option value="auto" data-i18n="modeAuto">Auto Router — швидка перша справна відповідь</option>
+          <option value="askall" data-i18n="modeAskAll">Ask All — запитати всіх вибраних</option>
+          <option value="code" data-i18n="modeCode">Code Review — незалежний аудит коду</option>
+          <option value="debate" data-i18n="modeDebate">Debate — відповіді + критика + фінальний Judge</option>
+          <option value="single" data-i18n="modeSingle">Single AI — тільки одна модель</option>
+          <option value="agent" data-i18n="modeAgent">Agent — автономні кроки + інструменти</option>
+          <option value="god" data-i18n="modeGod">God Mode — Search + Agent + Verify + Learn</option>
+        </select></label>
+        <div class="promptNewBtns"><button id="projectSaveBtn" type="button" class="primary" data-i18n="saveBtn">Зберегти</button><button id="projectCancelEditBtn" type="button" class="tinyBtn hidden" data-i18n="cancelBtn">Скасувати</button></div>
+      </details>
+    </div>
+  </div>
+
+  <div id="exportSheet" class="sheet hidden" role="dialog" aria-modal="true" aria-labelledby="exportSheetTitle">
+    <div class="sheetBackdrop" data-sheet-close></div>
+    <div class="sheetPanel">
+      <div class="sheetHead"><b id="exportSheetTitle" data-i18n="exportTitle">Експорт розмови</b><button type="button" class="tinyBtn" data-sheet-close data-i18n="close">Закрити</button></div>
+      <p class="sheetHint" data-i18n="exportHint">Збережи поточну відповідь у зручному форматі — без зовнішніх бібліотек.</p>
+      <label class="exportPickRow"><input type="checkbox" id="exportPickPlaceChk"><span><b data-i18n="exportPickPlace">Запитувати місце збереження («Зберегти як…»)</b><small data-i18n="exportPickPlaceDesc">Системне вікно вибору папки замість тихого завантаження (лише Chromium)</small></span></label>
+      <div class="exportOpts">
+        <button type="button" class="exportOpt" id="exportDocxBtn"><span class="eIco" aria-hidden="true">📝</span><span><b>Word (.doc)</b><small data-i18n="exportDocxDesc">Відкривається в Microsoft Word</small></span></button>
+        <button type="button" class="exportOpt" id="exportPdfBtn"><span class="eIco" aria-hidden="true">📄</span><span><b>PDF</b><small data-i18n="exportPdfDesc">Друкована верстка → зберегти як PDF</small></span></button>
+        <button type="button" class="exportOpt" id="exportDialogMdBtn"><span class="eIco" aria-hidden="true">💬</span><span><b data-i18n="exportDialogMd">Діалог (.md)</b><small data-i18n="exportDialogMdDesc">Повний діалог: запитання, відповіді моделей, оцінка Judge</small></span></button>
+        <button type="button" class="exportOpt" id="exportDialogJsonBtn"><span class="eIco" aria-hidden="true">🗂</span><span><b data-i18n="exportDialogJson">Діалог (.json)</b><small data-i18n="exportDialogJsonDesc">Повна структура діалогу для бекапа</small></span></button>
+        <button type="button" class="exportOpt" id="importDialogBtn"><span class="eIco" aria-hidden="true">📥</span><span><b data-i18n="importDialog">Імпортувати діалог</b><small data-i18n="importDialogDesc">JSON-файл з Bridge або ChatGPT</small></span></button>
+      </div>
+      <input type="file" id="importDialogFile" accept=".json,application/json" class="hidden" tabindex="-1" aria-hidden="true">
+    </div>
+  </div>
+
+  <div id="ctxSheet" class="sheet hidden" role="dialog" aria-modal="true" aria-labelledby="ctxSheetTitle">
+    <div class="sheetBackdrop" data-sheet-close></div>
+    <div class="sheetPanel">
+      <div class="sheetHead"><b id="ctxSheetTitle" data-i18n="ctxSheetTitle">Розбір контексту</b><button type="button" class="tinyBtn" data-sheet-close data-i18n="close">Закрити</button></div>
+      <p class="sheetHint" id="ctxTotal"></p>
+      <div id="ctxBreakdownList" class="ctxRows"></div>
+      <p class="sheetHint" data-i18n="ctxNote">Орієнтовна оцінка: символи ÷ 4. Системні інструкції сервера не враховані.</p>
+    </div>
+  </div>
+
+  <div id="schedSheet" class="sheet hidden" role="dialog" aria-modal="true" aria-labelledby="schedSheetTitle">
+    <div class="sheetBackdrop" data-sheet-close></div>
+    <div class="sheetPanel">
+      <div class="sheetHead"><b id="schedSheetTitle" data-i18n="schedTitle">⏰ Регулярні завдання</b><button type="button" class="tinyBtn" data-sheet-close data-i18n="close">Закрити</button></div>
+      <p class="sheetHint" data-i18n="schedHint">AI Bridge виконуватиме промпт за розкладом і сповіщатиме про результат.</p>
+      <div id="schedList" class="schedList"></div>
+      <details class="roleNew" id="schedNewBox">
+        <summary data-i18n="schedNew">＋ Новий розклад</summary>
+        <div class="schedForm">
+          <label><span data-i18n="schedName">Назва</span><input id="schedName" maxlength="80" autocomplete="off"></label>
+          <div class="schedFormRow">
+            <label><span data-i18n="schedTime">Час (HH:MM)</span><input id="schedTime" type="time" value="09:00"></label>
+            <label><span data-i18n="schedTz">Часовий пояс</span><input id="schedTz" autocomplete="off" placeholder="Europe/Kyiv"></label>
+          </div>
+          <label><span data-i18n="schedPrompt">Промпт</span><textarea id="schedPrompt" rows="3" maxlength="2000"></textarea></label>
+          <div class="promptNewBtns"><button id="schedSaveBtn" type="button" class="primary" data-i18n="saveBtn">Зберегти</button></div>
+        </div>
+      </details>
+    </div>
+  </div>
+
+  <!-- v5.11.40: «Запустити як завдання» — міст із відповіді в команду агентів -->
+  <div id="taskSheet" class="sheet hidden" role="dialog" aria-modal="true" aria-labelledby="taskSheetTitle">
+    <div class="sheetBackdrop" data-sheet-close></div>
+    <div class="sheetPanel">
+      <div class="sheetHead"><b id="taskSheetTitle" data-i18n="runAsTaskTitle">Запустити як завдання команди</b><button type="button" class="tinyBtn" data-sheet-close data-i18n="close">Закрити</button></div>
+      <label><span data-i18n="runAsTaskName">Назва</span><input id="taskName" maxlength="120" autocomplete="off"></label>
+      <label><span data-i18n="runAsTaskRole">Роль</span><select id="taskRole"></select></label>
+      <div class="taskFreq" role="radiogroup">
+        <label><input type="radio" name="taskFreq" value="once" checked> <span data-i18n="runAsTaskOnce">Разово</span></label>
+        <label><input type="radio" name="taskFreq" value="daily"> <span data-i18n="runAsTaskDaily">Щодня о</span> <input id="taskTime" type="time" value="08:00" aria-label="Час"></label>
+      </div>
+      <!-- v5.11.66: вкладення з вкладки «Файли» для делегованих завдань команди -->
+      <label class="taskFilesRow" id="taskFilesRow" hidden><input type="checkbox" id="taskIncludeFiles" checked> <span data-i18n="taskIncludeFiles">Додати файли з вкладки «Файли»</span></label>
+      <div class="promptNewBtns"><button id="taskCreateBtn" type="button" class="primary" data-i18n="runAsTaskCreate">Створити завдання</button></div>
+    </div>
+  </div>
+
+  <!-- v5.11.73: «Запропонувати ідею» з «Що нового» — форма падає в KV idea:v1, звідти в скриньку scout -->
+  <div id="ideaSheet" class="sheet hidden" role="dialog" aria-modal="true" aria-labelledby="ideaSheetTitle">
+    <div class="sheetBackdrop" data-sheet-close></div>
+    <div class="sheetPanel">
+      <div class="sheetHead"><b id="ideaSheetTitle"><span aria-hidden="true">💡</span> <span data-i18n="ideaSheetTitle">Запропонувати ідею</span></b><button type="button" class="tinyBtn" data-sheet-close data-i18n="close">Закрити</button></div>
+      <p class="sheetHint" data-i18n="ideaSheetHint">Твоя пропозиція потрапить у список ідей для наступних оновлень.</p>
+      <div class="ideaForm">
+        <label><span data-i18n="ideaName">Назва</span><input id="ideaTitle" maxlength="80" autocomplete="off" data-i18n-placeholder="ideaNamePh" placeholder="Що додати чи змінити?"></label>
+        <label><span data-i18n="ideaText">Опис</span><textarea id="ideaDesc" rows="3" maxlength="500" data-i18n-placeholder="ideaTextPh" placeholder="1–2 речення: що саме і навіщо"></textarea></label>
+        <div class="promptNewBtns"><button id="ideaSendBtn" type="button" class="primary" data-i18n="ideaSend">Надіслати ідею</button></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- v5.11.65: вибір «весь текст / тільки перелік» для «Зберегти в нотатки» -->
+  <div id="noteSaveSheet" class="sheet hidden" role="dialog" aria-modal="true" aria-labelledby="noteSaveSheetTitle">
+    <div class="sheetBackdrop" data-sheet-close></div>
+    <div class="sheetPanel">
+      <div class="sheetHead"><b id="noteSaveSheetTitle" data-i18n="saveNoteChoose">Що зберегти?</b><button type="button" class="tinyBtn" data-sheet-close data-i18n="close">Закрити</button></div>
+      <p class="sheetHint" id="noteSaveCount"></p>
+      <div class="promptNewBtns">
+        <button id="noteSaveFullBtn" type="button" class="primary" data-i18n="saveNoteFull">Зберегти весь текст</button>
+        <button id="noteSaveListBtn" type="button" class="tinyBtn" data-i18n="saveNoteList">Створити список</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="kbSheet" class="sheet hidden" role="dialog" aria-modal="true" aria-labelledby="kbSheetTitle">
+    <div class="sheetBackdrop" data-sheet-close></div>
+    <div class="sheetPanel">
+      <div class="sheetHead"><b id="kbSheetTitle" data-i18n="kbTitle">📚 База знань</b><button type="button" class="tinyBtn" data-sheet-close data-i18n="close">Закрити</button></div>
+      <p class="sheetHint" data-i18n="kbHint">Запитай про файли проєкту — відповідь прийде з цитатами.</p>
+      <div class="kbBox">
+        <div class="kbQueryRow"><input id="kbQuery" autocomplete="off" data-i18n-placeholder="kbPlaceholder" placeholder="Наприклад: де обробляються помилки API?"><button id="kbAskBtn" type="button" class="primary" data-i18n="kbAsk">Запитати</button></div>
+        <div id="kbAnswer" class="kbAnswer" aria-live="polite"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="srcSheet" class="sheet hidden" role="dialog" aria-modal="true" aria-labelledby="srcSheetTitle">
+    <div class="sheetBackdrop" data-sheet-close></div>
+    <div class="sheetPanel">
+      <div class="sheetHead"><b id="srcSheetTitle" data-i18n="srcTitle">Джерело</b><button type="button" class="tinyBtn" data-sheet-close data-i18n="close">Закрити</button></div>
+      <div id="srcPreview"></div>
+      <div class="exportOpts"><button type="button" class="exportOpt" id="srcOpenBtn"><span class="eIco" aria-hidden="true">↗</span><span><b data-i18n="srcOpen">Відкрити</b><small id="srcOpenUrl" style="word-break:break-all"></small></span></button></div>
+    </div>
+  </div>
+
+  <div id="confirmSheet" class="sheet hidden" role="dialog" aria-modal="true" aria-labelledby="confirmSheetTitle">
+    <div class="sheetBackdrop" data-confirm-cancel></div>
+    <div class="sheetPanel">
+      <div class="sheetHead"><b id="confirmSheetTitle" data-i18n="confirmTitle">Підтвердження</b></div>
+      <p class="confirmText" id="confirmSheetText"></p>
+      <div class="confirmBtns">
+        <button type="button" class="cancelBtn" data-confirm-cancel data-i18n="cancelBtn">Скасувати</button>
+        <button type="button" class="dangerBtn" id="confirmSheetOk" data-i18n="confirmOk">Підтвердити</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="cmdk" class="cmdk hidden" role="dialog" aria-modal="true" aria-label="Command palette">
+    <div class="cmdkBackdrop" data-cmdk-close></div>
+    <div class="cmdkPanel">
+      <div class="cmdkSearch"><svg class="uiIcon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="m16 16 4 4"></path></svg><input id="cmdkInput" type="text" autocomplete="off" spellcheck="false" placeholder="Що зробити?" data-i18n-placeholder="cmdkPlaceholder" aria-label="Command"><kbd>Esc</kbd></div>
+      <div id="cmdkList" class="cmdkList" role="listbox"></div>
+    </div>
+  </div>
+  <div id="toasts" class="toasts" aria-live="polite"></div>
+</div>
+
+<script defer src="zip-safety-core.js"></script>
+<script defer src="i18n.js"></script>
+<script defer src="markdown.js"></script>
+<script defer src="core.js"></script>
+<script defer src="app.js?v=5.11.100"></script>
+<script defer src="crew.js"></script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+AI Bridge v4.8.7
+
+- Fixed file-task instruction priority: the user task is now sent separately from file context and wrapped as the authoritative instruction.
+- Added a dedicated file-task system policy: attached files are untrusted evidence, not instructions.
+- Added raw file/source-dump detection so a provider cannot win Auto merely by echoing arbitrary source instead of completing the task.
+- Added one automatic repair attempt when a provider returns a raw dump; if it repeats the failure, Bridge rejects it and falls back to another provider.
+- Preserved backward compatibility with legacy clients that still concatenate <attached_files> into prompt.
+- Added regression coverage for the production failure shown on iPhone where sw.js source was returned as the final answer.

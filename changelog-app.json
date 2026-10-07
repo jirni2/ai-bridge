@@ -1,0 +1,1212 @@
+[
+  {
+    "v": "5.11.100",
+    "date": "2026-10-06",
+    "uk": [
+      "Muse і локальне Ядро більше не рахуються як API-ключі — статус показує реальну кількість хмарних провайдерів",
+      "Прості точні питання можуть отримати локальну відповідь Ядра в Auto, Agent або God навіть без хмарного ключа",
+      "Після помилки журнал чесно пише, що відповідь не отримано, замість неправдивого «Готово»"
+    ],
+    "en": [
+      "Muse and local Core no longer count as API keys — status now shows the real cloud-provider count",
+      "Simple deterministic questions can use local Core in Auto, Agent or God even without a cloud key",
+      "After a failed request the activity log says that no answer arrived instead of falsely reporting success"
+    ],
+    "ru": [
+      "Muse и локальное Ядро больше не считаются API-ключами — статус показывает реальное число облачных провайдеров",
+      "Простые точные вопросы могут получить локальный ответ Ядра в Auto, Agent или God даже без облачного ключа",
+      "После ошибки журнал честно пишет, что ответ не получен, вместо ложного «Готово»"
+    ]
+  },
+  {
+    "v": "5.11.99",
+    "date": "2026-10-05",
+    "uk": [
+      "Ядро стало розумнішим: знає столиці всіх країн і базові факти (наука, географія, Канада, Україна, кухонні міри) — без інтернету",
+      "Ядро вчиться саме: запам'ятовує відповіді хмарних моделей і вашу історію чатів, щоб потім відповісти без них",
+      "Ядро можна навчити прямо: «коли я питаю …, відповідай …», а на помилку сказати «неправильно»",
+      "Списки («додай молоко в список покупок») і кілька команд підряд («порахуй … і запам'ятай результат»)"
+    ],
+    "en": [
+      "The Core got smarter: it knows every country's capital and basic facts (science, geography, Canada, Ukraine, kitchen measures) — offline",
+      "The Core learns by itself: it remembers cloud models' answers and your chat history so it can answer without them later",
+      "You can teach the Core directly: \"when I ask …, answer …\", and say \"wrong\" to correct it",
+      "Lists (\"add milk to my shopping list\") and several commands in a row (\"calculate … and remember the result\")"
+    ],
+    "ru": [
+      "Ядро стало умнее: знает столицы всех стран и базовые факты (наука, география, Канада, Украина, кухонные меры) — без интернета",
+      "Ядро учится само: запоминает ответы облачных моделей и вашу историю чатов, чтобы потом ответить без них",
+      "Ядро можно научить прямо: «когда я спрашиваю …, отвечай …», а на ошибку сказать «неправильно»",
+      "Списки («добавь молоко в список покупок») и несколько команд подряд («посчитай … и запомни результат»)"
+    ]
+  },
+  {
+    "v": "5.11.98",
+    "date": "2026-10-05",
+    "uk": [
+      "М'які фейди на краях списків: історія, «Що нового» й панелі плавно гаснуть там, де є що гортати",
+      "Усі кнопки, чипи й вкладки — не менше 44px: зручніше влучати пальцем на телефоні",
+      "Поля вводу більше не змушують iPhone наближати екран — скрізь шрифт від 16px"
+    ],
+    "en": [
+      "Soft edge fades on lists: history, What's new and panels gently fade where there's more to scroll",
+      "All buttons, chips and tabs are at least 44px now — easier to tap on the phone",
+      "Inputs no longer force iPhone to zoom in — 16px font everywhere"
+    ],
+    "ru": [
+      "Мягкие затухания на краях списков: история, «Что нового» и панели плавно гаснут там, где есть что листать",
+      "Все кнопки, чипы и вкладки — не меньше 44px: удобнее попадать пальцем на телефоне",
+      "Поля ввода больше не заставляют iPhone приближать экран — везде шрифт от 16px"
+    ]
+  },
+  {
+    "v": "5.11.97",
+    "date": "2026-10-05",
+    "uk": [
+      "Коли всі хмарні моделі відмовили — Ядро тепер відповідає само, локально, замість сухого «INVALID API KEY • HTTP 401»",
+      "Простими словами: яка модель чому відмовила і що робити (новий ключ / поповнити баланс / зачекати)",
+      "Технічний рядок з кодом HTTP лишився внизу дрібним курсивом — для діагностики"
+    ],
+    "en": [
+      "When all cloud models fail — the Core now answers locally instead of a dry «INVALID API KEY • HTTP 401»",
+      "Plain words: which model failed why and what to do (new key / top up balance / wait)",
+      "Technical line with HTTP code stays at the bottom in small italics — for diagnostics"
+    ],
+    "ru": [
+      "Когда все облачные модели отказали — Ядро теперь отвечает само, локально, вместо сухого «INVALID API KEY • HTTP 401»",
+      "Простыми словами: какая модель почему отказала и что делать (новый ключ / пополнить баланс / подождать)",
+      "Техническая строка с кодом HTTP осталась внизу мелким курсивом — для диагностики"
+    ]
+  },
+  {
+    "v": "5.11.96",
+    "date": "2026-10-05",
+    "uk": [
+      "Аналіз великих текстів став швидшим у ~2.4 раза — Ядро тепер обробляє кожен шматок документа за один прохід",
+      "Результат аналізу не змінився: статистика, ключові слова й резюме — ті самі, лише швидше",
+      "Жодних зовнішніх сервісів — усе рахується на пристрої, як і раніше"
+    ],
+    "en": [
+      "Large-text analysis is ~2.4× faster — the Core now processes each document chunk in a single pass",
+      "Results unchanged: stats, keywords and summary are identical, just faster",
+      "No external services — everything still computed on-device"
+    ],
+    "ru": [
+      "Анализ больших текстов стал быстрее в ~2.4 раза — Ядро теперь обрабатывает каждый кусок документа за один проход",
+      "Результат не изменился: статистика, ключевые слова и резюме — те же, просто быстрее",
+      "Без внешних сервисов — всё считается на устройстве, как раньше"
+    ]
+  },
+  {
+    "v": "5.11.95",
+    "date": "2026-10-05",
+    "uk": [
+      "Ядро стало самостійним асистентом: рахує, переводить одиниці, працює з датами й текстом, запам'ятовує — все на цьому пристрої, без інтернету",
+      "Миттєві запити (рахунок, дата, пам'ять) більше не йдуть у хмару — відповідає Ядро",
+      "Без інтернету Ядро пробує відповісти саме, а не лише ставить у чергу",
+      "Пам'ять Ядра — окремий рядок у «Карті даних» з кнопкою очищення",
+      "Складені через дефіс слова («Wi-Fi») знаходяться і як «wifi»"
+    ],
+    "en": [
+      "Core is now a standalone assistant: calculates, converts units, works with dates and texts, remembers — all on this device, offline",
+      "Instant requests (math, dates, memory) no longer hit the cloud — the Core answers",
+      "Offline, the Core tries to answer itself instead of just queueing",
+      "Core memory gets its own row in the Data Map with a clear button",
+      "Hyphenated words ('Wi-Fi') are also found as 'wifi'"
+    ],
+    "ru": [
+      "Ядро стало самостоятельным ассистентом: считает, переводит единицы, работает с датами и текстами, запоминает — всё на этом устройстве, без интернета",
+      "Мгновенные запросы (счёт, даты, память) больше не идут в облако — отвечает Ядро",
+      "Без интернета Ядро пробует ответить само, а не только ставит в очередь",
+      "Память Ядра — отдельная строка в «Карте данных» с кнопкой очистки",
+      "Слова через дефис («Wi-Fi») находятся и как «wifi»"
+    ]
+  },
+  {
+    "v": "5.11.94",
+    "date": "2026-10-05",
+    "uk": [
+      "Ядро стало розумнішим: краще знаходить відповіді в тексті (41/42), визначає мову коротких фраз (21/21) і розбиває списки на речення",
+      "Ядро більше не зависає на довгих рядках без пробілів — мілісекунди замість хвилини",
+      "Сервер тепер відповідає 400 замість 500 на некоректні запити",
+      "Кнопка «До авторизації» в Команді агентів нарешті працює",
+      "Примітка «аналіз частковий» — лише коли текст справді оброблено не весь"
+    ],
+    "en": [
+      "Smarter core: better answers in text (41/42), short-phrase language detection (21/21), lists split into sentences",
+      "Core no longer hangs on long spaceless strings — milliseconds instead of a minute",
+      "Server now returns 400 instead of 500 on malformed requests",
+      "The 'To authorization' button in the Agent Team now works",
+      "'Partial analysis' note only when text truly wasn't fully processed"
+    ],
+    "ru": [
+      "Ядро стало умнее: лучше находит ответы в тексте (41/42), определяет язык коротких фраз (21/21), разбивает списки на предложения",
+      "Ядро больше не зависает на длинных строках без пробелов — миллисекунды вместо минуты",
+      "Сервер теперь отвечает 400 вместо 500 на некорректные запросы",
+      "Кнопка «К авторизации» в Команде агентов наконец работает",
+      "Пометка «анализ частичный» — только когда текст действительно обработан не весь"
+    ]
+  },
+  {
+    "v": "5.11.93",
+    "date": "2026-10-05",
+    "uk": [
+      "Якір наміру агента: над прогоном Agent / God / Дослідження закріплено рядок «Мета: …» — завжди видно, що саме робить агент",
+      "Сигнал впевненості: поруч з якорем — смуга впевненості з оцінки Judge (у відсотках), тож видно, наскільки відповідь надійна",
+      "Стартові запитання для ролі: у формі нового завдання команди — чипи-стартери; тап підставляє запитання в поле деталей",
+      "Свої стартові запитання для кожної ролі редагуються олівцем ✎ (по одному з рядка, до 4) і зберігаються на пристрої"
+    ],
+    "en": [
+      "Agent intent anchor: runs in Agent / God / Research modes now show a pinned “Goal: …” line — always clear what the agent is doing",
+      "Confidence signal: next to the anchor, a confidence bar from the Judge score (in percent), showing how reliable the answer is",
+      "Conversation starters for team roles: starter chips in the new task form; a tap fills the details field with the question",
+      "Custom starters per role are edited with the ✎ pencil (one per line, up to 4) and saved on the device"
+    ]
+  },
+  {
+    "v": "5.11.92",
+    "date": "2026-10-05",
+    "uk": [
+      "Виправлено помилку кнопки «Вниз», яка спрацьовувала на кожен скрол (тисячі записів у діагностиці)",
+      "Коли запит до AI не вдався, знову показується повідомлення про помилку, а кнопка відправки не зависає",
+      "Англійською та іншими мовами сторінка «АвтоКоди» більше не показує сирі ключі; додано 4 відсутні переклади",
+      "Шапка на iPhone: назва і версія більше не налазять на лічильник провайдерів",
+      "Безпека: Лото й АвтоКоди працюють лише після входу; внутрішні файли проєкту закрито від сторонніх"
+    ],
+    "en": [
+      "Fixed the “jump down” button error that fired on every scroll (thousands of diagnostics entries)",
+      "When an AI request fails, the error message is shown again and the send button no longer gets stuck",
+      "Car Codes page no longer shows raw keys in English and other languages; 4 missing translations added",
+      "iPhone header: name and version no longer overlap the provider counter",
+      "Security: Lotto and Car Codes require login; internal project files are no longer publicly reachable"
+    ]
+  },
+  {
+    "v": "5.11.91",
+    "date": "2026-10-05",
+    "uk": [
+      "Олівець ✎ у рядку історії: діалог можна перейменувати вручну — інлайн-редагування назви (Enter — зберегти, Esc — скасувати), своя назва має пріоритет",
+      "In-app тост «✅ Відповідь готова»: коли завдання завершилось, а ти дивишся інший діалог — спливне повідомлення з кнопкою «Відкрити» веде прямо до готової відповіді, без пошуку по історії",
+      "Доступність: skip-link «Пропустити до вмісту» — перший Tab з клавіатури веде до основного вмісту (design-evolver)",
+      "Ядро: analyze() тепер бере top-1 речення кожного чанка й складає резюме з початку, середини й кінця документа — висновок довгого тексту більше не губиться (core-evolver)"
+    ],
+    "en": [
+      "✎ pencil on the history row: dialogs can now be renamed manually — inline name editing (Enter saves, Esc cancels), a custom name takes priority",
+      "In-app “✅ Answer ready” toast: when a task finishes while you're looking at a different dialog, a toast with an “Open” button takes you straight to the finished answer — no more hunting through history",
+      "Accessibility: “Skip to content” link — the first Tab keypress jumps to the main content (design-evolver)",
+      "Core: analyze() now takes the top-1 sentence of each chunk and builds the summary from the document's head, middle and tail — the conclusion of long texts is no longer lost (core-evolver)"
+    ]
+  },
+  {
+    "v": "5.11.90",
+    "date": "2026-10-05",
+    "uk": [
+      "Скелетони завантаження в темній темі нарешті «живі»: додано легкий блік-шиммер, що проходить по смугах кожні 1.8 с (досі базова смуга майже не читалась і завантаження виглядало статичним); у світлій темі без змін"
+    ],
+    "en": [
+      "Loading skeletons in the dark theme finally feel alive: a soft shimmer sweep glides across the bars every 1.8s (the base band was nearly unreadable before, making loading look static); no change in the light theme"
+    ]
+  },
+  {
+    "v": "5.11.89",
+    "date": "2026-10-05",
+    "uk": [
+      "Кнопка «Дублювати» ⧉ на картці ролі AI: копія підставляється у форму «Нова роль» з суфіксом «(копія)» — Сергій править і зберігає",
+      "Перемикач «Запитувати місце збереження» в листі експорту: системне вікно «Зберегти як…» для діалогу (.md/.json) і Word (.doc) замість тихого завантаження — лише в Chromium, інакше як було"
+    ],
+    "en": [
+      "“Duplicate” ⧉ button on the AI role card: the copy is placed into the “New role” form with a “(copy)” suffix — edit and save",
+      "“Ask where to save” toggle in the export sheet: system “Save as…” dialog for the dialog (.md/.json) and Word (.doc) exports instead of silent download — Chromium only, unchanged elsewhere"
+    ]
+  },
+  {
+    "v": "5.11.88",
+    "date": "2026-10-05",
+    "uk": [
+      "Терміновий багфікс за самодіагностикою з iPhone: виправлено масову помилку «Can't find variable: renderScrollFab» (×15068) — функція тепер явно глобальна, всі виклики безпечні; додано null-check для кнопки підтвердження; привітання в режимі агента більше не женуться через Agent Core (Improvement Lab: маршрут agent|none|no_tools давав 3 збої на 1 успіх)"
+    ],
+    "en": [
+      "Urgent bugfix from iPhone self-diagnostics: fixed mass 'Can't find variable: renderScrollFab' error (×15068) — function now explicitly global, all calls safe; added null-check for confirm button; greetings in agent mode no longer routed through Agent Core (Improvement Lab: agent|none|no_tools route had 3 failures vs 1 success)"
+    ]
+  },
+  {
+    "v": "5.11.87",
+    "date": "2026-10-05",
+    "uk": [
+      "Картки історії чатів отримали тактильний відгук: при натисканні картка м'яко «натискається», як кнопки й чипи; для режиму зменшеного руху ефект вимкнено"
+    ],
+    "en": [
+      "History cards now give tactile press feedback: a gentle press-in like buttons and chips; disabled under prefers-reduced-motion"
+    ]
+  },
+  {
+    "v": "5.11.86",
+    "date": "2026-10-05",
+    "uk": [
+      "Рядок роутингу M2 називає відхилених кандидатів: під відповіддю «Чому не інші» розкриває, кого роутер розглянув і чому відхилив (без ключа, немає зору, тимчасово недоступний, поза політикою бюджету)",
+      "Свайп-дії на картках завдань команди: вправо — завершити/старт, вліво — відкласти з вибором «сьогодні ввечері / завтра / через тиждень»; відкладене повертається в чергу автоматично"
+    ],
+    "en": [
+      "M2 routing line names rejected candidates: “Why not others” under the answer shows who the router considered and why it declined them (no key, no vision, temporarily unavailable, outside budget policy)",
+      "Swipe actions on crew task cards: right — complete/start, left — snooze with “tonight / tomorrow / in a week”; snoozed tasks return to the queue automatically"
+    ]
+  },
+  {
+    "v": "5.11.85",
+    "date": "2026-10-05",
+    "uk": [
+      "Ядро: розумніші відповіді на запитання — речення, що містить усі слова запитання, тепер перемагає речення з одним частим словом (бонус покриття поверх BM25)"
+    ],
+    "en": [
+      "Core: smarter answers — a sentence containing all question words now beats one repeating a single frequent word (coverage bonus over BM25)"
+    ]
+  },
+  {
+    "v": "5.11.84",
+    "date": "2026-10-05",
+    "uk": [
+      "Швидкі відповіді на запитання агента: 3 чипи-чернетки під запитанням — тап підставляє текст у поле вводу, не відправляє",
+      "Морфна іконка кнопки відправки: стрілка плавно перетворюється на індикатор генерації, галочку «готово» або хрестик «помилка\""
+    ],
+    "en": [
+      "Smart replies to agent questions: 3 draft chips under a question — tap inserts the text into the input without sending",
+      "Morphing send-button icon: the arrow smoothly becomes a generation spinner, a \"done\" check or an \"error\" cross"
+    ]
+  },
+  {
+    "v": "5.11.83",
+    "date": "2026-10-05",
+    "uk": [
+      "Дизайн: світіння акцентних кнопок тепер у фірмовому індиго замість блакитного — єдиний акцент у всьому застосунку",
+      "Світіння підлаштовується під тему: темна — індиго #5e6ad2, світла — глибший індиго"
+    ],
+    "en": [
+      "Design: accent button glows now match the signature indigo instead of blue — one accent across the app",
+      "Glow adapts to the theme: indigo in dark mode, deeper indigo in light mode"
+    ]
+  },
+  {
+    "v": "5.11.82",
+    "date": "2026-10-05",
+    "uk": [
+      "Ядро: розумніше резюме — перше речення й висновок тепер важать більше, середина довгих текстів менше (lead-bias)",
+      "Резюме довгих текстів точніше виділяє головне замість щільних, але другорядних деталей"
+    ],
+    "en": [
+      "Core: smarter summaries — lead and conclusion sentences now weigh more, long-text middles less (lead-bias)",
+      "Long-text summaries now pick the main points instead of dense but secondary details"
+    ]
+  },
+  {
+    "v": "5.11.81",
+    "date": "2026-10-05",
+    "uk": [
+      "Розділено стан сервера й авторизації: 401 показує «потрібен вхід», а не «немає зв'язку»",
+      "Без входу статуси провайдерів показують «Невідомо — потрібен вхід» замість «0/8» і «НЕМАЄ»",
+      "Панель агентів: таймаут 15с на запити, кнопка переходу до авторизації при 401",
+      "Studio: прибрано рекламу Cloudflare Workers AI, чесний статус «Генерація не налаштована»"
+    ],
+    "en": [
+      "Separated server and auth state: 401 shows 'login required', not 'no connection'",
+      "Without login, provider statuses show 'Unknown — login required' instead of '0/8' and 'NONE'",
+      "Agents panel: 15s request timeout, go-to-login button on 401",
+      "Studio: removed Cloudflare Workers AI advertising, honest 'Generation not configured' status"
+    ]
+  },
+  {
+    "v": "5.11.80",
+    "date": "2026-10-04",
+    "uk": [
+      "Під час генерації — живі мітки міркувань українською («Розбираю запитання…», «Шукаю в пам'яті…», «Перевіряю план…») замість статичного тексту; без зайвих викликів моделей",
+      "Результати інструментів агента — згорнуті прев'ю з кнопкою «Читати повністю»: довгі уривки більше не займають стіну екрана"
+    ],
+    "en": [
+      "Live reasoning labels during generation («Parsing the question…», «Searching memory…», «Checking the plan…») instead of static text; no extra model calls",
+      "Agent tool results as collapsed previews with a «Read full» button — long excerpts no longer take over the screen"
+    ]
+  },
+  {
+    "v": "5.11.79",
+    "date": "2026-10-04",
+    "uk": [
+      "Заголовки навчилися збалансованим переносам: довгі українські назви сторінок і відповідей більше не «рвуться» на вузькому екрані — читається чистіше"
+    ],
+    "en": [
+      "Display headings now use balanced line wrapping: long titles no longer break awkwardly on narrow screens"
+    ]
+  },
+  {
+    "v": "5.11.78",
+    "date": "2026-10-04",
+    "uk": [
+      "Токенізатор ядра навчився апострофам: «ім'я», «м'яч», «п'єса», «don't» більше не губляться — пошук відповідей і ключові слова стали точнішими"
+    ],
+    "en": [
+      "Core tokenizer now handles apostrophes: words like \"ім'я\", \"м'яч\", \"п'єса\", \"don't\" are no longer dropped — answer search and keywords are more accurate"
+    ]
+  },
+  {
+    "v": "5.11.77",
+    "date": "2026-10-04",
+    "uk": [
+      "Картки агентів тепер клікабельні: натиснув на агента — відкрилася форма нового завдання з уже вибраною його роллю",
+      "Візуальний хінт: картка піднімається при наведенні, курсор-рука; клік не спрацьовує при виділенні тексту"
+    ],
+    "en": [
+      "Agent cards are now clickable: tap an agent to open the new task form with its role preselected",
+      "Visual hint: card lifts on hover with pointer cursor; click ignored while selecting text"
+    ]
+  },
+  {
+    "v": "5.11.76",
+    "date": "2026-10-04",
+    "uk": [
+      "Пошук відповідей у тексті (Q&A) — тепер на BM25: рідкісні слова важать більше, повторні згадки терміна піднімають речення, довгі речення не «забивають» короткі",
+      "Українська морфологія збережена: «витягує» знаходить «витягують» через стеммінг, як і раніше"
+    ],
+    "en": [
+      "In-text Q&A now uses BM25 ranking: rare words weigh more, repeated term mentions boost sentences, long sentences no longer drown out short ones",
+      "Ukrainian morphology preserved: stemming still matches inflected forms as before"
+    ]
+  },
+  {
+    "v": "5.11.75",
+    "date": "2026-10-04",
+    "uk": [
+      "«Захист Ядра»: ліміт вхідного тексту 500 000 символів — понад ліміт чесне повідомлення, а не зависання",
+      "Бюджет часу 10 секунд на операцію — великі тексти аналізуються частинами з позначкою «частково»",
+      "Самоперевірка цілісності: verifyIntegrity() детектить підміну коду в рантаймі; бейдж «Захищено ✓» у картці провайдера",
+      "Всі функції ядра в try/catch — жодна помилка не роняє застосунок; екранування HTML у виводі"
+    ],
+    "en": [
+      "“Core Shield”: 500,000-char input limit — over-limit shows an honest message instead of hanging",
+      "10-second time budget per operation — large texts analyzed in chunks marked “partial”",
+      "Integrity self-check: verifyIntegrity() detects runtime code tampering; “Protected ✓” badge on the provider card",
+      "All core functions wrapped in try/catch — no error crashes the app; HTML escaping in output"
+    ]
+  },
+  {
+    "v": "5.11.74",
+    "date": "2026-10-04",
+    "uk": [
+      "Захист сховища на iPhone: застосунок просить захищене сховище (storage.persist), щоб iOS не стирав дані через 7 днів; статус — на екрані «Де живуть твої дані»",
+      "Екран «Гарячі клавіші» в меню: довідка по шорткатах — Ctrl+Enter надіслати, / — поле вводу, Esc — закрити листи, Ctrl+K — командна палітра, ↑/↓ — історія запитів",
+      "Ctrl+Enter тепер відправляє й з поля вводу AI Агента"
+    ],
+    "en": [
+      "iPhone storage protection: the app requests persistent storage (storage.persist) so iOS doesn't wipe data after 7 days; status lives on the “Where your data lives” screen",
+      "“Hotkeys” screen in the menu: shortcut reference — Ctrl+Enter to send, / to focus input, Esc to close sheets, Ctrl+K for the command palette, ↑/↓ for prompt history",
+      "Ctrl+Enter now also sends from the AI Agent input"
+    ]
+  },
+  {
+    "v": "5.11.73",
+    "date": "2026-10-04",
+    "uk": [
+      "Розумне поле вводу: підказки режиму за наміром — «порівняй» пропонує Дебати, «детально» → Глибоко, «коротко» → Швидко, довге доручення → Агент",
+      "Чипи натискають справжні кнопки режиму/глибини; аналіз тексту — локально, нічого не надсилається",
+      "Кнопка «Запропонувати ідею» на екрані «Що нового» — твоя пропозиція потрапляє у список ідей для наступних оновлень"
+    ],
+    "en": [
+      "Intent-aware composer: “compare” suggests Debate, “in detail” → Deep, “short” → Fast, a long task → Agent",
+      "Chips press the real mode/depth buttons; text analysis is local, nothing is sent anywhere",
+      "“Suggest an idea” button on the “What’s new” screen — your proposal lands in the ideas list for future updates"
+    ]
+  },
+  {
+    "v": "5.11.72",
+    "date": "2026-10-04",
+    "uk": [
+      "«Ядро»: виправлено генерацію питань «Де …?» (модуль №28) — тепер усі 21 тести проходять"
+    ],
+    "en": [
+      "“Core”: fixed “Where …?” question generation (module #28) — all 21 tests pass"
+    ]
+  },
+  {
+    "v": "5.11.71",
+    "date": "2026-10-04",
+    "uk": [
+      "«Ядро» виросло: 39 нових модулів від команди з 40 агентів — 55 функцій аналізу тексту",
+      "Розумні резюме (TF-IDF, lead-bias, зі структурою заголовків, мульти-документні), тональність, теми, читабельність, сутності (імена/дати/місця/організації)",
+      "Ключові фрази, колокації, цитати, таблиці, списки, action items, схожість текстів, відбитки для дедуплікації, експорт у Markdown/JSON"
+    ],
+    "en": [
+      "“Core” grown: 39 new modules from a 40-agent team — 55 text-analysis functions",
+      "Smart summaries (TF-IDF, lead-bias, heading-structured, multi-document), sentiment, topics, readability, entities (persons/dates/places/orgs)",
+      "Key phrases, collocations, quotes, tables, lists, action items, text similarity, dedup fingerprints, Markdown/JSON export"
+    ]
+  },
+  {
+    "v": "5.11.70",
+    "date": "2026-10-04",
+    "uk": [
+      "«Ядро» — власний локальний движок аналізу тексту (провайдер ⚙️ Ядро, бейдж «Офлайн»): чистий JavaScript без жодних мережевих викликів, працює навіть офлайн",
+      "Встав довгий текст — Ядро видасть мову, статистику, ключові слова й резюме; додай файли у вкладці «Файли» і запитай — знайде відповідь у їхньому тексті. Чесно: це аналізатор, а не чат-бот — діалоги не веде"
+    ],
+    "en": [
+      "“Core” — own local text-analysis engine (provider ⚙️ Core, “Offline” badge): pure JavaScript with zero network calls, works even offline",
+      "Paste a long text — Core returns language, statistics, keywords and a summary; add files in the Files tab and ask — it finds the answer in their text. Honest: this is an analyzer, not a chatbot — it doesn't chat"
+    ]
+  },
+  {
+    "v": "5.11.69",
+    "date": "2026-10-04",
+    "uk": [
+      "Кнопка «Покращити» в полі вводу: дешева фонова модель переписує чернетку запиту чіткіше й конкретніше — текст замінюється в полі, ти перевіряєш і відправляєш",
+      "Кнопка «Перекласти» під відповіддю: один тап — і текст перекладається українською (дешевою фоновою моделлю) в інлайн-бокс під відповіддю; повторний тап не б'є модель знову — показує кешований переклад"
+    ],
+    "en": [
+      "“Improve” button in the composer: a cheap background model rewrites your draft prompt more clearly and specifically — the text is replaced in the field for you to review and send",
+      "“Translate” button under the answer: one tap translates the text into English (cheap background model) in an inline box under the answer; tapping again shows the cached translation instead of calling the model"
+    ]
+  },
+  {
+    "v": "5.11.68",
+    "date": "2026-10-04",
+    "uk": [
+      "Мітка «🧠 Пам'ять використано тут» під відповіддю агента: видно, коли хід реально використав пам'ять (дайджест M5 старих повідомлень і вивчені патерни); тап розкриває, які саме факти пішли в модель",
+      "Згадки минулих чатів: введи @@ у полі вводу — відкриється пошук по історії діалогів; вибраний чат прикріплюється чипом як контекст до поточного запиту (в мережевий промпт, в історії — лише короткий слід)"
+    ],
+    "en": [
+      "“🧠 Memory used here” badge under the agent's answer: visible when the turn actually used memory (the M5 digest of older messages and learned patterns); tap reveals exactly which facts went into the model",
+      "Past-chat mentions: type @@ in the input — a dialog-history search opens; the selected chat attaches as a chip of context to the current request (into the network prompt; history keeps only a short trace)"
+    ]
+  },
+  {
+    "v": "5.11.67",
+    "date": "2026-10-04",
+    "uk": [
+      "Новий екран «Приватність» (··· → Приватність): путівник по всіх елементах керування — пам'ять розмови, тимчасовий діалог, вартовий секретів, історія запитів, карта даних, експорт, бюджет. Кожен рядок пояснює простою мовою, показує живий статус і дає кнопку «Керувати»",
+      "Видиме стиснення контексту: маркер у стрічці тепер показує «N повідомлень → ~X символів» і чесну вартість (стиснення локальне — 0 токенів), дайджест ховається в згортку; поруч із кнопкою «Стиснути контекст» — прогноз «ще ≈N ходів»"
+    ],
+    "en": [
+      "New “Privacy” screen (··· → Privacy): a guide to all privacy controls — conversation memory, temporary chat, secret guard, prompt history, data map, export, budget. Each row explains in plain language, shows a live status and has a “Manage” button",
+      "Visible context compression: the thread marker now shows “N messages → ~X characters” and the honest cost (compression is local — 0 tokens), the digest hides in a collapsible; next to the “Compress context” button — a “≈N more turns” forecast"
+    ]
+  },
+  {
+    "v": "5.11.66",
+    "date": "2026-10-04",
+    "uk": [
+      "Вкладка «Файли» тепер читає PDF, DOCX і XLSX: текст витягується локально на твоєму пристрої (завендорений pdf.js, без зовнішніх серверів) і йде в контекст моделі разом з іншими файлами",
+      "Захищений паролем PDF або пошкоджений файл — чесне повідомлення замість мовчазного пропуску",
+      "«Запустити як завдання»: у шиті з'явився чекбокс «Додати файли з вкладки «Файли»» — ввімкни, і стислий текст вкладень додасться до завдання команди (з чесною міткою, якщо обрізано)"
+    ],
+    "en": [
+      "The “Files” tab now reads PDF, DOCX and XLSX: text is extracted locally on your device (vendored pdf.js, no external servers) and goes into the model context together with the other files",
+      "A password-protected PDF or a corrupted file produces an honest message instead of being silently skipped",
+      "“Run as task”: the sheet gained an “Attach files from the Files tab” checkbox — enable it and a compacted text of the attachments is appended to the team task (with an honest mark if truncated)"
+    ]
+  },
+  {
+    "v": "5.11.65",
+    "date": "2026-10-04",
+    "uk": [
+      "Кнопка «📝 Зберегти в нотатки» в меню «•••» під відповіддю: текст відповіді одразу стає нотаткою (редагується, як і решта нотаток)",
+      "Якщо у відповіді є перелік — пропонує «Створити список»: пункти зберігаються як чек-лист «- [ ]»",
+      "Довге натискання (long-press) по відповіді відкриває меню дій «•••» — альтернатива кебаб-меню для телефону"
+    ],
+    "en": [
+      "“📝 Save to notes” button in the “•••” menu under the answer: the answer text instantly becomes a note (editable like the rest)",
+      "If the answer contains a list, offers “Create checklist”: items are saved as a “- [ ]” checklist",
+      "Long-press on the answer opens the “•••” actions menu — a kebab-menu alternative for the phone"
+    ]
+  },
+  {
+    "v": "5.11.64",
+    "date": "2026-10-04",
+    "uk": [
+      "Бейдж ролі автора відповіді (👤 Аналітик тощо) над відповіддю: видно, яка роль відповіла; натискання відкриває вибір ролі для наступної відповіді",
+      "Жива швидкість генерації: під час очікування — лічильник секунд, після — «⚡ ~ток/с · токени · час» під відповіддю й ~ток/с у вкладці кожної моделі (токени — орієнтовна оцінка ≈ символи/4)"
+    ],
+    "en": [
+      "Author-role badge (👤 Analyst, etc.) above the answer: shows which role answered; tap opens the role picker for the next answer",
+      "Live generation speed: a ticking seconds counter while waiting, then “⚡ ~tokens/s · tokens · time” under the answer and ~tokens/s on each model's tab (tokens are an estimate ≈ chars/4)"
+    ]
+  },
+  {
+    "v": "5.11.63",
+    "date": "2026-10-03",
+    "uk": [
+      "Цінова мітка на кнопці вибору моделі: ○ — безкоштовно, ●/●●/●●● — тири цін. Рівень ціни видно до відкриття меню, не треба гадати, що спалює бюджет",
+      "Кнопка «⇄ Копіювати для ШІ» в меню «•••» під відповіддю: весь діалог копіюється в буфер як чистий текст (запитання + відповідь + модель) — для живого перенесення контексту в інший сеанс ШІ",
+      "Лагодження: англійські підписи кнопки «▶ Continue» з v5.11.61 тепер беруться з правильного словника (раніше в en показувався сирий ключ)"
+    ],
+    "en": [
+      "Cost-tier dots on the model picker button: ○ free, ●/●●/●●● price tiers — visible before opening the menu, no more guessing what burns the budget",
+      "“⇄ Copy for AI” button in the “•••” menu under the answer: copies the whole dialog to the clipboard as clean text (question + answer + model) for live context handoff to another AI session",
+      "Fix: English labels of the v5.11.61 “▶ Continue” button now resolve from the correct dictionary (raw key was shown in en before)"
+    ]
+  },
+  {
+    "v": "5.11.62",
+    "date": "2026-10-03",
+    "uk": [
+      "Muse як провайдер: картка «Muse — твій персональний асистент» у списку провайдерів, бейдж «Асистент», завжди доступний без ключа",
+      "Чесно: Muse не має публічного API, тому відповіді не імітуються — при виборі показується картка з поясненням і запрошенням продовжити в застосунку Muse"
+    ],
+    "en": [
+      "Muse as a provider: “Muse — your personal assistant” card in the provider list, “Assistant” badge, always available without a key",
+      "Honest: Muse has no public API, so answers are not faked — selecting it shows a card explaining this and inviting you to continue in the Muse app"
+    ]
+  },
+  {
+    "v": "5.11.61",
+    "date": "2026-10-03",
+    "uk": [
+      "Кнопка «▶ Продовжити» під відповіддю: якщо модель обірвала відповідь на ліміті токенів, один тап дописує її з того ж місця — текст склеюється в цілісну відповідь",
+      "SSRF-гігієна веб-фетчу: hostname перед запитом перевіряється через DNS (блокує приватні IP навіть при DNS-rebinding), ліміт редиректів і таймаут лишаються; помилка — чесним рядком у трасуванні"
+    ],
+    "en": [
+      "“▶ Continue” button under the answer: if the model hit the token limit mid-answer, one tap continues from the exact cutoff — the text is stitched into one complete answer",
+      "SSRF hygiene for web fetch: hostname is DNS-checked before each request (blocks private IPs even under DNS rebinding); redirect limit and timeouts remain; failures surface as an honest trace line"
+    ]
+  },
+  {
+    "v": "5.11.60",
+    "date": "2026-10-03",
+    "uk": [
+      "Інструкції для діалогу: кнопка «📋 Інструкції» біля поля вводу — власні вказівки («відповідай коротко», «ти — редактор»), які діють лише в цьому діалозі",
+      "Вставка скріншотів з буфера: Ctrl+V / «Вставити» з картинкою в буфері одразу додає її у вкладення чату"
+    ],
+    "en": [
+      "Per-dialog instructions: “📋 Instructions” chip near the composer — custom directives (“answer briefly”, “act as an editor”) that apply only to this dialog",
+      "Clipboard screenshots: Ctrl+V / Paste with an image in the clipboard adds it straight to chat attachments"
+    ]
+  },
+  {
+    "v": "5.11.59",
+    "date": "2026-10-03",
+    "uk": [
+      "Терміновий фікс: вкладка «Зв'язок» знову відкривається (data-page виправлено на connections)"
+    ],
+    "en": [
+      "Hotfix: the “Connections” tab opens again (data-page fixed to connections)"
+    ]
+  },
+  {
+    "v": "5.11.58",
+    "date": "2026-10-03",
+    "uk": [
+      "АвтоКоди в меню «···»: база з 427 кодів помилок OBD-II (P/B/C/U + специфічні Toyota, Honda, Ford, VW, GM, Hyundai/Kia, Nissan, BMW, Mercedes) — опис, причини, критичність українською",
+      "VIN-декодер: перевірка контрольної цифри, марка, країна, рік (69 WMI)"
+    ],
+    "en": [
+      "Car Codes in the “···” menu: 427-code OBD-II database (P/B/C/U + Toyota, Honda, Ford, VW, GM, Hyundai/Kia, Nissan, BMW, Mercedes specifics) — description, causes, severity",
+      "VIN decoder: check-digit validation, make, country, year (69 WMIs)"
+    ]
+  },
+  {
+    "v": "5.11.57",
+    "date": "2026-10-03",
+    "uk": [
+      "Лотерея, що навчається: прогнози зберігаються до наступного тиражу, збіги оновлюють точність стратегій (EMA)",
+      "Еволюція успішних стратегій: при точності ≥0.6 генеруються похідні комбо (Гарячі+, Дозрілі+, Парні+ тощо), максимум 8",
+      "Розумний підбір показує точність кожної стратегії та найкращу"
+    ],
+    "en": [
+      "Learning lottery: predictions saved until next draw, matches update strategy accuracy (EMA)",
+      "Evolving winning strategies: derivatives (Hot+, Ripe+, Pairs+…) at accuracy ≥0.6, max 8 combos",
+      "Smart picks show per-strategy accuracy and the best one"
+    ]
+  },
+  {
+    "v": "5.11.56",
+    "date": "2026-10-03",
+    "uk": [
+      "Органайзер вкладки «Агенти»: огляд трьома картками, сітка агентів, чипи-фільтри, схвалення релізів, таймлайн, згорнуті налаштування",
+      "Композер-пігулка: повністю закруглене поле вводу"
+    ],
+    "en": [
+      "Agents tab organizer: three-card overview, agent grid, filter chips, release approvals, timeline, collapsed settings",
+      "Pill composer: fully rounded input"
+    ]
+  },
+  {
+    "v": "5.11.55",
+    "date": "2026-10-03",
+    "uk": [
+      "Розумний підбір лотереї: композитний скоринг чисел (частота 40%, пауза 30%, парні зв'язки 30%)",
+      "5 стратегій комбінацій — Гарячі, Дозрілі, Баланс, Парні, Анти-тренд — з поясненням кожної",
+      "Зона малих виграшів: топ-10 пар чисел, що разом трапляються у близьких тиражах"
+    ],
+    "en": [
+      "Smart lottery picks: composite number scoring (frequency 40%, recency gap 30%, pair strength 30%)",
+      "5 combination strategies — Hot, Ripe, Balanced, Pairs, Anti-trend — each with an explanation",
+      "Small-win zone: top-10 number pairs co-occurring in near-miss draws"
+    ]
+  },
+  {
+    "v": "5.11.54",
+    "date": "2026-10-03",
+    "uk": [
+      "Композер у два ряди: вгорі довга таблетка поля вводу, внизу кнопки — камера, фото, мікрофон і відправка",
+      "Поле вводу займає всю ширину, кнопки вишикувані в ряд під ним"
+    ],
+    "en": [
+      "Two-row composer: long input pill on top, buttons below — camera, photo, microphone and send",
+      "Input field spans full width, buttons lined up in a row beneath it"
+    ]
+  },
+  {
+    "v": "5.11.53",
+    "date": "2026-10-03",
+    "uk": [
+      "Поле вводу тепер видиме завжди — CSS перебиває приховування від старого кешованого коду",
+      "Підписи вкладок: менший шрифт і чиста трикрапка, текст більше не налазить один на одного"
+    ],
+    "en": [
+      "Chat input is now always visible — CSS overrides hiding from old cached code",
+      "Tab bar labels: smaller font and clean ellipsis, text no longer overlaps"
+    ]
+  },
+  {
+    "v": "5.11.52",
+    "date": "2026-10-03",
+    "uk": [
+      "Виправлено оновлення застосунку: CSS і JS тепер вантажаться з міткою версії — телефон завжди підтягує свіжий дизайн без перевстановлення",
+      "Підписи вкладок таб-бара: чиста трикрапка замість налазіння тексту одна на одну"
+    ],
+    "en": [
+      "Fixed app updates: CSS and JS now load with a version tag — the phone always picks up the fresh design without reinstalling",
+      "Tab bar labels: clean ellipsis instead of overlapping text"
+    ]
+  },
+  {
+    "v": "5.11.51",
+    "date": "2026-10-03",
+    "uk": [
+      "Поле вводу на екрані чату тепер завжди видиме — як у схваленому макеті (старе приховування «Тиші» скасовано)",
+      "Підписи вкладок таб-бара показуються повністю («Команда», «Агенти») — більше ніяких обрізаних «Ком...»"
+    ],
+    "en": [
+      "Chat input is now always visible, as in the approved mockup (the old 'Silence' hiding is removed)",
+      "Tab bar labels are shown in full ('Team', 'Agents') — no more truncated 'Tea...'"
+    ]
+  },
+  {
+    "v": "5.11.50",
+    "date": "2026-10-03",
+    "uk": [
+      "Екран «Доступність» у меню: шрифт для дислексії (читабельніші обриси літер) і розмір тексту (Звичайний / Великий / Дуже великий) — застосовується до першого рендера, зберігається лише на цьому пристрої",
+      "«Фонова модель» у Команді: Сергій обирає дешеву швидку модель для службових задач (оцінки Judge, фонові виклики) — преміум-моделі лишаються лише для відповідей, витрати падають без втрати якості"
+    ],
+    "en": [
+      "New “Accessibility” screen in the menu: dyslexia-friendly font and text size (Standard / Large / Extra large) — applied before first paint, stored on this device only",
+      "“Background model” in Team: pick a cheap fast model for background work (Judge scores, service calls) — premium models stay for answers only, cutting costs without quality loss"
+    ]
+  },
+  {
+    "v": "5.11.49",
+    "date": "2026-10-03",
+    "uk": [
+      "Головний екран як у макеті v2: всі 9 вкладок таб-бару видно без кнопки «Ще» (підписи з макету, іконки stroke 2); верхній рядок — орб 28px, «AI Bridge» + версія моноширинним, пігулка мережі «6/6», круглі кнопки мови 40px і «···» 40px",
+      "Композер-пігулка: рядок вартості зверху праворуч моноширинним 11px; кнопки-інструменти — круглі 44px без підписів; поле вводу 17px з плейсхолдером «Написати…»; кнопка відправки — індиго-круг 44px з білою стрілкою"
+    ],
+    "en": [
+      "Main screen per v2 mockup: all 9 tab-bar tabs visible without a “More” button (mockup labels, stroke-2 icons); top row — 28px orb, “AI Bridge” + monospace version, “6/6” network pill, round 40px language and “···” buttons",
+      "Pill composer: cost line on top right in 11px monospace; tool buttons — round 44px icon-only; 17px input with “Write…” placeholder; send button — 44px indigo circle with white arrow"
+    ]
+  },
+  {
+    "v": "5.11.48",
+    "date": "2026-10-03",
+    "uk": [
+      "Дизайн V2: таб-бар з читабельними підписами 11.5px і чіткими іконками stroke 2, активна вкладка — індиго-смужка зверху замість залитого чипа; єдиний акцент Індиго замість фіолетового усюди",
+      "Картка відповіді: шапка «модель · час», оцінка поруч, дії — пігулками з іконками; статуси провайдерів на екрані підключення — лише крапкою, без кольорових плашок"
+    ],
+    "en": [
+      "Design V2: tab bar with readable 11.5px labels and crisp stroke-2 icons, active tab — indigo indicator bar on top instead of a filled chip; single Indigo accent instead of purple everywhere",
+      "Answer card: “model · time” header, score alongside, actions as icon pills; provider statuses on the connections screen — dot only, no colored badges"
+    ]
+  },
+  {
+    "v": "5.11.47",
+    "date": "2026-10-03",
+    "uk": [
+      "Нотатки: швидкі нотатки в меню «Більше» на цьому пристрої; кнопка «✨ Покращити ШІ» переписує текст підключеним роутером, також можна скопіювати чи кинути текст у чат одним тапом",
+      "Статистика: новий екран у меню «Більше» — відповіді за 30 днів, діалоги за 7 днів, топ моделей за відповідями, витрати 30 днів проти бюджету, стовпчиковий графік по днях і завантаження даних у CSV"
+    ],
+    "en": [
+      "Notes: quick notes in the “More” menu on this device; the “✨ Improve with AI” button rewrites the text with the connected router, plus one-tap copy or send-to-chat",
+      "Statistics: a new screen in the “More” menu — answers for 30 days, dialogs for 7 days, top models by answers, 30-day spend vs budget, a per-day bar chart, and CSV export"
+    ]
+  },
+  {
+    "v": "5.11.46",
+    "date": "2026-10-03",
+    "uk": [
+      "Вибір моделі з пошуком: на сторінці команди поле пошуку фільтрує моделі наживо, моделі згруповано за провайдером з коротким описом сили («довгі тексти», «швидкі», «безкоштовні»); налаштована модель позначена ✓; тап по моделі обирає її провайдера",
+      "Індикатори непрочитаного в історії: діалог, що завершився, поки Сергій дивився інший, отримує крапку «непрочитане» в історії — зникає при відкритті"
+    ],
+    "en": [
+      "Model picker with search: the team page search field filters models live, grouped by provider with short strength labels (“long context”, “fast”, “free”); the configured model is marked ✓; tapping a model selects its provider",
+      "Unread indicators in history: a dialog that finished while you were viewing another gets an “unread” dot in history — cleared on open"
+    ]
+  },
+  {
+    "v": "5.11.45",
+    "date": "2026-10-03",
+    "uk": [
+      "Панель міркувань агента: під час прогону — відкрита зі «живим» індикатором і поточним станом, після фінішу сама згортається в рядок-резюме «Продумано за N с · M кроків»; кроки — одним тапом",
+      "URL protocol handler web+ai-bridge://: посилання з нотаток відкривають застосунок одразу на новому діалозі з підставленим текстом (web+ai-bridge://chat?q=…) або на сторінці команди; текст не відправляється сам — Сергій контролює"
+    ],
+    "en": [
+      "Agent thinking panel: open with a live pulsing indicator while running, auto-collapses after finish into a summary line “Thought for Ns · M steps”; steps expand with one tap",
+      "URL protocol handler web+ai-bridge://: links from notes open the app straight into a new chat with prefilled text (web+ai-bridge://chat?q=…) or the team page; text is never auto-sent — you stay in control"
+    ]
+  },
+  {
+    "v": "5.11.44",
+    "date": "2026-10-03",
+    "uk": [
+      "Історія запитів: стрілка ↑ у порожньому полі вводу підтягує попередній відправлений запит, ↓ — наступний (останні 30, лише текст, на твоєму пристрої); очищення — кнопкою на екрані «Де живуть твої дані»",
+      "Вибір мови на екрані входу: селектор мови поруч із полем токена авторизації — інтерфейс перемикається українською/англійською ще до авторизації, без пошуку глобуса в шапці"
+    ],
+    "en": [
+      "Prompt history: press ↑ in an empty input field to recall your previous sent prompt, ↓ for the next one (last 30, text only, on your device); clear it with the button on the “Where your data lives” screen",
+      "Language choice on the login screen: a language selector next to the authorization token field — switch the interface to Ukrainian/English before authorizing, without hunting the globe icon in the top bar"
+    ]
+  },
+  {
+    "v": "5.11.43",
+    "date": "2026-10-03",
+    "uk": [
+      "Свайп вліво по відповіді — цитата: жест як у Telegram, з гумовим поверненням і легким тактильним відгуком на порозі (код-блоки й кнопки жест не чіпає)",
+      "Статус-оголошення для екранного читця: окремий тихий регіон каже «Генерація…» → «Відповідь готова» / «Помилка», а текст відповіді не перечитується; у фоні — одна коротка вібрація по готовності"
+    ],
+    "en": [
+      "Swipe left on an answer to quote it: Telegram-style gesture with rubber-band return and a light haptic tick at the threshold (code blocks and buttons are gesture-free)",
+      "Screen-reader status announcements: a dedicated quiet region announces “Generating…” → “Answer ready” / “Error” without re-reading the answer text; in background — one short vibration when ready"
+    ]
+  },
+  {
+    "v": "5.11.42",
+    "date": "2026-10-03",
+    "uk": [
+      "Прогноз вартості до відправки: у рядку під полем вводу тепер видно «≈$0.004 · ~12 400 ток» ще до натискання «Надіслати» — рахується з довжини твого запиту, вкладень і цін провайдера (верхня межа, не білінг)",
+      "Згортальні групи дат в історії: шеврон біля «Сьогодні», «Вчора», «Старіші» згортає секцію — список діалогів став компактнішим, стан запам'ятовується"
+    ],
+    "en": [
+      "Pre-send cost estimate: the line under the input now shows “≈$0.004 · ~12,400 tok” before you press Send — computed from your prompt length, attachments and provider prices (upper bound, not billing)",
+      "Collapsible date groups in history: a chevron next to “Today”, “Yesterday”, “Older” collapses the section — the dialog list is more compact, state is remembered"
+    ]
+  },
+  {
+    "v": "5.11.41",
+    "date": "2026-10-03",
+    "uk": [
+      "«Імпорт діалогу» в меню експорту: JSON-бекап Bridge або conversations.json з ChatGPT розбирається прямо на пристрої й падає в історію як звичайні діалоги (до 50 за раз)",
+      "Тап по індикатору контексту розкриває детальний розбір: скільки токенів з'їдають твої запити, відповіді, перекази пам'яті M5 та інше — плюс топ-5 найбільших повідомлень діалогу"
+    ],
+    "en": [
+      "“Import dialog” in the export menu: a Bridge JSON backup or ChatGPT conversations.json is parsed on-device and lands in history as regular dialogs (up to 50 at a time)",
+      "Tapping the context indicator opens a detailed breakdown: how many tokens your questions, answers, M5 memory summaries and the rest consume — plus the top-5 largest messages in the dialog"
+    ]
+  },
+  {
+    "v": "5.11.40",
+    "date": "2026-10-03",
+    "uk": [
+      "«Запустити як завдання» під відповіддю: кнопка в меню дій «•••» перетворює поточну відповідь на завдання команди — разове (з'являється в панелі «Команда агентів») або щоденне в обраний час (через «Регулярні завдання»); назва й роль редагуються перед створенням",
+      "Нова сторінка «Де живуть твої дані» в колонці-меню: чесна карта — що лежить лише на твоєму пристрої (історія, пам'ять M5, нотатки), що в зашифрованому сховищі браузера (ключі провайдерів), а що на сервері Bridge (завдання команди у фоні)"
+    ],
+    "en": [
+      "“Run as a task” under the answer: a button in the “•••” actions menu turns the current answer into a crew task — one-off (shows up in the agent crew panel) or daily at a chosen time (via “Recurring tasks”); title and role are editable before creation",
+      "New “Where your data lives” page in the side menu: an honest map — what stays only on your device (history, M5 memory, notes), what lives in the browser's encrypted storage (provider keys), and what sits on the Bridge server (background crew tasks)"
+    ]
+  },
+  {
+    "v": "5.11.39",
+    "date": "2026-10-02",
+    "uk": [
+      "Тимчасовий діалог (інкогніто): перемикач у Налаштуваннях композера — такий діалог не пишеться в історію, живе лише в пам'яті вкладки; закрив вкладку — зник. Бейдж «Тимчасовий» у шапці діалогу, без хмарної синхронізації, закладок і архіву",
+      "Історія групується за датами: «Сьогодні» / «Вчора» / «Попередні 7 днів» / «Попередні 30 днів» / «Старіші»; закріплені діалоги лишаються зверху поза групуванням, архів і фільтр «Тільки закладки» працюють разом із секціями"
+    ],
+    "en": [
+      "Temporary dialog (incognito): a toggle in the composer Settings — such a dialog is never written to history and lives only in this tab's memory; close the tab and it's gone. “Temporary” badge in the dialog header, no cloud sync, bookmarks or archive",
+      "History is grouped by date: “Today” / “Yesterday” / “Previous 7 days” / “Previous 30 days” / “Older”; pinned dialogs stay on top outside the groups, and the archive plus the “Bookmarks only” filter work together with the sections"
+    ]
+  },
+  {
+    "v": "5.11.38",
+    "date": "2026-10-02",
+    "uk": [
+      "Розумніший веб-пошук: «Який телефонний код України?», «Яка історія України?», «Яка програма передач сьогодні?» — такі фактичні питання більше не блокуються фільтром творчих завдань, Bridge шукає відповідь у вебі (раніше їх помилково вважали завданням «напиши код/історію/програму»)",
+      "Транслітерація в пошуку: «погода Київ» тепер розпізнає результати з написанням Kiev, Одеса — Odessa, Харків — Kharkov — відповіді з вебу більше не губляться"
+    ],
+    "en": [
+      "Smarter web search: “Який телефонний код України?”, “Яка історія України?”, “Яка програма передач сьогодні?” — such factual questions are no longer blocked by the creative-task filter; Bridge searches the web for the answer (previously they were misread as “write code/story/program” tasks)",
+      "Search transliteration: “погода Київ” now matches results spelled Kiev, Одеса — Odessa, Харків — Kharkov — web answers no longer get lost"
+    ]
+  },
+  {
+    "v": "5.11.37",
+    "date": "2026-10-02",
+    "uk": [
+      "Wake Lock на час генерації: поки триває довга генерація, екран телефону не гасне — стрім не переривається (вмикається автоматично, вимикається після фінішу)",
+      "Архів діалогів: кнопка 📦 в історії ховає закриті діалоги з основного списку — повернути можна фільтром «Архів» у шапці історії, звідти ж видалити назавжди"
+    ],
+    "en": [
+      "Wake Lock during generation: while a long generation runs, the phone screen stays on — the stream is not interrupted (auto-on, auto-off after finish)",
+      "Dialog archive: the 📦 button in history hides closed dialogs from the main list — restore them via the “Archive” filter in the history header, or delete forever from there"
+    ]
+  },
+  {
+    "v": "5.11.36",
+    "date": "2026-10-02",
+    "uk": [
+      "Стиснути контекст: нова кнопка біля індикатора контексту в Агенті вручну згортає початок довгого діалогу в переказ — останні 4 пари лишаються недоторканими",
+      "Чипи джерел під відповіддю агента: коли агент робить веб-дослідження, під відповіддю з'являється рядок чипів-джерел (назва, номер) — тап відкриває прев'ю джерела"
+    ],
+    "en": [
+      "Compact context: a new button next to the context meter in Agent manually folds the start of a long dialog into a summary — the last 4 pairs stay untouched",
+      "Source chips under the agent answer: when the agent does web research, a row of source chips (title, number) appears under the answer — tap opens a source preview"
+    ]
+  },
+  {
+    "v": "5.11.35",
+    "date": "2026-10-02",
+    "uk": [
+      "Копіювати з форматуванням: нова кнопка під фінальною відповіддю (і ⧉ на кожному повідомленні агента) копіює відповідь зі збереженою структурою — заголовки, жирний, списки — для вставки в нотатки й документи",
+      "Згортальні довгі блоки коду: блоки довші за 20 рядків стартують згорнутими з кнопкою «Показати повністю (N)» — довгі лістинги більше не розтягують відповідь на екрані"
+    ],
+    "en": [
+      "Copy with formatting: a new button under the final answer (and ⧉ on every agent message) copies the answer with its structure intact — headings, bold, lists — for pasting into notes and documents",
+      "Collapsible long code blocks: blocks longer than 20 lines start collapsed with a “Show all (N)” button — long listings no longer stretch the answer across the screen"
+    ]
+  },
+  {
+    "v": "5.11.34",
+    "date": "2026-10-02",
+    "uk": [
+      "Чипи згенерованих файлів під повідомленням агента: документи, звіти й тексти, які створює агент (нова дія generate_file — md, txt, csv, json, xml, yaml, html, svg), з'являються чипами з кнопкою завантаження прямо під відповіддю; ім'я файла й тип суворо перевіряються",
+      "Поле вводу не ховається під клавіатурою iOS: застосунок слухає visualViewport, піднімає нижню навігацію й додає відступ, а фокусоване поле докручується у видиму зону"
+    ],
+    "en": [
+      "Generated file chips under agent messages: documents, reports and texts the agent creates (new generate_file action — md, txt, csv, json, xml, yaml, html, svg) appear as chips with a download button right under the answer; filename and type are strictly validated",
+      "Input field no longer hides under the iOS keyboard: the app listens to visualViewport, lifts the bottom navigation, adds a bottom offset, and scrolls the focused field into the visible area"
+    ]
+  },
+  {
+    "v": "5.11.33",
+    "date": "2026-10-02",
+    "uk": [
+      "Скасування видалення діалогу: кошик 🗑 на картці діалогу в історії видаляє його одразу — помилку можна скасувати тостом «Скасувати» протягом 8 секунд (діалог, закладка й закріплення відновлюються)",
+      "Заборона pull-to-refresh у чаті: жест «тягни-вниз» більше не перезавантажує сторінку й не вбиває активний стрім генерації"
+    ],
+    "en": [
+      "Undo delete for dialogs: the 🗑 button on a history card deletes it instantly — an Undo toast gives 8 seconds to restore (dialog, bookmark and pin come back)",
+      "Pull-to-refresh disabled in chat: the pull-down gesture no longer reloads the page or kills an active generation stream"
+    ]
+  },
+  {
+    "v": "5.11.32",
+    "date": "2026-10-02",
+    "uk": [
+      "Медіагенерація: заборону Workers AI знято (2026-10-01) — рушій «Фото» в команді агентів тепер чесно використовує безкоштовний модуль Studio (flux-2-klein-4b, квота 10 000 neurons/day); без налаштування — статус not_connected, жодної імітації",
+      "Чесний статус відео: у каталозі Workers AI відеомоделей немає (перевірено за офіційними доками 2026-10-02) — план лишається поетапним: LTX-2 на власному GPU або fal.ai за явною згодою"
+    ],
+    "en": [
+      "Media generation: the Workers AI ban is lifted (2026-10-01) — the team's Photo engine now honestly uses the free Studio module (flux-2-klein-4b, 10,000 neurons/day quota); not_connected when unconfigured, no imitation",
+      "Honest video status: the Workers AI catalog has no video models (verified against official docs 2026-10-02) — the phased plan stays: self-hosted LTX-2 GPU or fal.ai with explicit opt-in"
+    ]
+  },
+  {
+    "v": "5.11.31",
+    "date": "2026-10-02",
+    "uk": [
+      "Журнал подій команди — з хеш-ланцюгом цілісності: кожен запис посилається на хеш попереднього (SHA-256); підробку видно одразу. Статус «Ланцюг цілісності: ✓ перевірено» — у вкладці «Команда агентів», плюс кнопка «Експорт JSONL»",
+      "Експорт діалогу: у меню «Експорт» під відповіддю — «Діалог (.md)» (запитання, відповіді моделей з цінами, оцінка Judge, джерела) і «Діалог (.json)» (повна структура для бекапа)"
+    ],
+    "en": [
+      "Team event log is now hash-chained: every entry links to the previous hash (SHA-256), so tampering is immediately visible. The “Integrity chain: ✓ verified” status lives in the “Agent team” tab, with an “Export JSONL” button",
+      "Dialog export: in the Export menu under an answer — “Dialog (.md)” (question, per-model answers with costs, Judge score, sources) and “Dialog (.json)” (full structure for backup)"
+    ]
+  },
+  {
+    "v": "5.11.30",
+    "date": "2026-10-02",
+    "uk": [
+      "Закладки на діалоги: зірочка ☆ на відповіді й у списку історії зберігає важливе; кнопка «Тільки закладки» показує лише збережене зі стрибком до діалогу",
+      "Місячний бюджет витрат: у «Історія → Використання AI» ставиш ліміт у $ — Bridge попереджає на 80% і відхиляє нові запити на 100% ще до виклику моделі"
+    ],
+    "en": [
+      "Dialog bookmarks: the ☆ star on an answer and in the history list saves what matters; the “Bookmarks only” button shows just the saved ones with a jump to the dialog",
+      "Monthly spend budget: in “History → AI usage” you set a $ cap — Bridge warns at 80% and rejects new requests at 100% before any model call"
+    ]
+  },
+  {
+    "v": "5.11.29",
+    "date": "2026-10-02",
+    "uk": [
+      "Відкрити .md/.txt у Bridge: тап по markdown- чи текстовому файлу на телефоні пропонує «Відкрити в Bridge» — текст падає в поле вводу (довгий файл стає чипом-вкладенням, як довга вставка)",
+      "Кнопка «Вниз» з лічильником: коли прогорнув угору під час генерації, з'являється плаваюча кнопка з бейджем кількості нових повідомлень — тап плавно повертає донизу"
+    ],
+    "en": [
+      "Open .md/.txt in Bridge: tapping a markdown or text file on the phone offers «Open in Bridge» — the text lands in the input field (a long file becomes an attachment chip, like a long paste)",
+      "Scroll-down button with counter: when you scrolled up during generation, a floating button appears with a badge of new message count — tap smoothly scrolls back down"
+    ]
+  },
+  {
+    "v": "5.11.28",
+    "date": "2026-10-02",
+    "uk": [
+      "Довга вставка стає вкладенням: вставка понад 5000 знаків більше не засмічує поле стіною тексту — з'являється короткий чип-маркер, а повний текст підставляється лише в запит до моделі (в історію йде маркер)",
+      "Картка-цитата PNG: кнопка 🖼️ під відповіддю (і в меню «•••», і в палітрі ⌘K) зберігає відповідь або виділений фрагмент як вертикальну картку 1080×1920 з підписом «P.S.M» — готовий фон для соцмереж"
+    ],
+    "en": [
+      "Long paste becomes an attachment: pasting over 5000 characters no longer floods the field with a wall of text — a short chip marker appears instead, and the full text is substituted only into the model request (history keeps the marker)",
+      "Quote card PNG: the 🖼️ button under an answer (in the “•••” menu and the ⌘K palette) saves the answer or a selected fragment as a 1080×1920 vertical card signed “P.S.M” — ready for social media"
+    ]
+  },
+  {
+    "v": "5.11.27",
+    "date": "2026-10-02",
+    "uk": [
+      "Цінник відповіді: під кожною відповіддю моделі тепер чип з орієнтовною вартістю (≈$0.0042) або «безкоштовно» — чесна картина витрат за публічними прайсами",
+      "Політики роутингу: замість повзунка — чотири кнопки «Економно / Швидко / Збалансовано / Якість»; під відповіддю рядок «Вибір моделі: …» пояснює, чому відповів саме цей провайдер"
+    ],
+    "en": [
+      "Cost chip per answer: every model answer now carries a chip with the estimated cost (≈$0.0042) or \"free\" — an honest spend picture from public price lists",
+      "Routing policies: four buttons — Economy / Fast / Balanced / Quality — instead of a slider; a \"Model choice: …\" line under each answer explains why this provider answered"
+    ]
+  },
+  {
+    "v": "5.11.26",
+    "date": "2026-10-01",
+    "uk": [
+      "Повний аудит перекладів: усі написи інтерфейсу тепер ідуть через мовні ключі — при перемиканні мови глобусом перекладається все (кнопки, помилки, статуси, підказки)",
+      "Серверні повідомлення теж під мову інтерфейсу: помилки API і push-сповіщення «Завдання виконано» приходять твоєю мовою"
+    ],
+    "en": [
+      "Full translation audit: every UI string now goes through language keys — switching language via the globe translates everything (buttons, errors, statuses, hints)",
+      "Server messages follow the UI language too: API errors and “Task done” push notifications arrive in your language"
+    ]
+  },
+  {
+    "v": "5.11.25",
+    "date": "2026-10-01",
+    "uk": [
+      "Справжнє «редагувати і перегенерувати»: олівець «Змінити питання» відкриває редактор — «Зберегти і оновити» одразу генерує нову відповідь",
+      "Розумні чипи продовження: під відповіддю тепер 3 найдоречніші підказки (довга відповідь → «Коротше», код → «Поясни простіше») замість 5 однакових"
+    ],
+    "en": [
+      "True “edit & regenerate”: the “Edit question” pencil opens an editor — “Save and regenerate” immediately generates a new answer",
+      "Smarter follow-up chips: 3 most relevant suggestions under each answer (long answer → “Shorter”, code → “Explain simpler”) instead of 5 static ones"
+    ]
+  },
+  {
+    "v": "5.11.24",
+    "date": "2026-10-01",
+    "uk": [
+      "Інтерфейс тепер завжди українською за замовчуванням — мова браузера більше не перемикає застосунок на англійську (глобус мови лишився для ручного вибору)"
+    ],
+    "en": [
+      "Interface now defaults to Ukrainian — the browser language no longer switches the app to English (the language globe remains for manual choice)"
+    ]
+  },
+  {
+    "v": "5.11.23",
+    "date": "2026-10-01",
+    "uk": [
+      "Згадки моделей у тексті: напиши «@groq поясни це» — і відповість тільки Groq, всупереч вибору роутера (є автодоповнення назв після @)",
+      "Бейдж іконки PWA: кількість завдань, що завершилися, поки застосунок був у фоні — скидається, щойно повертаєшся"
+    ],
+    "en": [
+      "Model mentions: type “@groq explain this” and only Groq answers, overriding the router (name autocomplete after @)",
+      "PWA icon badge: count of tasks finished while the app was in background — cleared when you return"
+    ]
+  },
+  {
+    "v": "5.11.22",
+    "date": "2026-10-01",
+    "uk": [
+      "Чесна кнопка авторизації: зелене «Авторизовано» — тільки після реального входу за токеном; без входу кнопка нейтральна — «Підключити»",
+      "Прибрано зайву галочку і виправлено баг, коли «Авторизоване» світилось без жодного входу"
+    ],
+    "en": [
+      "Honest auth button: green “Authorized” appears only after a real token login; without login the button stays neutral — “Connect”",
+      "Removed the extra checkmark and fixed a bug where “Authorized” showed without any login"
+    ]
+  },
+  {
+    "v": "5.11.21",
+    "date": "2026-10-01",
+    "uk": [
+      "Голосове введення на панелі файлів: кнопка мікрофона поруч із полем завдання — говориш, текст з'являється сам (мова UA/EN на вибір, за замовчуванням — мова інтерфейсу)",
+      "Чистіша панель завантаження: зона додавання згортається після вибору файлів, кожен файл видно з назвою, розміром і типом — менше зайвих тапів до аналізу"
+    ],
+    "en": [
+      "Voice input on the Files panel: a microphone button next to the task field — speak and the text appears by itself (UA/EN language switch, defaults to the interface language)",
+      "Cleaner upload panel: the picker collapses once files are chosen, each file shows name, size and type — fewer taps to start the analysis"
+    ]
+  },
+  {
+    "v": "5.11.20",
+    "date": "2026-10-01",
+    "uk": [
+      "Регулятор глибини мислення: перемикач «Швидко / Стандарт / Глибоко» в налаштуваннях чату — керує старанністю відповіді моделі",
+      "Вартовий секретів: якщо вставлений або набраний текст схожий на ключ/токен, застосунок попередить перед надсиланням"
+    ],
+    "en": [
+      "Thinking-depth switch: “Fast / Standard / Deep” in the chat settings controls how hard the model reasons before answering",
+      "Secret guard: if pasted or typed text looks like a key/token, the app warns before sending"
+    ]
+  },
+  {
+    "v": "5.11.19",
+    "date": "2026-10-01",
+    "uk": [
+      "Авторизація як треба: після входу кнопка стає зеленою «✓ Пристрій авторизовано» і такою лишається",
+      "Помилки входу тепер видно одразу помітним повідомленням (невірний токен, забагато спроб, токен не налаштовано на сервері)"
+    ],
+    "en": [
+      "Authorization done right: after login the button turns green “✓ Device authorized” and stays that way",
+      "Login errors are now shown as a prominent message (wrong token, too many attempts, server token not configured)"
+    ]
+  },
+  {
+    "v": "5.11.18",
+    "date": "2026-10-01",
+    "uk": [
+      "Автооновлення без чищення кешу: застосунок сам перевіряє нову версію (при відкритті, поверненні на екран і кожні 15 хв) й оновлюється автоматично — навіть без токена",
+      "Чернетки повідомлень зберігаються під час набору й відновлюються після оновлення — нічого не губиться"
+    ],
+    "en": [
+      "Self-updating without cache clearing: the app checks for new versions itself (on open, on foreground, every 15 min) and updates automatically — even without a token",
+      "Message drafts are saved while typing and restored after an update — nothing is lost"
+    ]
+  },
+  {
+    "v": "5.11.17",
+    "date": "2026-10-01",
+    "uk": [
+      "Цитата-відповідь: кнопка ❝ на кожному повідомленні агента і в меню «•••» — цитує фрагмент або все повідомлення у поле вводу",
+      "Код-блоки: нова кнопка «Завантажити» поруч із «Копіювати» — зберігає код у файл",
+      "Швидший рендер: відповіді перерендерюються пакетовано (кадр анімації), незмінений текст не чіпається — плавніше на мобайлі"
+    ],
+    "en": [
+      "Quote-reply: a ❝ button on every agent message and in the ••• menu — quotes a fragment or the whole message into the input",
+      "Code blocks: new Download button next to Copy — saves code to a file",
+      "Faster rendering: answers re-render in animation-frame batches, unchanged text is skipped — smoother on mobile"
+    ]
+  },
+  {
+    "v": "5.11.16",
+    "date": "2026-10-01",
+    "uk": [
+      "Лотерейний аналізатор: виправлено дані Lotto Max — прибрано 19 тиражів з неможливими числами (51/52), тепер кожен тираж перевіряється за правилами гри",
+      "Історія тиражів тепер справді зберігається на сервері (підключено сховище до тестової версії)"
+    ],
+    "en": [
+      "Lottery Analyzer: fixed Lotto Max data — removed 19 draws with impossible numbers (51/52); every draw is now validated against game rules",
+      "Draw history is now actually persisted on the server (storage connected to the preview build)"
+    ]
+  },
+  {
+    "v": "5.11.15",
+    "date": "2026-10-01",
+    "uk": [
+      "Лотерейний аналізатор: Lotto Max, Lotto 6/49 і Daily Grand — офіційні тиражі WCLC, історія зі 100+ тиражів кожної гри",
+      "Статистика збігів: повтори комбінацій, частота чисел і пар, розриви",
+      "«Мої комбінації»: зберігай свої набори чисел і перевіряй їх за всією історією"
+    ],
+    "en": [
+      "Lottery Analyzer: Lotto Max, Lotto 6/49 and Daily Grand — official WCLC draws, 100+ draws of history per game",
+      "Match statistics: combination repeats, number and pair frequencies, gaps",
+      "“My combinations”: save your number sets and check them against full history"
+    ]
+  },
+  {
+    "date": "2026-10-01",
+    "en": [
+      "“What’s new” screen: every update cycle is now visible inside the app (menu → What’s new)",
+      "Agent chat contents: topic chips that jump straight to the message",
+      "New app logo — gradient suspension bridge"
+    ],
+    "uk": [
+      "Екран «Що нового»: усі цикли оновлень тепер видно прямо в застосунку (меню → Що нового)",
+      "«Зміст» діалогу агента: чипи тем повідомлень зі стрибком до потрібного місця",
+      "Новий логотип застосунку — градієнтний підвісний міст"
+    ],
+    "v": "5.11.14"
+  },
+  {
+    "date": "2026-10-01",
+    "en": [
+      "Share Target: text and links from other apps land straight in the input field",
+      "App Shortcuts: long-press the PWA icon — New chat, Agent team, Quick question"
+    ],
+    "uk": [
+      "«Поділитися» з інших застосунків: текст і посилання одразу потрапляють у поле вводу",
+      "App Shortcuts: довгий тап на іконці PWA — Новий чат, Команда агентів, Швидке питання"
+    ],
+    "v": "5.11.13"
+  },
+  {
+    "date": "2026-10-01",
+    "en": [
+      "Context usage meter in the header (“Context 42% · 4/10”)",
+      "Pin chats and models with 📌 — pinned items stay on top"
+    ],
+    "uk": [
+      "Індикатор використання контексту в шапці («Контекст 42% · 4/10»)",
+      "Закріплення чатів і моделей кнопкою 📌 — закріплене тримається зверху"
+    ],
+    "v": "5.11.12"
+  },
+  {
+    "date": "2026-10-01",
+    "en": [
+      "Language globe in the header next to the version",
+      "Input field appears on orb tap"
+    ],
+    "uk": [
+      "Глобус мови в шапці біля версії",
+      "Поле вводу з’являється по тапу на орб"
+    ],
+    "v": "5.11.11"
+  },
+  {
+    "date": "2026-10-01",
+    "en": [
+      "Auto-update when the app opens",
+      "New version check when returning from background"
+    ],
+    "uk": [
+      "Автооновлення застосунку при відкритті",
+      "Перевірка нової версії при поверненні з фону"
+    ],
+    "v": "5.11.10"
+  },
+  {
+    "date": "2026-10-01",
+    "en": [
+      "Smart model selection per task (M2)",
+      "Every answer scored by a separate model — “Score: 4.2” (M3)",
+      "“Silence” home screen, model-tabbed answers, right drawer menu (D2–D4)"
+    ],
+    "uk": [
+      "Розумний вибір моделі під задачу (M2)",
+      "Оцінка кожної відповіді окремою моделлю — «Оцінка: 4,2» (M3)",
+      "Головний екран «Тиша», відповіді вкладками з назвою моделі, права колонка-меню (D2–D4)"
+    ],
+    "v": "5.11.9"
+  },
+  {
+    "date": "2026-10-01",
+    "en": [
+      "60-question benchmark for smart model routing (M1)",
+      "Agent remembers the last 4 dialogue pairs, older ones as a compact summary (M5)",
+      "Design system in CSS tokens with no visual change (D1)"
+    ],
+    "uk": [
+      "Еталон із 60 питань для розумного вибору моделі (M1)",
+      "Агент пам’ятає останні 4 пари діалогу, старіше — стислий переказ (M5)",
+      "Дизайн-система в CSS-токенах без зміни вигляду (D1)"
+    ],
+    "v": "5.11.8"
+  }
+]

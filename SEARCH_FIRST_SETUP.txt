@@ -1,0 +1,22 @@
+AI Bridge Search First
+======================
+
+Search First is enabled by default for short factual questions in Auto mode.
+
+No-key fallbacks:
+- DuckDuckGo Instant Answer / HTML results
+- Bing RSS results
+
+Optional official search APIs (Cloudflare environment secrets):
+- Google Programmable Search: GOOGLE_SEARCH_API_KEY + GOOGLE_SEARCH_CX
+- Yandex Search API v2: YANDEX_SEARCH_API_KEY + YANDEX_SEARCH_FOLDER_ID
+- Brave Search API: BRAVE_SEARCH_API_KEY
+
+Official engines are preferred when their complete credential pair is configured.
+Queries that appear to contain passwords, tokens, API keys, attached files, private
+context, or transformation instructions are never sent to search engines.
+
+For a sufficient low-risk factual result, Bridge returns the search result and
+clickable HTTPS sources without calling AI. For explanation, comparison, uncertain,
+or high-stakes questions, Bridge supplies the retrieved sources to the connected AI
+provider and labels the response as AI + SOURCES.

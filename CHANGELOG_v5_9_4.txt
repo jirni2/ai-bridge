@@ -1,0 +1,36 @@
+AI Bridge v5.9.4 — fixes for every finding of the v5.9.3 production audit
+
+1. Deep Scan read only 36k of each file (HIGH)
+   Parts were planned by each file's full retained size (up to 180k chars) but packed
+   with the 36k single-request cap, so ~75% of large files (their middle) was never sent
+   while the UI claimed full coverage. Deep Scan now sends whole retained files; each part
+   stays within the request budget. Normal single requests are unchanged.
+
+2. Hidden-HTML filter could erase a whole page (HIGH)
+   - Unclosed <p hidden>/<li hidden> (valid HTML) hid everything after it -> Agent saw an
+     empty page. Optional end tags (p, li, dt/dd, option, table cells/rows) are now honoured.
+   - Attributes are parsed properly: the word "hidden" inside title/data-* no longer hides
+     content; class="hidden" (single class) and d-none are detected.
+
+3. Work Controller accepted "OK"/"Done"/refusals as answers (MEDIUM)
+   New workResultUsable(): short real answers ("42", "Kyiv") are accepted; acknowledgements
+   and refusals are not, and cannot form a "consensus".
+
+4. Internal files were downloadable from the live site (MEDIUM)
+   The Worker now returns 404 for /tests/, /tools/, /improvements/, /releases/,
+   MANIFEST.sha256.json, uppercase *.txt docs (CHANGELOG, AUDIT, README, SECURITY...),
+   oauth-replay-do.js and chatgpt-app-submission.json (also URL-encoded / double-slash forms).
+   The files stay in the package for tests and tooling.
+
+5. Visible version labels showed v5.9.1 (LOW)
+   tools/sync-version.mjs now updates the hero badge and sidebar; release-check verifies them.
+
+6. OAuth replay protection was per-isolate only (LOW)
+   With AI_BRIDGE_JOBS KV bound, used codes/refresh tokens are also remembered across Worker
+   isolates (/public-check reports "private-kv-cross-isolate"). A Durable Object
+   (OAUTH_REPLAY_DO_SETUP.txt) is still required for the fully atomic public-plugin mode.
+
+7. Dead code removed (greetingLike, unused verify context, studioPollTimer, unused constant).
+
+Tests: tests/run_v594_audit_fixes_tests.mjs reproduces all findings (25 checks fail on v5.9.3,
+all pass on v5.9.4).

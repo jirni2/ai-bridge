@@ -1,0 +1,8 @@
+AI Bridge v5.3.1 — Agent ZIP/File Picker Fix
+
+- Agent Files / ZIP button now opens the native file picker directly instead of forcing a trip to the Files tab.
+- Agent file-context checkbox is no longer disabled when no files are attached; tapping it opens the picker.
+- A successful Agent-originated file selection automatically enables Agent file context.
+- Removed restrictive HTML accept= filtering from the project file picker because iOS/iCloud/third-party Files providers can report ZIP archives with MIME types that cause valid .zip files to appear greyed out.
+- File safety remains enforced after selection: only ZIP archives and supported text/code files are accepted; unsupported binary files are rejected.
+- Kept ZIP size/decompression protections and context limits unchanged.

@@ -1,0 +1,10 @@
+AI Bridge v5.1.7
+
+- Restored Agent Plan as a real Team mode. v5.1.6 had no Agent Plan UI mode or worker execution path.
+- Added bounded planner -> executor -> verifier workflow (maximum 4 steps; maximum 3 with attached file context).
+- Added validated JSON planning with deterministic fallback when a planner returns malformed output.
+- Added per-step provider fallback and free-provider-first automatic selection.
+- Agent Plan now works with normal prompts, files/ZIP context and supported image inputs.
+- Code/security file tasks retain evidence-guarded final verification.
+- Added Agent Plan UI, quick control, progress copy, result metadata and Ukrainian/English localization.
+- Added regression tests for successful planning/execution and malformed-planner recovery.

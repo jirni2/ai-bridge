@@ -1,0 +1,26 @@
+AI Bridge v4.9.5
+
+Security / production hardening based on live aibridge-aff.pages.dev audit.
+
+1. Browser session separation
+- ai_bridge_session no longer stores BRIDGE_ACCESS_TOKEN.
+- Login issues a 14-day HMAC-signed session token with iat/exp/nonce.
+- Dedicated SESSION_SIGNING_SECRET supported; fallback: OAUTH_SIGNING_SECRET, then BRIDGE_ACCESS_TOKEN as signing key only.
+- Existing v4.9.4 raw-token session cookies are rejected and require one fresh login.
+- Cross-origin login/logout mutations are blocked.
+
+2. Provider vault key separation
+- Added PROVIDER_VAULT_SECRET as preferred AES-GCM vault secret.
+- New writes use the highest-priority dedicated secret.
+- Reads try legacy fallback secrets so existing device vault cookies can migrate without abrupt loss.
+
+3. Live /work route consistency
+- work/index.html synchronized byte-for-byte with work.html.
+- Removed stale sessionStorage wording from the route Cloudflare Pages serves at /work/.
+
+4. Privacy + UX
+- Privacy policy now distinguishes public Review Panel retention from private PWA browser/job storage.
+- Mobile Work Controller secondary text enlarged for readability.
+
+5. Regression coverage
+- Added v4.9.5 tests for session-cookie secrecy/tamper rejection, legacy-cookie rejection, Bearer compatibility, dedicated secret priority, work route synchronization, and privacy disclosure.

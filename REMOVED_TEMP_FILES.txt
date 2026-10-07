@@ -1,0 +1,54 @@
+Removed in v5.9.1: temporary copies of old _worker.js versions left behind by earlier test runs.
+They are not referenced by any test or tool (checked), total ~12 MB, and each run creates and deletes its own copy.
+Real fixtures (worker-v38-under-test.mjs, worker-v41-*.mjs, worker-v452-adversarial.mjs) are kept.
+
+- tests/worker-v485-1790033782513.mjs
+- tests/worker-v490-1789662851001.mjs
+- tests/worker-v490-1789663897857.mjs
+- tests/worker-v490-1789663954780.mjs
+- tests/worker-v490-1789664006921.mjs
+- tests/worker-v490-1790029982724.mjs
+- tests/worker-v490-1790030046649.mjs
+- tests/worker-v490-1790033784612.mjs
+- tests/worker-v490-1790036396257.mjs
+- tests/worker-v490-1790039428731.mjs
+- tests/worker-v490-1790054395082.mjs
+- tests/worker-v490-1790054523481.mjs
+- tests/worker-v490-1790085737493.mjs
+- tests/worker-v490-1790085820609.mjs
+- tests/worker-v490-1790086550832.mjs
+- tests/worker-v490-1790087022348.mjs
+- tests/worker-v490-1790088403536.mjs
+- tests/worker-v490-1790094060628.mjs
+- tests/worker-v490-1790094112672.mjs
+- tests/worker-v490-1790107192975.mjs
+- tests/worker-v490-1790107227039.mjs
+- tests/worker-v490-1790111919219.mjs
+- tests/worker-v490-1790113960208.mjs
+- tests/worker-v490-1790114185122.mjs
+- tests/worker-v492-1790031673691.mjs
+- tests/worker-v492-1790032679307.mjs
+- tests/worker-v492-1790035598479.mjs
+- tests/worker-v492-1790035655526.mjs
+- tests/worker-v492-1790035731599.mjs
+- tests/worker-v514-1789662859279.mjs
+- tests/worker-v514-1789663906151.mjs
+- tests/worker-v514-1789663963328.mjs
+- tests/worker-v514-1789664014991.mjs
+- tests/worker-v514-1790031684506.mjs
+- tests/worker-v514-1790032690222.mjs
+- tests/worker-v514-1790033797118.mjs
+- tests/worker-v514-1790054403438.mjs
+- tests/worker-v514-1790054531518.mjs
+- tests/worker-v514-1790085745591.mjs
+- tests/worker-v514-1790085828891.mjs
+- tests/worker-v514-1790086559182.mjs
+- tests/worker-v514-1790087030839.mjs
+- tests/worker-v514-1790088412082.mjs
+- tests/worker-v514-1790094069330.mjs
+- tests/worker-v514-1790094120857.mjs
+- tests/worker-v514-1790107201520.mjs
+- tests/worker-v514-1790107235030.mjs
+- tests/worker-v514-1790111927704.mjs
+- tests/worker-v514-1790113968504.mjs
+- tests/worker-v514-1790114193187.mjs

@@ -1,0 +1,10 @@
+AI Bridge v4.8.1
+
+Critical runtime fix
+- Removed stale getToken() calls left behind after v4.8.0 migrated browser auth from Web Storage to an HttpOnly session cookie.
+- These undefined calls crashed Send and provider diagnostics in the browser before /api/run or /api/diagnostics/providers could execute.
+- Send and diagnostics now rely on the server-side session cookie as the source of truth and handle HTTP 401 normally.
+- Updated 401 UX copy to describe session re-authorization instead of obsolete per-tab token storage.
+
+Regression hardening
+- Added a client-runtime regression test that fails if obsolete getToken() gating is reintroduced.

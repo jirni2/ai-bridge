@@ -1,0 +1,13 @@
+AI Bridge v4.8.8
+
+VERIFIED FILE AUDITS / SELF-AUDIT FALSE-POSITIVE FIX
+- Fixed the v4.8.7 self-audit failure mode where _worker.js (about 150k chars) was truncated to its first 70k chars in the mobile Files flow. Later declarations could disappear from model context and produce false "not defined / ReferenceError" findings.
+- Raised the main per-file context allowance to 180k chars so AI Bridge's own _worker.js is included in full under the normal 350k project budget.
+- Oversized source files now preserve head + middle + tail samples instead of head-only truncation and mark truncation explicitly.
+- Reprioritized project context so source/config files outrank changelogs/release notes.
+- Auto code audits with synthesis enabled now run independent reviewers plus a source-grounded Judge instead of returning the first reviewer response.
+- Judge schema now requires verdict=supported|unsupported|uncertain and a verification reason, with explicit counterevidence checks.
+- Added deterministic rejection for a common false undefined-symbol claim when the allegedly missing identifier has a top-level JavaScript function declaration in the same available source (function declarations are hoisted).
+- Rejected/uncertain findings are separated from supported findings in the final audit.
+- Updated README token-storage and greeting documentation to match the current HttpOnly-cookie runtime.
+- Added v4.8.8 regression coverage reproducing the false b64urlBytes/encodeProviderVault ReferenceError finding.

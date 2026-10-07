@@ -1,0 +1,8 @@
+Only needed if public MCP/OAuth is enabled later.
+
+v3.8 intentionally fails public OAuth token exchange closed unless OAUTH_REPLAY_DO is bound.
+
+Deploy oauth-replay-do.js as a separate Cloudflare Worker with Durable Object class OAuthReplayGuard,
+then bind that Durable Object namespace to the AI Bridge environment as OAUTH_REPLAY_DO.
+
+Current ChatGPT Work -> /work -> Free Team does NOT need this binding.

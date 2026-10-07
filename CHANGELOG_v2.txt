@@ -1,0 +1,13 @@
+AI BRIDGE v2.1 — CONNECTOR HARDENING
+
+• Corrected MCP safety annotations: external-provider calls are not marked read-only.
+• Added idempotency annotations so repeated paid provider calls are not treated as free/no-effect repeats.
+• Added ChatGPT CIMD client_id allowlisting.
+• Enforced OAuth resource audience at authorization and token exchange.
+• Added analyze_files_with_ai_team with ChatGPT file-input metadata.
+• Added safe HTTPS file download checks, redirect checks, size limits and private-address blocking.
+• Added server-side text/code ZIP extraction for ChatGPT-attached projects.
+• Fixed ask_ai_team so explicitly selected providers are actually honored.
+• Switched stateless /mcp GET to 405 and added OPTIONS/CORS support for inspection clients.
+• Updated optional OpenAI default model to current gpt-6-astra.
+• Expanded regression tests for MCP handshake, modern discovery, annotations, auth and file schema.

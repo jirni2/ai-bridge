@@ -1,0 +1,14 @@
+name = "aibridge-binance-bot"
+main = "worker.mjs"
+compatibility_date = "2026-09-01"
+
+[[durable_objects.bindings]]
+name = "BOT"
+class_name = "BinanceBot"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["BinanceBot"]
+
+# Add BINANCE_TESTNET_API_KEY and BINANCE_TESTNET_API_SECRET as Worker secrets.
+# Keep BINANCE_LIVE_ENABLED unset until live trading is reviewed and enabled.

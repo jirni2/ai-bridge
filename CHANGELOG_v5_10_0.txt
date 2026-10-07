@@ -1,0 +1,99 @@
+CHANGELOG v5.10.0 (2026-09-28)
+===========================
+"Perfection" milestone: security audit fixes (13x P1), trading bot v2 with
+risk layer + backtested strategies, design quick wins, 4 new AI features.
+Based on 2026 competitor research (ChatGPT, Claude, Perplexity, Grok,
+NotebookLM, LibreChat, Open WebUI, LobeHub) + trading research (grid/DCA/
+trend-following, prop risk standards, walk-forward vs overfitting).
+
+SECURITY / RELIABILITY (audit P1, all fixed):
+Worker (_worker.js):
+- Login rate limiting: KV login:attempts:<ip> (TTL 600s); 5 fails -> 429
+  with Retry-After + exponential backoff (60..600s); success resets.
+- Atomic jobClaim: claimOwner token + re-read verification (defense in
+  depth); parallel submits with one clientRequestId execute exactly once.
+  (True single-flight needs a DO binding in Pages project settings at
+  deploy time - documented for future.)
+- Dead background jobs: new scheduled() handler scans job:* (paginated),
+  marks processing jobs with stale heartbeat (>15 min) as failed and sends
+  push via notifyJobComplete. Fixes the background-mode promise.
+  DEPLOY NOTE: set cron to */5 * * * * (also drives recurring agents).
+- handleRun errors sanitized via publicErrorMessage/publicProviderResults;
+  query strings redacted from URLs, key-like tokens (sk-, AIza, xai-, gsk-,
+  fal_) masked.
+- neutralizeEmbeddedFileTags unified: single canonical strong version
+  (~20 tags, copied from app.js) + parity test.
+- Removed tools/release-v451.mjs (destructive: rewrote VERSION to 4.5.1).
+Client:
+- XSS in renderHistory fixed (esc() on provider fallback).
+- sw.js: per-asset precache with catch (one 404 no longer kills SW/push).
+- index.html: defer on scripts incl. i18n.js; 100dvh for iOS.
+- New _headers with CSP (no wildcards).
+
+TRADING BOT v2 (binance-bot/):
+- Native STOP_LOSS_LIMIT placed after every BUY (config stop/limit);
+  re-placed on safety buys, cancel/replace, never duplicated.
+- alarm() keeps firing while position/pending open (no silent unmonitored
+  positions). New `reconcile` command: re-syncs state with exchange,
+  clears stale pending, unpauses when flat.
+- SELL uses minNotional from exchangeInfo filters (was hardcoded 5 USDT).
+- NEW risk.mjs (deterministic, vetoes any entry order): 1% risk/trade
+  position sizing; max 10% per coin / 30% total exposure; daily halt at
+  -3% (to 00:00 UTC), -5% two days -> 7-day pause; -15% drawdown -> full
+  stop + manual review; martingale banned architecturally (mult<=1.5,
+  steps<=5); cooldowns 60s / 15min after loss; max 20 trades/day;
+  kill-switch `stop-all`; serverTime sync; 429/418 exponential backoff.
+- NEW strategies.mjs + indicators.mjs (EMA/RSI/ATR/ADX, no deps):
+  regime filter (trend/range/chaos; chaos = volatility >3x avg -> pause);
+  BoundedGrid (ADX<20, 12 ATR-sized levels, no martingale, global stop on
+  >5% range break); TrendFollow (EMA20/50 cross + RSI>55 + volume, 2.5xATR
+  trailing); ConservativeDCA (BTC/ETH only, 7% base, 5x safety -2% x1.25,
+  TP +2.5%, HARD -20% stop).
+- NEW tools/backtest.mjs: 2y Binance 1h klines, 0.1% fee + 0.07% slippage,
+  walk-forward 12mo->3mo, param sweep +-20%, auto-reject on overfit flags
+  (winrate>80%, Sharpe>3, maxDD<2%).
+  Backtest ConservativeDCA/BTCUSDT: VERDICT FAIL-OVERFIT (winrate 95.2%,
+  avg OOS Sharpe -0.46, 2y equity $9779 from $10000). Honest result kept:
+  strategy NOT recommended for live; paper/testnet only.
+- GET /api/trade/metrics: winRate, profitFactor, sharpe, maxDrawdown,
+  calmar, avgWin/avgLoss, currentDrawdown, dailyPnl vs limit, tradesToday,
+  monthlyPnl, equityCurve, openPositions.
+- Live triple-gate UNCHANGED (BINANCE_LIVE_ENABLED=1 + confirm="LIVE" +
+  separate keys). Default: paper/testnet.
+- trade/ UI: new Metrics tab (10 cards, SVG equity chart, monthly bars,
+  reconcile / stop-all / pause-resume buttons).
+
+DESIGN QUICK WINS (client):
+- Haptic-motion: navigator.vibrate + press-scale + send spring
+  (respects prefers-reduced-motion).
+- Empty states everywhere (emoji + 1 line + 1 CTA, UA). No more "No data".
+- Skeleton shimmer placeholders instead of spinners.
+- Dark theme 2.0: warm surfaces (#121014), tonal elevation, single accent
+  #8b7bff, theme-color synced.
+- Smarter composer: auto-grow, attachment chips (#url/ZIP/image), quick
+  actions row, mode chips (auto/team/debate/agent/god/research).
+- Animated brand orb (idle pulse / breathing while generating).
+- Liquid glass composer + bottom nav; bottom-sheet modals; per-mode color
+  badges on assistant messages.
+- Offline bar + localStorage message queue with auto-resend; human UA
+  error cards with "Try again".
+
+NEW FEATURES:
+- Deep Research (POST /api/research): plan -> search steps (reuses
+  agentSearchWeb) -> synthesis with inline [n] citations; Perplexity-style
+  source chips with preview bottom-sheet. quick (60s) / deep (5min).
+- Recurring agents (GET/POST/DELETE /api/schedules): daily HH:MM in IANA
+  timezone -> background job + push on completion; idempotent
+  clientRequestId=schedule:<id>:<date>.
+- RAG-lite (POST /api/projects/:id/kb/query): project files as knowledge
+  base (POST /api/projects accepts files[], <=20 files/<=200KB, secret
+  scan); keyword-ranked chunks -> answers citing [filename].
+- Vision (POST /api/vision/analyze): image analysis via vision-capable
+  providers (gemini/openai/claude/grok); fal /api/media contract
+  documented for image/video generation UI.
+- Chat export: DOCX (Word-compatible blob) + PDF (print layout), one click.
+
+TESTS: 115+ files green (incl. new run_v510_backend_tests.mjs,
+run_v510_trading_tests.mjs 67/67: HMAC vector, lot-step, risk vetoes,
+live-gate negatives, indicators, regime, reconcile; run_v510_single_studio).
+release-check: RELEASE READY.

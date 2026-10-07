@@ -1,0 +1,26 @@
+AI Bridge v5.11.3 — редизайн ORGANIZER (2026-09-30)
+==================================================
+Напрям «Organizer»: мінімум, чисто, організовано, без мішури.
+Семпли: Linear, Vercel/Geist, Stripe, Arc, Things 3, Todoist, Notion mobile,
+ChatGPT, Claude, Perplexity, Gemini, Binance, Bybit, Coinbase, Robinhood, TradingView.
+Деталі: ~/workspace/goals/ai-bridge/hidden_files/design_redesign/STATUS.md
+
+ЗМІНЕНО:
+- Палітра: темна bg #0b0b0d / surface #141416, текст #f5f5f7 → #a1a1a6 → #6e6e73,
+  hairline rgba(255,255,255,.07); акцент indigo #5e6ad2 (був #8b7bff);
+  success #22c07a, warning #f5a524, error #f04452. Світла тема оновлена відповідно.
+  Прибрано кольорові radial-плями з фону.
+- Кнопки: єдина система з 6 типів (primary/secondary/ghost/iconBtn/tab/tool);
+  primary — плоский акцент 48px; secondary — hairline.
+- Таб-бар: підписи 11px (було 9.5px), іконки 22px; активний = акцентний текст +
+  підкреслення 2px (замість залитого фону).
+- Композер: прибрано кольорові кола іконок (синій/фіолетовий/червоний) —
+  одноколірні стримані іконки; quickActions: емодзі → чисті SVG-іконки.
+- Панель команди: 24 агенти згруповано в 5 категорій (Керування/Контент/Дані/
+  Система/Розробка) з mono caps заголовками; статусні точки збережено.
+- trade.css: up #0ECB81 / down #F6465D (Binance-канон, лише колір тексту),
+  табличні цифри для сум.
+- Новий клас .secLabel — mono caps мітки секцій 11px.
+
+НЕ ЗМІНЕНО: функціональність, API, безпека, Binance-логіка, i18n-ключі,
+назви класів. Production-ДЕПЛОЙ НЕ виконано — версія для перегляду власником.

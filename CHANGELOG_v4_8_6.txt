@@ -1,0 +1,7 @@
+AI Bridge v4.8.6
+
+- Replaced the phone provider setup copy buttons with real token input, Save, and Delete controls.
+- Added /api/provider-tokens GET/POST/DELETE for authenticated same-origin mobile credential management.
+- Provider tokens saved from the phone are AES-GCM encrypted and stored only in an HttpOnly, Secure, SameSite=Strict cookie on that device; plaintext tokens are never returned to JavaScript.
+- Mobile provider tokens override existing Cloudflare provider secrets for browser API calls. Deleting the mobile token falls back to the Cloudflare secret if one exists.
+- Added CSRF origin checks and token length/size limits.

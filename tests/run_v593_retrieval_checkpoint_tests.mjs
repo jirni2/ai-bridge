@@ -1,0 +1,23 @@
+import fs from "node:fs";
+import path from "node:path";
+import vm from "node:vm";
+const root=path.resolve(new URL("..",import.meta.url).pathname),app=fs.readFileSync(path.join(root,"app.js"),"utf8"),i18n=fs.readFileSync(path.join(root,"i18n.js"),"utf8");
+const ok=(x,msg)=>{if(!x)throw Error(msg);console.log("PASS",msg)};
+function block(start,end){const a=app.indexOf(start),b=app.indexOf(end,a);if(a<0||b<0)throw Error(`missing source block ${start}`);return app.slice(a,b)}
+const ctx={};vm.createContext(ctx);vm.runInContext(block("function taskAwareExcerpt","function rankAttachmentFiles"),ctx);
+const long="HEADER\n"+"x".repeat(120000)+"\nUNIQUE_NEEDLE_SYMBOL\n"+"y".repeat(45000)+"\nTAIL";
+const r=ctx.taskAwareExcerpt(long,["unique_needle_symbol"],12000);
+ok(r.mode==="task-windows"&&r.text.includes("UNIQUE_NEEDLE_SYMBOL"),"retrieval finds a task term beyond the old prefix window");
+ok(r.text.length<=12000&&r.truncated,"retrieval remains bounded per file");
+const h=ctx.taskAwareExcerpt(long,[],8000);ok(h.mode==="head-tail"&&h.text.includes("HEADER")&&h.text.includes("TAIL"),"no-query fallback preserves both head and tail");
+ok(/taskAwareExcerpt\(f\.text,terms/.test(app)&&/retrieval="\$\{excerpt\.mode\}"/.test(app),"file context uses task-aware retrieval windows");
+ok(/const name=String\(f\.name\|\|""\)\.toLowerCase\(\),body=String\(f\.text\|\|""\)\.toLowerCase\(\)/.test(app),"file ranking searches all retained text, not only the first 80k");
+const ls=new Map(),localStorage={getItem:k=>ls.has(k)?ls.get(k):null,setItem:(k,v)=>ls.set(k,String(v)),removeItem:k=>ls.delete(k)};
+const c={localStorage,attachments:[{name:"project.zip",chars:123,names:null,manifestNames:["a.js","b.js"],files:[]}],JSON,Date};vm.createContext(c);vm.runInContext(block('const DEEP_SCAN_CHECKPOINT_KEY','/* v5.9.1 Deep Scan'),c);
+const sig=c.deepScanCheckpointSignature("audit",{totalParts:3});c.saveDeepScanCheckpoint(sig,["p1"],{completedParts:1,totalParts:3});
+const restored=c.loadDeepScanCheckpoint(sig);ok(restored?.notes?.[0]==="p1"&&restored.completedParts===1,"Deep Scan checkpoints completed parts locally");
+ok(c.loadDeepScanCheckpoint(sig+"x")===null,"Deep Scan checkpoint cannot resume against a different project/task");
+c.clearDeepScanCheckpoint(sig);ok(c.loadDeepScanCheckpoint(sig)===null,"Deep Scan checkpoint clears after successful completion");
+ok(/for\(let i=resumeAt;i<n;i\+\+\)/.test(app)&&/saveDeepScanCheckpoint\(checkpointSignature,notes/.test(app),"Deep Scan resumes from the first unfinished part");
+ok(/\[404,429,499,500,502,503,504\]\.includes/.test(app)&&/deepScanPartFailed/.test(app),"temporary Deep Scan provider failures (incl. transient 404) retry once, then stop without pretending full coverage");
+ok(/up to 10/.test(i18n)&&/до 10/.test(i18n)&&/deepScanResume/.test(i18n),"Deep Scan UI documents the real 10-part limit and recovery");

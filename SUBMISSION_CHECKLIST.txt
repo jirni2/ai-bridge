@@ -1,0 +1,67 @@
+BRIDGE REVIEW PANEL v3 — SUBMISSION CHECKLIST
+
+STATUS
+This is a submission candidate, not an approval guarantee. The public MCP surface is intentionally narrowed to an independent Review Panel workflow rather than a generic provider connector.
+
+1. DEPLOY
+Upload AI_Bridge_v3_REVIEW_PANEL_SUBMISSION.zip to the existing Cloudflare Pages project as a new Production deployment. Existing provider secrets can remain.
+
+2. CLOUDFLARE VARIABLES / SECRETS
+Required for public Review Panel:
+- GOOGLE_API_KEY (Secret)
+- GROQ_API_KEY (Secret)
+- OPENROUTER_API_KEY (Secret)
+- PUBLIC_PLUGIN_MODE = 1 (Text variable)
+- SUPPORT_EMAIL = your real support email (Text variable)
+
+Private PWA can continue to use BRIDGE_ACCESS_TOKEN. Paid provider keys are ignored by the public MCP Review Panel.
+
+3. VERIFY PUBLIC PAGES
+Open these URLs on the deployed domain:
+- /plugin.html
+- /privacy.html
+- /terms.html
+- /support
+- /mcp (GET should return 405; POST is the MCP endpoint)
+
+4. OPENAI PLATFORM
+- Use an organization/project with global data residency.
+- Verify your individual or business identity.
+- Ensure your role has Apps Management: Write (organization owners already have it).
+- Open the Plugin submission portal and choose Create plugin -> With MCP.
+
+5. MCP SERVER
+Use the production URL, for example:
+https://aibridge-aff.pages.dev/mcp
+Choose Universal MCP URL. With PUBLIC_PLUGIN_MODE=1, this public submission surface does not require OAuth.
+
+6. DOMAIN VERIFICATION
+When the portal gives an exact domain-verification token, add it in Cloudflare as:
+OPENAI_APPS_CHALLENGE = <exact token>
+Deploy once more. The Worker serves it at:
+/.well-known/openai-apps-challenge
+Verify that URL returns only the token, then continue.
+
+7. SCAN TOOLS
+Select Scan Tools. Expected tools:
+- get_review_panel_status
+- review_task
+- review_code
+- review_project_files
+Each tool has explicit readOnlyHint/openWorldHint/destructiveHint values and an outputSchema.
+
+8. LISTING URLS
+Website: https://aibridge-aff.pages.dev/plugin.html
+Privacy: https://aibridge-aff.pages.dev/privacy.html
+Terms: https://aibridge-aff.pages.dev/terms.html
+Support: https://aibridge-aff.pages.dev/support
+Make sure SUPPORT_EMAIL is set before submission.
+
+9. IMPORT REVIEW MATERIALS
+Upload chatgpt-app-submission.json where the portal supports the submission-import file, or copy its app info, tool justifications, five positive cases, and three negative cases into the form.
+
+10. BEFORE SUBMIT
+Run the positive cases against the live deployed MCP endpoint. Do not submit if fewer than two public review engines are configured or if real review calls fail.
+
+POLICY RISK TO REVIEW
+OpenAI's plugin guidelines do not approve plugins that primarily function as unofficial pass-through connectors. v3 removes single-provider passthrough, provider selection, and raw delegation tools from the public MCP surface and provides a fixed independent-review workflow with synthesis. This materially reduces that risk, but final approval remains OpenAI's decision.

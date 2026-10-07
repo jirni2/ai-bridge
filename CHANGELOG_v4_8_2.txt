@@ -1,0 +1,10 @@
+AI Bridge v4.8.2
+
+UX FIX
+- The chat composer is cleared immediately after a valid prompt is accepted by Send.
+- The submitted prompt is still preserved in the request, run history, and error record.
+- Focus returns to the composer so the next question can be typed without manually deleting the previous one.
+- Call estimate is refreshed after clearing the composer.
+
+REGRESSION
+- Added a prompt-clear regression test to ensure clearing happens only after validation and before the network request.

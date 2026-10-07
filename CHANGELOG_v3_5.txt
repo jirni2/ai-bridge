@@ -1,0 +1,14 @@
+AI BRIDGE v3.5 — REAL CODE REVIEW TEST
+
+- Added code/ZIP upload to /work.
+- ZIP extraction happens locally in the browser.
+- Same extracted code context is sent to Gemini, Groq Free and OpenRouter Free.
+- Paid OpenAI / Claude / xAI remain excluded from Work Controller.
+- Added synthesis compaction to avoid Groq 8k input-token overflow.
+- Judge receives max ~12k chars of provider answers plus max 4k chars of task.
+- v3.4 /work redirect fix retained.
+
+Recommended real test prompt:
+Review the attached AI Bridge code itself. Find real bugs, security issues, routing problems,
+provider/API failure modes, token-limit problems, and concrete fixes. Cite the exact file/function
+or logic you are criticizing. Do not give only a generic checklist.

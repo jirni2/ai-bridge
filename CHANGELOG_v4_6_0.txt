@@ -1,0 +1,12 @@
+AI Bridge v4.6.0 — production reliability hardening
+
+- Added live provider diagnostics endpoint and UI for Gemini, Groq Free and OpenRouter Free.
+- Provider status now distinguishes KEY SET from a real successful API call.
+- Added transient retry handling to OpenAI, Claude and Grok calls.
+- Added max_output_tokens cap to OpenAI Responses calls.
+- Hardened PWA updates: service worker registers with updateViaCache=none and forces update checks.
+- Critical static assets return no-cache; sw.js returns no-store, reducing stale-deploy behavior.
+- Added static UI / Worker version mismatch warnings.
+- Added X-AI-Bridge-Version to critical static responses.
+- Clarified current ChatGPT custom MCP plan requirement: Business or Enterprise/Edu; Plus can use the standalone Bridge web app but cannot currently create the custom MCP app.
+- Added v4.6.0 production regression tests.

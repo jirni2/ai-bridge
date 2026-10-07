@@ -1,0 +1,12 @@
+AI Bridge v5.9.2 — production audit fixes
+
+Confirmed production issues fixed:
+- Agent web evidence now excludes hidden/aria-hidden/display:none/visibility:hidden/class=hidden DOM content before HTML-to-text conversion, preventing hidden update banners from being reported as visible UI.
+- ZIP extraction retains up to 180k chars per safe text file and 8M chars total on-device; Deep Scan partitions retained content by its real size and can use up to 10 bounded parts. Single AI requests remain capped at 350k chars and ZIP bomb/decompression safety limits remain unchanged.
+- Work Controller synthesis accepts successful short provider answers and uses an exact two-provider consensus fallback when Judge synthesis is unavailable; the UI labels that fallback truthfully.
+- Regression tests reproduce hidden-DOM evidence, consensus fallback, and Deep Scan coverage limits.
+
+Safety/architecture:
+- Per-entry ZIP decompression cap remains 2 MB; total decompression cap remains 16 MB; entry cap remains 512; compression-ratio guard remains 120.
+- No claim of durable execution without AI_BRIDGE_JOBS KV.
+- Production deployment still requires a separate live smoke test.

@@ -1,0 +1,5 @@
+AI Bridge v5.1.3
+
+- Fixed Chat/Files context isolation: ordinary Chat and Team submissions can no longer inherit stale ZIP/file context from the Files workspace.
+- File context is sent only when the user explicitly presses “Send files + task” from the Files tab.
+- Added regression coverage for stale attachment isolation so project/test files cannot contaminate a later normal chat.

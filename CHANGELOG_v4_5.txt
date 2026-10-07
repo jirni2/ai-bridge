@@ -1,0 +1,7 @@
+AI BRIDGE v4.5 — DIAGNOSTIC SCHEMA
+
+- symbol/literal excerpts now preserve segmentKind and sampleKind.
+- verificationExcerpts[] now has consistent segment metadata for file-only and symbol/literal paths.
+- behavioral tests cover symbol hits in head, tail and full segments.
+- diagnostic schema is validated for every emitted excerpt, not only by source-string checks.
+- production Free Team still requires a live Cloud Browser run after recovery.

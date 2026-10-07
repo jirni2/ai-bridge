@@ -1,0 +1,13 @@
+AI BRIDGE v4.1 — JUDGE RESILIENCE
+
+• Evidence sanitizer preserves leading indentation; only outer newlines are removed.
+• Full pipeline test covers indented Judge evidence through sanitizer and exact verifier.
+• Gemini/Groq/OpenRouter provider calls validate meaningful text inside retry closures.
+• Empty 200 responses become retryable 502 before withRetry returns.
+• Gemini/Groq/OpenRouter Judge calls retry 429/502/503/504 and honor Retry-After.
+• JSON-mode compatibility fallback remains restricted to HTTP 400.
+• Judge diagnostics retain every candidate attempt, initial/repair use, structured mode, error/status and elapsed time.
+• judgeRepairUsed aggregates across all candidates.
+• Work diagnostics expose judgeAttempts[].
+• Legacy /api/work/run uses the same structured Judge path.
+• Version synchronized to 4.1.0.

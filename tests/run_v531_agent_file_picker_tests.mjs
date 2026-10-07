@@ -1,0 +1,15 @@
+import fs from "node:fs";
+import path from "node:path";
+import {fileURLToPath} from "node:url";
+const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),"..");
+const read=f=>fs.readFileSync(path.join(root,f),"utf8");
+const ok=(v,m)=>{if(!v)throw new Error("FAIL: "+m);console.log("✓",m)};
+const html=read("index.html"),app=read("app.js"),meta=JSON.parse(read("bridge-version.json"));
+ok(/^5\.(?:3\.(?:[1-9][0-9]*)|[4-9]\.[0-9]+|[1-9][0-9]+\.[0-9]+)$/.test(meta.version),"release preserves the v5.3.1+ Agent file-picker fix");
+ok(/id="fileInput" class="nativeFileInput" type="file" multiple>/.test(html),"project picker has no restrictive accept filter");
+ok(app.includes('$("agentFilesBtn")?.addEventListener("click",()=>{agentFilePickPending=true;openNativeFilePicker($("agentFilesBtn"))})'),"Agent Files / ZIP opens native picker directly");
+ok(app.includes('check.disabled=false;if(!n)check.checked=false'),"Agent file checkbox stays interactive with zero attachments");
+ok(app.includes('if(fromAgent&&attachments.length)')&&app.includes('useFiles.checked=true'),"Agent-originated selection automatically enables file context");
+ok(app.includes('function isSupportedPickedFile(f)')&&app.includes('if(/\\.zip$/i.test(name))return true;'),"post-selection validation explicitly accepts ZIP by filename");
+ok(app.includes('Unsupported file type.'),"unsupported binary selections are rejected after picking");
+console.log("AI Bridge v5.3.1 Agent ZIP/file-picker regression tests passed.");

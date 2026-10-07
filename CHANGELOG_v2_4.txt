@@ -1,0 +1,10 @@
+AI BRIDGE v2.4 — FREE TEAM
+
+• Removed Kimi from active providers.
+• Added Groq Free (GROQ_API_KEY), default: openai/gpt-oss-120b.
+• Added OpenRouter Free (OPENROUTER_API_KEY), default: openrouter/free.
+• Auto Router is now Free-first.
+• Auto Judge is Free-first.
+• Paid OpenAI / Claude / Grok (xAI) remain available only by explicit selection when free providers exist.
+• Migrates old Kimi selection to Groq Free + OpenRouter Free.
+• MCP provider schemas updated for both new providers.

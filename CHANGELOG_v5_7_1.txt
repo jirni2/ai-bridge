@@ -1,0 +1,6 @@
+AI Bridge v5.7.1 — God Mode production follow-up
+
+- Preserves the complete v5.7.0 God Mode, mentor doctrine, provider-health routing and Work reconnect hardening.
+- Search-only answers now lead with one compact factual summary and source links instead of dumping multiple long snippets.
+- Added regression coverage for compact source-grounded answers.
+- Live production audit evidence: v5.5.0 Search First answered without AI; explicit Groq Free Agent completed and stored a verified runtime pattern; the older Auto Agent path exposed a quota failure.

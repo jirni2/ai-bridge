@@ -1,0 +1,10 @@
+AI BRIDGE v4.5.4 — LONG REFUSAL FILTERING
+
+- Rejects provider responses padded with tables, file names and recommendations
+  when they repeatedly conclude that the requested review is not provable or
+  that the relevant implementation/evidence is missing.
+- Keeps mixed responses meaningful when they contain a concrete technical
+  finding even if they also include a limited uncertainty note.
+- Adds adversarial regression coverage based on the production Groq response
+  observed during the v4.5.3 live smoke test.
+- Synchronizes static pages, manifest, Worker and Service Worker cache to 4.5.4.

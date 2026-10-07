@@ -1,0 +1,80 @@
+AI Bridge v4.9.2
+
+ROOT CAUSE FIXED: "Мобільне з'єднання перервалося" no longer loses or duplicates work.
+- Found the exact cause: /api/run-stream tied the entire AI Team run to the
+  lifetime of one ReadableStream, and the top-level `fetch(req,env)` handler
+  never received a Cloudflare ExecutionContext, so `ctx.waitUntil()` was never
+  available anywhere in this file. When Safari on 5G dropped the underlying
+  TCP connection, the Workers runtime cancelled the stream and the in-flight
+  runTeam() call was actually abandoned -- even though the old UI message
+  claimed "the server already started the task." There was no durable job
+  record anywhere for a reconnect to recover from (the only Durable Object
+  binding in the project, OAUTH_REPLAY_DO, is unrelated -- OAuth replay
+  protection only, deployed as a separate Worker).
+
+NEW: resumable job lifecycle (submit -> jobId -> processing -> result/error).
+- `_worker.js`: added `POST /api/job/submit`, `GET /api/job/status`, and a
+  durable job store (`jobGet`/`jobPut`/`jobClaim`) backed by an OPTIONAL
+  `AI_BRIDGE_JOBS` KV namespace, with an honest in-memory fallback
+  (`jobsDurable:false` in every response) when no KV is bound. `fetch` now
+  receives `(req,env,ctx)` and threads `ctx` into every route that starts a
+  job, so `ctx.waitUntil()` keeps the AI Team run alive independent of any
+  single client connection.
+- `/api/run-stream` is now a thin NDJSON relay on top of the same durable
+  job: closing the stream never stops the job, and the jobId delivered in
+  the first frame lets the client resume via `/api/job/status` after a
+  reconnect or a full page reload.
+- `/api/run` (legacy synchronous clients) keeps its synchronous contract but
+  now shares the same idempotent job record when the client sends a
+  `clientRequestId`.
+- Idempotency: `clientRequestId` (generated and persisted to localStorage by
+  app.js BEFORE the request is sent) deterministically maps to one `jobId`.
+  A retried Send, a reconnect, or two genuinely concurrent submits for the
+  same `clientRequestId` never invoke the AI providers more than once
+  (`jobClaim()` is a true atomic check-and-set for the in-memory fallback;
+  documented as a narrow best-effort race for plain KV, which has no atomic
+  conditional write -- closing that completely would need a Durable Object,
+  the same pattern `oauth-replay-do.js` already uses for OAuth replay).
+- `app.js`: persists a pending-job marker (clientRequestId/jobId/prompt/
+  mode/providers/attachment names) to localStorage before every Send,
+  recovers it automatically on page load, and polls `/api/job/status`
+  instead of ever re-submitting after a dropped connection. UI states:
+  "Завдання прийнято" / "AI Team аналізує файл…" / "З'єднання відновлюється…"
+  / "Завдання продовжує виконуватися на сервері" / "Готово" / a concrete
+  server error. Raw `Load failed` / `TypeError: Failed to fetch` text is
+  never shown to the user.
+- Result records are size-bounded (never attempt a KV write past ~20MB) and
+  expire after 45 minutes (`expirationTtl` on KV; lazy pruning in-memory).
+- KV read/write failures degrade gracefully everywhere (treated as "not
+  found yet" / "did not win the claim") instead of throwing and breaking
+  the request.
+- Execution-limit disclosure: ctx.waitUntil() is bounded by Cloudflare's
+  platform limits, not infinite. A normal AI Team run finishes well inside
+  those limits because every provider call already has its own
+  timeout/retry ceiling (see withRetry/RETRY_DELAY_CAP_MS). If a future
+  change needs a single job to legitimately run longer than the platform's
+  waitUntil ceiling, in-Worker waitUntil is the wrong tool for that --
+  Cloudflare Queues or a Durable Object with alarm()-based checkpointing is
+  the correct architecture, not a longer waitUntil. See README.txt.
+- New optional Cloudflare binding: AI_BRIDGE_JOBS (Workers KV namespace).
+  Without it, resumability is best-effort within one isolate only. Setup
+  steps are documented in README.txt.
+- Service Worker (sw.js) already excluded every `/api/*` path from its
+  cache (verified, unchanged) -- /api/job/submit, /api/job/status, and
+  /api/run-stream are never served from the SW cache.
+
+TESTS
+- Fixed 3 pre-existing tests whose literal source-text assertions no longer
+  matched after the payload/call-signature changes above (v4.8.2 prompt-
+  clear ordering, v4.8.7 file-task payload shape, v4.9.0 mobile-stream UI
+  copy) -- behavior preserved, assertions updated to match the new (still
+  equivalent) source.
+- Added tests/run_v492_resumable_job_tests.mjs: 38 new assertions covering
+  normal completion, disconnect-then-continue, reconnect-same-jobId,
+  reload-mid-job, concurrent duplicate submit (same-isolate race closed),
+  cross-endpoint duplicate submit, missed final stream frame recovered via
+  polling, provider timeout (504), provider 429, session 401 on both
+  endpoints, large ZIP / small file / plain-chat payloads, honest
+  jobsDurable reporting with and without KV, KV failure handling, oversized
+  result bounding, KV TTL, and ctx.waitUntil plumbing.
+- Full regression suite: 53/53 files, 100% pass.

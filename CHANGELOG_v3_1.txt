@@ -1,0 +1,8 @@
+BRIDGE REVIEW PANEL v3.1 — SUPPORT CONTACT FIX
+
+• Published support contact is now aibridge.support@gmail.com.
+• Added static /support.html so support contact does not depend on Cloudflare runtime-variable propagation.
+• /support keeps SUPPORT_EMAIL as an optional override but falls back to the published support address.
+• Updated Plugin, Privacy, Terms and app footer links to /support.html.
+• Added an explicit Privacy Policy contact section.
+• Bumped server and service-worker versions to 3.1.0.

@@ -1,0 +1,24 @@
+AI Bridge v4.5.8
+
+- Fixes server-side ZIP central-directory parsing (extractZipText, used by the
+  review_project_files MCP tool): a forged final central-directory entry with
+  an oversized declared nameLen/extraLen/commentLen was checked only against
+  the total file length, not against the real EOCD offset, so it could extend
+  past the EOCD (into trailing padding) without being rejected. This is the
+  same class of malformed-ZIP entry that zip-safety-core.js (client-side) was
+  hardened against in v4.5.7 -- that fix never reached this independent
+  server-side parser. Also requires the server-side parsed central directory
+  to end exactly at the EOCD, matching zip-safety-core.js's scanZipMeta().
+- Fixes forged file-boundary injection: attached file content was embedded
+  verbatim into "<file path=\"...\">...</file>" review context blocks. A
+  decoy file whose own content contained a literal "</file><file path=\"...\">"
+  sequence could impersonate a file boundary for an unrelated real file in
+  the same submission. The regex-based verification parser then saw a
+  duplicate path and its duplicate-path guard dropped both entries, so
+  correct, real findings against the real file were incorrectly reported as
+  unverified ("file_not_found_in_source"). Untrusted file content is now
+  neutralized against embedded "<file" / "</file>" sequences before it is
+  wrapped in a real file block.
+- Adds adversarial regression tests derived from both confirmed bugs
+  (tests/run_v458_adversarial_tests.mjs), verified to fail against the
+  pre-fix v4.5.7 implementation.

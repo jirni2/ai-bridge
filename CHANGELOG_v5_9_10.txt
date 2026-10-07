@@ -1,0 +1,15 @@
+AI Bridge v5.9.10 — production audit fixes
+
+1. Fixed Search First returning web pages about one operand instead of the
+   result for elementary arithmetic (production reproduction: "What is 2+2?"
+   returned pages about the number 2). A strict, deterministic two-operand
+   arithmetic path now answers locally without search, AI calls, or eval().
+2. Site Self-Check now warns when route learning is only in isolate memory and
+   will reset after a Worker restart. It no longer presents an HTTP 200 alone
+   as proof of persistent self-learning.
+3. Fixed Agent web-page extraction treating collapsed <details> content as
+   visible. Closed panels now expose only their visible summary; open panels
+   keep their full content.
+4. Added regression tests for arithmetic routing, zero network/provider calls,
+   dates, division by zero, ambiguous multi-expression prompts, the no-AI UI
+   badge, truthful volatile-learning diagnostics, and collapsed details.

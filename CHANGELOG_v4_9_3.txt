@@ -1,0 +1,24 @@
+AI Bridge v4.9.3
+
+CONFIRMED PRODUCTION FIXES
+- `NO VERIFIED FINDINGS` is now a valid strict code-review result with
+  `outcome:"no_findings"`; Work renders it as NO FINDINGS instead of a false
+  provider HTTP 502.
+- Work providers now run through `/api/work/provider-stream`, backed by the
+  existing job store. Retry attempt/status/wait/delay-source events are sent
+  live as NDJSON, the underlying provider job continues after a stream drop,
+  and the same clientRequestId resumes rather than duplicating the call.
+- Added `/api/work/provider-status` for terminal recovery. Durability is
+  reported honestly: true only with an AI_BRIDGE_JOBS KV binding.
+- Judge output is mode-aware. A code-evidence schema and “verified code audit”
+  heading are used only for Code mode with real attached source. General tasks
+  use a neutral advisory schema and conservative team-summary heading.
+- Work diagnostics now separates providerAttempts[] from judgeAttempts[].
+- `/api/status` and critical response headers expose buildSha256 so operators
+  can distinguish different deployments carrying the same semantic version.
+
+REGRESSION COVERAGE
+- Added tests/run_v493_production_audit_fixes_tests.mjs covering the negative
+  review sentinel, mode-aware schemas/headings, live RetryInfo ordering and
+  fields, background continuation after disconnect, idempotent resume, honest
+  durability, and Work UI provider diagnostics.

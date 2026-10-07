@@ -1,0 +1,28 @@
+AI Bridge v4.5.12 — live audit / MCP 2026 compatibility hardening
+Date: 2026-09-12
+
+CONFIRMED FIXES
+- Fixed a stray control/backspace character in app.js Connector fallback regex so WWW-Authenticate: Bearer challenges are detected correctly.
+- Completed explicit MCP 2026-07-28 support instead of merely advertising it:
+  * validates MCP-Protocol-Version against per-request _meta protocolVersion;
+  * requires io.modelcontextprotocol/clientCapabilities on modern requests;
+  * validates required Mcp-Method and tools/call Mcp-Name headers;
+  * returns HeaderMismatch (-32020) for modern header/body mismatch;
+  * returns UnsupportedProtocolVersion (-32022) with supported/requested data;
+  * adds resultType=complete and serverInfo metadata to modern results;
+  * adds ttlMs/cacheScope to server/discover and tools/list;
+  * keeps 2025-11-25 / 2025-06-18 / 2025-03-26 compatibility and preserves a supported requested legacy response version;
+  * does not expose the retired initialize/ping flow as modern 2026 behavior.
+- OAuth discovery now advertises offline_access while retaining authorization_code + refresh_token support, matching current ChatGPT guidance for persistent OAuth connectivity.
+- OAuth authorization accepts offline_access and defaults to the full supported OAuth scope set when no scope is supplied.
+- OAuth login password comparison now uses the same constant-time comparison helper as the private API token gate.
+- /api/mcp-info reports modern MCP support and OAuth offline-access capability.
+- Connector Test now verifies OAuth discovery includes offline_access when /api/mcp-info is present or when using the fallback probe.
+- Updated ChatGPT connection instructions to the current Apps → Create → Scan tools → OAuth flow; removed outdated “Security and login / ChatGPT Plugins” directions.
+- Updated the UI tool list to the four MCP tools actually exposed by the Review Panel.
+- Rewrote README connector documentation to match the current v4.5.12 behavior and removed obsolete tool/model setup text.
+
+VALIDATION
+- Added v4.5.12 modern MCP/OAuth regression tests.
+- Updated public-discovery regression fixtures to include the required 2026-07-28 per-request metadata.
+- Full syntax + regression suite must pass before release packaging.

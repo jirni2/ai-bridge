@@ -1,0 +1,9 @@
+AI BRIDGE v4.3 — CONTEXT COVERAGE + RETRY UI
+
+- judge_retry now streams attempt, nextAttempt and maxAttempts; production label shows attempt/status/wait/source.
+- File-only claims use head/tail/evenly spaced windows instead of first 24 lines only.
+- Reviewer hints include quoted symbols, file paths, endpoints, selectors and HTML IDs.
+- Behavioral UI test executes the same work-ui-core.js used in production.
+- Mock Gemini integration test covers 429 + google.rpc.RetryInfo -> actual wait -> successful retry + streamed diagnostics.
+- Missing task/token uses inline status instead of blocking alert, so Cloud Browser does not get stuck.
+- Fixed an additional v4.2 defect: JUDGE_RESPONSE_SCHEMA was referenced by Gemini Judge but was not defined.

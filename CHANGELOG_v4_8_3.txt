@@ -1,0 +1,8 @@
+AI Bridge v4.8.3
+
+- Files & ZIP now has its own task composer and visible Send button.
+- Users can attach files, describe the requested work, and submit directly from the Files tab.
+- File send is disabled until both an attachment and a task are present.
+- File task text clears after submission while attachments remain available for follow-up work.
+- Sending from Files switches to Chat to show progress/result immediately.
+- Fixed stale Auto status copy that incorrectly mentioned a local hello responder.

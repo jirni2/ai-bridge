@@ -1,0 +1,12 @@
+AI Bridge v5.1.7 Agent Plan audit / fix summary
+
+Confirmed root cause:
+- Agent Plan was not implemented in v5.1.6 (and was also absent from the supplied v5.1.3 base). The UI/worker contained Auto, Ask All, Code Review, Debate and Single modes only; runTeam rejected unknown modes back to Auto.
+
+Fix:
+- Added Agent Plan to the Team selector and quick controls.
+- Added server-side plan parser/normalizer and a bounded deterministic fallback plan.
+- Added step-by-step execution through existing provider adapters with provider fallback.
+- Added final synthesis/verification while preserving evidence-grounded code/file audit behavior.
+- Automatic provider selection is free-first; no hidden external tools or side effects are claimed.
+- Added tests covering UI wiring, planner JSON, successful staged execution and malformed-planner fallback.

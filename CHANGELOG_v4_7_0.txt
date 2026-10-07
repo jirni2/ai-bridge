@@ -1,0 +1,21 @@
+AI Bridge v4.7.0
+
+Reliability-first release focused on real chat runtime failures.
+
+Fixed
+- “Привіт”/hello smoke test no longer depends on any third-party provider.
+- Ordinary Auto chat returns the first valid provider answer and cancels slower losers.
+- Remaining free providers are tried automatically; explicitly selected paid providers may rescue the request only after free providers fail.
+- Gemini accepts GOOGLE_API_KEY, GEMINI_API_KEY, or GOOGLE_GENAI_API_KEY.
+- Model-not-found/model-retired errors trigger conservative fallback to known current stable model IDs.
+- Groq GPT-OSS uses current max_completion_tokens, include_reasoning=false, and low reasoning effort.
+- OpenAI-compatible array content is parsed correctly instead of becoming [object Object].
+- Provider errors are classified and redacted before returning to the browser.
+- External cancellation now reaches the active fetch, not just retry sleeps.
+- Invalid/non-JSON upstream responses are surfaced as controlled provider errors.
+- Strict review validation no longer rejects a response merely for being shorter than 80 characters.
+
+Verified
+- 40/40 test suites pass, including v4.7 runtime regressions.
+- 49 JavaScript/MJS/CJS files pass node --check.
+- HTML duplicate-ID scan passes.

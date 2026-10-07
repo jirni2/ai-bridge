@@ -1,0 +1,10 @@
+AI Bridge v5.1.1
+
+- Added Cloudflare Workers AI image engine support through an AI binding.
+- Photo AI and Create Image prefer Cloudflare FLUX.2 klein 4B when the binding is present.
+- Automatic fallback to fal.ai if Cloudflare image generation fails.
+- Clearer exhausted-balance diagnostics and setup guidance.
+- Photo edit sends a safe <=500px fallback reference image to Workers AI while preserving the original for fal.ai.
+- Connections now shows whether the Cloudflare Workers AI binding is active.
+- Studio can render synchronous data-URI results from Workers AI.
+- Video tools remain on fal.ai because Workers AI does not expose direct hosted video generation in this integration.

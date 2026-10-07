@@ -1,0 +1,6 @@
+AI Bridge v5.3.9
+
+- Fixed plain Chat progress incorrectly saying that a file was being analyzed.
+- Hardened Agent Core against treating a helper model's self-report as real verification.
+- Added regression coverage for truthful progress and verification language.
+- Includes the v5.3.8 off-main-thread ZIP Web Worker and the complete prior package.

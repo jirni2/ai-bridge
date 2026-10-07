@@ -1,0 +1,83 @@
+AI Bridge v5.9.15 — Фоновий режим + push-сповіщення + встановлення на iPhone (2026-09-27)
+
+ЩО НОВОГО
+1. ФОНОВИЙ РЕЖИМ. Завдання AI Bridge завжди виконувались на сервері
+   Cloudflare незалежно від з'єднання (resumable job lifecycle), але
+   користувач ніяк не дізнавався про готовність із закритим застосунком.
+   Тепер: після завершення (або помилки) завдання сервер надсилає
+   Web Push-сповіщення на всі підписані пристрої. Сценарій: дав завдання
+   → закрив застосунок → прийшло сповіщення "✅ Завдання виконано" →
+   відкрив → забрав відповідь. Працює для всіх режимів (auto, team,
+   agent, god, single) — кожна частина Deep Scan теж сповіщає окремо.
+2. PUSH-ІНФРАСТРУКТУРА (сервер, _worker.js):
+   - Шифрування RFC 8291 aes128gcm (ECDH P-256 + HKDF-SHA256 +
+     AES-128-GCM) повністю на WebCrypto, без зовнішніх залежностей.
+   - VAPID-авторизація (ES256 JWT). Ключі генеруються власником через
+     новий tools/gen-vapid.mjs і зберігаються як Cloudflare Secrets
+     (VAPID_PUBLIC_KEY / VAPID_PRIVATE_KEY / VAPID_SUBJECT) — у коді
+     ключів немає.
+   - Підписки в KV (push:subs:v1), максимум 25 пристроїв, дедуплікація
+     за endpoint; протухлі підписки (404/410 від push-сервісу)
+     видаляються автоматично.
+   - Ендпоінти: GET /api/push/vapid-key, POST /api/push/subscribe,
+     POST /api/push/unsubscribe (авторизація через BRIDGE_ACCESS_TOKEN).
+   - notifyJobComplete викликається в processJob після обох
+     jobPutTerminal (done/error); best-effort — ніколи не ламає запис
+     результату.
+3. КЛІЄНТ (app.js, sw.js, i18n):
+   - Нова секція "Сповіщення" (сторінка Connections): toggle з усіма
+     станами — denied (підказка де ввімкнути в iOS), unsupported
+     (потрібна iOS 16.4+ і встановлення на головний екран),
+     setupRequired (підказка власнику згенерувати VAPID).
+   - Після відправки завдання з увімкненим push: підказка "Можеш
+     закрити застосунок — сповіщу, коли буде готово".
+   - sw.js: обробники push / notificationclick (показ сповіщення,
+     фокус/відкриття застосунку по тапу).
+4. ВСТАНОВЛЕННЯ НА iPHONE: застосунок і раніше був PWA
+   (apple-touch-icon, standalone), тепер додано закриваєму
+   картку-підказку для iOS: Safari → Поділитися → "Додати на головний
+   екран" (укр/eng/ru). Окремий файл BACKGROUND_MODE_UA.txt —
+   повна інструкція українською.
+
+ЧЕСНІ ОБМЕЖЕННЯ
+- Вкладка в фоні на iPhone жити не може (обмеження Apple) — тому фон
+  = сервер + push, і це єдина коректна архітектура.
+- Deep Scan з N частин: кожна частина — окреме фонове завдання зі
+  своїм сповіщенням; наступна частина стартує, коли застосунок
+  відкрито (checkpoint частин зберігається на пристрої, нічого не
+  втрачається і не оплачується двічі).
+- Binance-бот (binance-bot/worker.mjs) працює 24/7 на Cloudflare
+  alarms сам по собі — змін не потребував.
+
+ТЕСТИ
+- Новий tests/run_v596_push_tests.mjs: СПРАВЖНІЙ криптографічний
+  roundtrip (шифрування сервером → розшифрування клієнтським ключем,
+  plaintext збігається включно з unicode), перевірка VAPID JWT
+  (ES256-підпис валідується публічним ключем, aud/exp/sub коректні),
+  дедуплікація і кап підписок, наявність роутів/ендпоінтів, sw.js
+  push/notificationclick, i18n-ключі.
+- Повний регресійний набір: усі PASS, 0 падінь.
+
+НАЛАШТУВАННЯ ВЛАСНИКОМ (одноразово, серверна частина)
+1. node tools/gen-vapid.mjs → скопіювати вивід.
+2. npx wrangler secret put VAPID_PUBLIC_KEY / VAPID_PRIVATE_KEY /
+   VAPID_SUBJECT (у теці деплою _worker.js).
+3. Задеплоїти воркер і Pages ZIP як зазвичай.
+Без VAPID-ключів застосунок працює як раніше; toggle сповіщень покаже
+підказку про налаштування.
+
+WHAT'S NEW (EN)
+Background mode: Cloudflare already ran every job independently of the
+client connection; now the server also sends a Web Push notification
+when a job reaches done/error, so you can close the app and get
+pinged. Full RFC 8291 (aes128gcm) + VAPID implementation on WebCrypto,
+no dependencies; subscriptions in KV (cap 25, auto-pruned on 410/410).
+New "Notifications" section with denied/unsupported/setup states,
+post-send hint, sw.js push/click handlers, and an iOS "Add to Home
+Screen" install card (i18n en/uk/ru). Honest limits documented:
+iOS cannot keep a tab alive — background = server + push; Deep Scan
+advances parts while the app is open (checkpoints persist); the
+Binance bot already runs 24/7 on alarms.
+
+Деплой: як v5.9.14 — плюс три VAPID-секрети (див. вище). Жоден
+реальний ордер під час роботи не створювався.

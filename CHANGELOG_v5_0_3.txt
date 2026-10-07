@@ -1,0 +1,11 @@
+AI Bridge v5.0.3
+
+Rounded media controls + multilingual UI
+- Redesigned Camera, Photo, and Voice controls as large rounded pill buttons with consistent SVG icons.
+- Increased rounding on image previews and preserved visible pressed/listening feedback.
+- Added a header language picker beside the site Refresh button.
+- Added persistent UI language selection stored locally on the device.
+- Added Ukrainian, English, Russian, Polish, Spanish, French, German, and Portuguese language packs.
+- Voice recognition now follows the selected UI language.
+- Added i18n.js to the service-worker offline asset list.
+- Added regression coverage for language persistence, language/voice locale mapping, rounded controls, and packaging.

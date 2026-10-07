@@ -1,0 +1,36 @@
+<!doctype html><html lang="uk"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#080e1b"><title>Binance Paper Bot • AI Bridge</title><link rel="stylesheet" href="/trade/trade.css"></head>
+<body><main class="shell">
+<header><a href="/" class="brand">↗ AI Bridge</a><span class="badge">BINANCE SPOT · PAPER</span></header>
+<section class="hero"><div><p class="eyebrow">MARKET LAB</p><h1>Торговий бот</h1><p>Ринкові дані Binance. Стратегія SMA 9/21 + RSI. Автоматичний серверний режим і окремий навчальний режим.</p></div><div class="status" id="status" role="status" aria-live="polite">Готовий до перевірки ринку</div></section>
+<section class="panel autoPanel"><div class="autoHead"><div><p class="eyebrow">SERVER BOT</p><h2>Автоматична торгівля Binance</h2></div><strong id="autoStatus" role="status" aria-live="polite">Перевіряю підключення…</strong></div>
+<p>Працює через серверні alarms після закриття iPhone. Testnet надсилає справжні API ордери з віртуальними коштами Binance. Live доступний лише після окремого налаштування секретів і підтвердження. Pause/Stop не продає відкриту позицію; перед зупинкою перевір її на Binance.</p>
+<div class="controls"><label>Середовище<select id="autoMode"><option value="testnet">Binance Spot Testnet</option><option value="live" disabled>Live — не налаштовано</option></select></label><label>Пара<select id="autoSymbol"><option>BTCUSDT</option><option>ETHUSDT</option><option>BNBUSDT</option><option>SOLUSDT</option></select></label><label>Свічка<select id="autoInterval"><option value="1h">1 година</option><option value="15m">15 хвилин</option><option value="5m">5 хвилин</option><option value="1m">1 хвилина</option></select></label><label>Бюджет, USDT<input id="autoBudget" type="number" min="50" max="100" value="100" inputmode="decimal"></label></div>
+<label id="liveConfirmWrap" class="hidden">Для live введи LIVE<input id="liveConfirm" autocomplete="off" placeholder="LIVE"></label>
+<div class="actions"><button id="autoVerify">Перевірити Binance API</button><button id="autoStart" class="primary">Start Auto</button><button id="autoPause">Pause</button><button id="autoStop">Stop</button><button id="autoRefresh">Оновити статус</button></div>
+<div id="autoDetails" class="autoDetails">Немає даних.</div><div class="tableWrap"><table><thead><tr><th>Час</th><th>Ордер</th><th>Причина</th><th>Кількість</th><th>USDT</th></tr></thead><tbody id="autoJournal"><tr><td colspan="5">Ордерів немає</td></tr></tbody></table></div>
+</section>
+<section class="panel metricsPanel" id="metricsPanel">
+<div class="autoHead"><div><p class="eyebrow">PERFORMANCE</p><h2>📊 Метрики</h2></div><strong id="mBotStatus" role="status" aria-live="polite">Завантаження…</strong></div>
+<div class="actions mActions">
+<button id="mRefresh">🔄 Оновити</button>
+<button id="mReconcile">🔍 Звірка ордерів</button>
+<button id="mPause" data-mode="pause">⏸ Пауза</button>
+<button id="mStopAll" class="dangerBtn">⏹ Зупинити все</button>
+<span id="mUpdated" class="mUpdated"></span>
+</div>
+<div class="mGrid" id="mCards"></div>
+<h3 class="mSub">Equity</h3>
+<div id="mEquity"></div>
+<h3 class="mSub">Місячний P&L, USDT</h3>
+<div id="mMonthly"></div>
+</section>
+<h2 class="sectionLabel">Локальний paper режим</h2>
+<div class="notice">Лише paper trading. Реальні ордери не надсилаються. Бот перевіряє ринок, поки ця сторінка відкрита; Safari може зупиняти вкладку у фоні. Результат симуляції не прогнозує прибуток.</div>
+<section class="controls"><label>Пара<select id="symbol"><option>BTCUSDT</option><option>ETHUSDT</option><option>BNBUSDT</option><option>SOLUSDT</option></select></label><label>Свічка<select id="interval"><option value="1h">1 година</option><option value="15m">15 хвилин</option><option value="4h">4 години</option><option value="1d">1 день</option><option value="5m">5 хвилин</option></select></label><label>Стартовий баланс, USDT<input id="capital" type="number" min="10" max="1000000" value="100" inputmode="decimal"></label></section>
+<section class="actions"><button id="check">Перевірити ринок</button><button id="backtest">Історичний тест</button><button id="start" class="primary">Запустити paper</button><button id="pause">Пауза</button><button id="stop">Зупинити</button><button id="reset">Новий paper рахунок</button></section>
+<section class="grid"><article><small>Остання ціна</small><strong id="price">—</strong><span id="marketTime">—</span></article><article><small>Баланс paper</small><strong id="equity">$100.00</strong><span id="cash">USDT 100.00</span></article><article><small>Позиція</small><strong id="position">Немає</strong><span id="signal">Сигнал: —</span></article></section>
+<section class="panel"><h2>Ліміти ризику</h2><p>Спот, тільки long · без кредитного плеча · максимум 10% капіталу на вхід · стоп 3% · ціль 6% · денний ліміт втрат 3% · до 5 входів на день · комісія 0,1% на сторону. Бот не вгадує ринок за допомогою AI.</p></section>
+<section class="panel"><h2>Історичний тест</h2><div id="testResult">Натисни «Історичний тест». Сигнал розраховується тільки на закритих свічках, а симульоване виконання відбувається на відкритті наступної.</div></section>
+<section class="panel"><h2>Журнал paper угод</h2><div class="tableWrap"><table><thead><tr><th>Час</th><th>Дія</th><th>Ціна</th><th>Кількість</th><th>P/L</th></tr></thead><tbody id="journal"><tr><td colspan="5">Угод ще немає</td></tr></tbody></table></div><button id="export" class="secondary">Експорт журналу JSON</button></section>
+<footer><a href="/">← Повернутися до AI Bridge</a> · <span>Зберігається лише на цьому пристрої</span></footer>
+</main><script type="module" src="/trade/trade.js"></script><script type="module" src="/trade/bot-ui.js"></script><script type="module" src="/trade/metrics.js"></script></body></html>

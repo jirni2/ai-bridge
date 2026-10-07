@@ -1,0 +1,8 @@
+AI Bridge v5.1.6
+
+- Added inline Cloudflare Workers AI REST setup directly inside AI Studio.
+- Added atomic Account ID + API Token save flow with live Cloudflare token and Workers AI permission verification.
+- Added Test connection and Remove REST access controls in Studio.
+- Studio can auto-save/test entered REST credentials before the first image request.
+- Missing Free Photo AI no longer sends the user away to Connections; setup is shown in context.
+- REST credential test uses Cloudflare token verification and Workers AI model search without generating an image.

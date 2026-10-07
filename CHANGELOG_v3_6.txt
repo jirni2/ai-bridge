@@ -1,0 +1,17 @@
+AI BRIDGE v3.6 — HARDENED WORK CONTROLLER
+
+Confirmed fixes from the real-code audit:
+1. workFile + fileStatus are now present in BOTH work.html and work/index.html.
+2. Added tests that explicitly fail if upload UI disappears.
+3. Groq Free gets a provider-specific code budget (18,000 prioritized characters) so a whole 100k+ project is not blindly sent into an 8k-class free request.
+4. Gemini automatically retries 429/503/504 with short backoff.
+5. Final Judge priority is OpenRouter -> Gemini -> Groq, with fallback to the next successful provider if synthesis fails.
+6. OpenAI-compatible outputs now have explicit max_tokens caps.
+7. PUBLIC_PLUGIN_MODE alone no longer disables MCP authentication. Public MCP now requires PUBLIC_PLUGIN_MODE=1 AND ALLOW_PUBLIC_MCP=1.
+8. MCP tools/call now checks bridge:status vs bridge:run scopes.
+9. OAUTH_SIGNING_SECRET is supported separately; BRIDGE_ACCESS_TOKEN remains a backwards-compatible fallback.
+10. Filenames are sanitized before prompt embedding, and reviewer system prompts explicitly treat attached code as untrusted data.
+
+Not fully solved yet:
+- Provider results are still returned after Promise.all, so a slow OpenRouter call can delay the final page update. A streaming/progressive endpoint would be a larger architectural change.
+- Truly reviewing ALL 100k+ characters with Groq Free cannot fit one free 8k-class request. v3.6 intentionally limits Groq to prioritized code while OpenRouter/Gemini receive the full project.

@@ -1,0 +1,51 @@
+AI Bridge v5.9.14 — Deep Scan 404 resubmit fix (2026-09-27)
+
+ДІАГНОЗ (баг зі скріншота: "Deep Scan зупинився на частині 2/10")
+runDeepScan створював для кожної частини payload з clientRequestId, але
+НІКОЛИ не викликав savePendingPayload(). Коли статус-запит повертав 404
+(job "unknown": KV-запис ще не реплікувався між edge-локаціями, KV-запис
+не вдався, або isolate було витіснено), pollJobStatus після 20с grace
+викликав tryResubmit() -> resubmitPendingJob(clientRequestId) ->
+loadPendingPayload(clientRequestId) -> null — відновлення мовчки не
+спрацьовувало, і скан помирав з термінальною помилкою "Bridge не знайшов
+це завдання після повторних перевірок". Додатково одноразовий retry
+у runDeepScan покривав лише [429,499,500,502,503,504] — 404 на рівні
+частини не повторювався взагалі.
+
+ВИПРАВЛЕНО (тільки app.js, runDeepScan)
+1. Цикл частин: savePendingPayload(payload.clientRequestId, payload)
+   перед streamingRunRequest; deletePendingPayload після успішної частини
+   (після notes.push + saveDeepScanCheckpoint).
+2. Фінальний синтез-запит: те саме — зберегти перед запитом, видалити
+   після успіху.
+3. Retry-гілка: при новому clientRequestId payload зберігається під
+   новим id (save -> request -> delete для кожної спроби).
+4. Одноразовий retry тепер покриває і 404: 404 на цьому рівні зазвичай
+   транзиторний (KV propagation / isolate mismatch), повтор з новим
+   id безпечний — сервер дедуплікує за id.
+5. Логіка checkpoint не змінювалась — "Завершені частини збережені"
+   працює як раніше.
+
+ТЕСТИ
+- Новий tests/run_v595_deepscan_resubmit_tests.mjs: статично перевіряє
+  save-before-request для частин/фіналу/retry, delete після успіху,
+  404 у retry-списку, цілість checkpoint-логіки.
+- Повний регресійний набір: 111 файлів — усі PASS, 0 падінь.
+
+DIAGNOSIS (EN)
+Deep Scan died at part 2/10 because runDeepScan never persisted part
+payloads via savePendingPayload(), so pollJobStatus's 404-grace resubmit
+(resubmitPendingJob -> loadPendingPayload -> null) silently failed.
+Additionally the part-level one-shot retry did not cover 404 at all.
+
+FIX (EN)
+Persist every Deep Scan part payload (and the final synthesis payload)
+before sending, delete on success; resubmit path can now actually restore
+the job after a 404 grace window. 404 added to the one-shot retry list —
+at this level it is usually transient (KV propagation / isolate
+mismatch) and a retry with a fresh clientRequestId is safe (server
+de-duplicates by id). Checkpoint logic untouched.
+
+Деплой: як v5.9.13 — спочатку npx wrangler deploy у binance-bot/
+(aibridge-binance-bot), прив'язка TRADE_BOT у Pages, потім деплой
+Pages ZIP. Жоден реальний ордер під час роботи не створювався.

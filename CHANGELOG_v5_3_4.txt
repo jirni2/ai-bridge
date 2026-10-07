@@ -1,0 +1,12 @@
+AI BRIDGE v5.3.4
+
+- Chat now sends with Enter; Shift+Enter still inserts a newline.
+- Agent Plan is constrained to the required 1–4 runtime steps in both UI and Worker.
+- Live provider diagnostics now have bounded server and browser timeouts, so the
+  button and UI cannot remain stuck forever.
+- Restored all eight release-history and regression files that were present in
+  the v5.1.7 base but missing from the later working tree: three AUDIT files,
+  three CHANGELOG files, and the v5.1.6 Studio/v5.1.7 Agent Plan tests.
+- Updated the two restored regression tests to validate the current protected
+  token vault, REST image path, provider-routed Agent and invalid-JSON fallback.
+- Retains the v5.3.3 Bridge-controlled provider router and fallback behavior.

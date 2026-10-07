@@ -1,0 +1,12 @@
+AI Bridge v5.0.2
+
+Multimodal task composer
+- Added Camera button in the main task composer for taking a new photo on iPhone.
+- Added Photos button for attaching existing images from the photo library/files picker.
+- Added local image previews with remove controls before sending.
+- Images are resized/compressed on-device before upload and are never sent until Send is pressed.
+- Image tasks route only to configured vision-capable providers (Gemini, OpenAI, Claude, Grok).
+- Added multimodal provider payloads for Gemini, OpenAI Responses, Claude Messages, and xAI Grok Chat Completions.
+- Added microphone speech-to-text control for the task field using browser SpeechRecognition/webkitSpeechRecognition when available.
+- Voice UI shows listening/interim/final states and never sends automatically.
+- Added regression coverage for camera/photo controls, image sanitization/routing, provider payloads, and voice-input wiring.

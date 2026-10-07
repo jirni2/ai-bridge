@@ -1,0 +1,7 @@
+AI Bridge v5.8.6
+- Fixed the production-observed Search First false positive: an AI Bridge version question was answered with unrelated Walmart search results.
+- Search-only completion now requires topical evidence, not merely long snippets on two domains.
+- Unrelated results are not presented as answers or fed to the AI fallback as factual context; the direct provider receives the original task.
+- Added a regression test reproducing the Walmart example and asserting one provider fallback call, plus a control test for a relevant zero-AI answer.
+- Retains the complete v5.8.5 package inventory, including tests and tools.
+Production verification is required after deployment; local tests alone do not establish production success.

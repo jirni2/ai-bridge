@@ -1,0 +1,15 @@
+AI BRIDGE v3.8 — EVIDENCE GUARD
+
+Fixes from the v3.7 live audit:
+1. Groq cross-file sampling now parses <file> tags even when they have original_chars/truncated attributes.
+2. Empty/placeholder provider outputs are failures, so they are retryable and cannot become Judge candidates.
+3. Judge returns structured JSON findings. Server verifies each code_evidence quote against the actual source before labeling it evidence-backed.
+4. Claims without matching code evidence are shown as UNVERIFIED, not confirmed.
+5. Synthesis still does not run with only one meaningful provider result.
+6. Public OAuth token exchange fails closed unless an atomic Durable Object binding OAUTH_REPLAY_DO is configured.
+7. oauth-replay-do.js provides transaction-based one-use jti consumption.
+8. ZIP extraction adds real resource limits: entry cap, per-entry decompressed-byte cap, total decompressed-byte cap, compression-ratio cap, and streaming cancellation.
+9. Added behavioral tests for the exact Groq parsing bug, empty provider outputs, evidence verification, and actual 429->success retry.
+
+Important:
+"Evidence-backed" means the quoted snippet exists in the supplied code. It does not automatically prove that the model's interpretation of that snippet is correct.

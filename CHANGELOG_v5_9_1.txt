@@ -1,0 +1,63 @@
+AI BRIDGE v5.9.1 — RELIABILITY RELEASE (fix plan items 1–10)
+
+1. INVENTORY / BASELINE
+• v5.9.0 package verified against v5.8.6: nothing missing (286 -> 290 files, 4 added).
+• tools/release-check.mjs writes MANIFEST.sha256.json (path -> sha256, size) and, with
+  --baseline <dir>, fails if any baseline file is missing.
+
+2. AGENT PLAN HANG ("Planning • 1/4") + ZIP COVERAGE
+• Root cause: the Agent Core planner tried up to 6 providers sequentially, each with its own
+  retries/~95s timeout and no shared budget, while the job heartbeat kept the job "processing"
+  forever. Reproduced: v5.8.6 still "planning" after 60s with unresponsive providers.
+• Fix: per-provider attempt 28s, planner 60s, tools 25s, delegation 45s, whole Agent run 180s,
+  whole job 300s (withDeadline). Providers in cooldown are tried last. Every job now ends in
+  done or error; a job "processing" longer than the ceiling is reported stale.
+• Invalid planner JSON: a readable answer is used as a labelled fallback instead of failing.
+• After a partial run, gathered evidence is returned instead of discarded.
+• ZIP: extraction keeps up to 1.4M chars on the device (was 350k, e.g. 57 of 282 files).
+  Files are ranked by relevance to the task; two-pass packing (deep excerpts for the most
+  relevant, short excerpts for the rest) sends far more files per request.
+• Coverage report: found / text / read / skipped with reasons (service dirs, binary,
+  too large or suspiciously compressed, encrypted, over device limit, unreadable).
+• Deep Scan (opt-in): reads the whole project in up to 5 parts, then one final answer.
+• One over-compressed entry (repetitive log/fixture) no longer rejects the whole ZIP; it is
+  skipped and reported. Strict default behaviour of the zip-bomb guard is unchanged.
+• sw.js, lockfiles, bundles, i18n packs and test-fixture copies of _worker.js are ranked last.
+
+3–4. JOBS, RECONNECT, PROVIDERS
+• Terminal job states (done/error) are retried with backoff on transient KV errors.
+• UI wording: job recovery is labelled best-effort, never "durable".
+• HTTP 499 = Bridge's own cancellation of a slower Auto racer: classified "cancelled",
+  shown as "not needed — a faster AI already answered", never as a Gemini error.
+• Free chat fallback order: Groq -> OpenRouter -> Gemini (long file context keeps Gemini first).
+• Work Controller: Final Judge synthesis is bounded to 150s; the best single answer is shown
+  if the Judge fails or one provider is offline.
+
+5–6. FILE CONTEXT, CHAT, URLS
+• The user task is repeated after the files and models are told never to answer by pasting a
+  file (e.g. sw.js). File tags remain neutralized; injection markers are flagged as data.
+• URLs: typographic hyphens (U+2010–2015, U+2212 …) and invisible characters are normalized
+  before links are built or fetched — fixes links like xn--aibridgeaff-….pages.dev.
+• Plain-language errors for 429, 413, 502/503/52x, timeouts and network loss.
+
+7–8. STUDIO, TOKENS, OAUTH, MCP
+• Save & verify: a saved provider key is checked with one real short request; Cloudflare
+  Workers AI tokens via Cloudflare's free token-verify endpoint (no image generated);
+  fal.ai honestly shown as "saved, not verified" (no paid test call).
+• New end-to-end test: security headers, cookie flags, CSRF, token vault never echoes secrets,
+  OAuth code+PKCE, invalid redirect, wrong verifier, MCP 401 challenge, authorized MCP
+  (2025-11-25), tools/list, refresh rotation and replay rejection.
+
+9. CONTROLLED SELF-IMPROVEMENT
+• improvement-lab.mjs: prints a diff summary; --apply only after every gate passes, with a
+  backup of touched files; tools/rollback.mjs <id> restores them. Production is never changed
+  automatically.
+
+10. RELEASE / DEPLOY
+• tools/release-check.mjs [--baseline dir] [--package]: tests, syntax, version sync, SW assets,
+  inventory, SHA-256 manifest, release ZIP kept in releases/ for rollback.
+• tools/smoke-test.mjs <url> [--token T] [--ai]: production smoke test after deploy.
+
+NEW TESTS: run_v591_agent_deadline_tests, run_v591_zip_context_tests,
+run_v591_security_integration_tests. Updated 5 tests that pinned the old 350k extraction limit /
+old source text.

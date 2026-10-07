@@ -1,0 +1,10 @@
+AI Bridge v4.8.9
+
+AUDIT REPORT CLARITY / FALSE-POSITIVE UX HARDENING
+- Final code-audit reports now show only source-supported actionable defects/risks as findings.
+- Unsupported or uncertain risk hypotheses are counted but no longer dumped into the user-facing defect list.
+- Correctly implemented security controls, praise, and neutral observations are classified as positive/observation and excluded from defect findings.
+- Judge schema now includes kind=defect|risk|positive|observation and explicitly forbids treating correct protections as defects.
+- Removed the meaningless "manually confirmed" count from deterministic summaries; AI Bridge never performs a human/manual confirmation step.
+- When no defect is confirmed, the final answer clearly says so while warning that absence of confirmed evidence does not prove the code is perfect.
+- Added v4.8.9 regression coverage for the exact screenshot failure mode: five unverified claims, including positive security controls, no longer appear as a scary defect list.

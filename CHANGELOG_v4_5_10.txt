@@ -1,0 +1,81 @@
+AI Bridge v4.5.10
+
+Investigated after a production run where Gemini returned HTTP 429 with
+"Please retry in 59.577s" and no retry appeared to happen.
+
+ROOT CAUSE -- WHAT WAS AND WAS NOT CONFIRMED
+
+The original hypothesis ("RetryInfo is not used, or a timeout ends the
+operation before the delay") was NOT confirmed by code evidence. A PoC driving
+the real handleWorkRun with a 429 body containing both RetryInfo "59.577s" and
+the "Please retry in 59.577s" text showed the retry DID fire in Node: a sleep
+of 59746ms was scheduled and a second fetch was made. The RetryInfo parser,
+the message parser and withRetry() all behaved correctly.
+
+What WAS confirmed as real defects, by code evidence:
+
+1. RETRY DELAY SOURCE PRECEDENCE WAS INVERTED (fetchJSON).
+   The HTTP Retry-After header was applied first, and the response body was
+   consulted only if the header was absent. A Gemini 429 carrying both
+   "Retry-After: 1" and a google.rpc.RetryInfo of 59.577s would therefore wait
+   1 second, retry far too early, and be rate-limited again -- which can
+   present exactly as "no effective retry happened". Order is now
+   google.rpc.RetryInfo -> "Please retry in ...s" -> Retry-After -> backoff.
+
+2. THE PROVIDER RETRY PATH HAD NO DIAGNOSTICS AT ALL.
+   Only the Judge path passed onAttempt/onRetry hooks; callGemini(),
+   callGroqFree() and callOpenRouter() passed none. A ~60s wait was therefore
+   completely invisible to the UI -- the run simply looked like it had ended.
+   This also means the absence of retry diagnostics in the production report
+   is NOT evidence that no retry occurred. Provider retries now emit
+   provider_attempt, provider_retry and provider_retry_skipped events with
+   provider, attempt, maxAttempts, status, requestedWaitMs, actualWaitMs,
+   delaySource, nextAttempt and timestamp, emitted BEFORE the sleep begins.
+
+3. THE RETRY BUDGET GUARD SILENTLY DROPPED RETRIES.
+   withRetry()'s guard `Date.now()-started+wait>=maxTotalMs` threw the original
+   429 with no indication that a retry had been computed and discarded. With
+   Gemini's maxTotalMs=90000 and a ~59.6s delay, any 429 arriving later than
+   about 30.4s into the call lost its retry, and the resulting error was
+   indistinguishable from "this status is not retryable". The guard now
+   annotates the error (retrySkipped, retrySkippedReason, retryRequestedMs,
+   retryWouldHaveWaitedMs, retryBudgetMs) and emits provider_retry_skipped.
+   Budgets raised so a ~60s delay plus a following attempt actually fits:
+   Gemini 90000 -> 150000, OpenRouter 95000 -> 150000, Groq 75000 -> 110000.
+
+4. THE DELAY CAP HAD ALMOST NO HEADROOM.
+   RETRY_DELAY_CAP_MS was 60000, which the real 59.577s delay cleared by only
+   423ms; a 60.5s RetryInfo would have been silently truncated to 60s and the
+   retry would still have been too early. Raised to 75000.
+
+5. CANCELLATION DID NOT INTERRUPT THE WAIT.
+   sleepMs() was not abortable, so a user cancel or client disconnect could
+   not interrupt a pending ~60s backoff -- only the next fetch. sleepMs() now
+   accepts an AbortSignal, withRetry() threads it, and handleWorkRun /
+   handleWorkProvider pass the request's signal, so a disconnect releases the
+   Worker instead of holding it for the full delay.
+
+OTHER CHANGES
+
+- handleWorkRun and handleWorkProvider now return retryEvents plus
+  meta.retryCount / meta.retrySkipped.
+- Failed provider results carry retrySkipped and retryDiagnostics so the UI
+  can distinguish a dropped retry from a never-attempted one.
+- New tests/run_v4510_retry_tests.mjs covers cases A-G from the brief with
+  fake timers (exact 59577ms, 1.25s message, Retry-After: 3, precedence,
+  timeout vs cancel, result merge, streaming event ordering, empty 200 OK,
+  non-retryable 4xx), verified to fail against the pre-fix implementation.
+- Two legacy assertions pinned to the old 60s cap and old Groq budget were
+  updated to assert the new intent; no test was deleted or weakened.
+
+ARCHITECTURAL LIMITATION -- NOT MASKED
+
+Whether a Cloudflare Worker can actually hold a single request open for a ~60s
+retry wait was NOT verified; no live deployment was available in this build
+environment. The changes above make such a wait correct, cancellable and fully
+observable, but if Cloudflare's execution limits cut the request short in
+production, that will now be visible in the diagnostics rather than silent. If
+live testing shows the wait is cut, the correct next step is a client-driven
+resumable retry (retry only the failed provider from the client, preserving
+the other providers' results), which is deliberately NOT implemented here
+because the need for it has not yet been demonstrated by production evidence.

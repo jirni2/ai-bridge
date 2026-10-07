@@ -1,0 +1,10 @@
+AI BRIDGE v4.4 — SEGMENT BALANCE
+
+- File-only sampling is balanced across source segments.
+- Every segment receives a primary sample when budget allows.
+- tail segments use a center-first primary sample, preventing the head segment from consuming all windows and improving coverage of deep tail code.
+- Remaining sample budget is filled round-robin across segments.
+- Regression test uses head 1–100 + tail 901–1000 and verifies criticalTailHandler() on line 950 reaches Judge context.
+- Judge diagnostics now expose verificationExcerpts[] and verificationExcerptCount with path/start/end/reason/segment metadata.
+- These excerpt diagnostics are streamed live in judge_context_ready and retained by Work UI.
+- Production Free Team behavior still requires a live Cloud Browser run after browser recovery.

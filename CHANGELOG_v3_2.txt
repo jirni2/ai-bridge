@@ -1,0 +1,8 @@
+AI BRIDGE v3.2 — SUPPORT ROUTE HARDENING
+
+• Support email is now compiled into the public support route: aibridge.support@gmail.com
+• /support and /support.html are both served directly by the Worker.
+• Added visible 'Bridge Review Panel v3.2' marker.
+• Added /public-check JSON endpoint for deployment verification.
+• Support responses use no-store headers.
+• Static support.html remains as a redundant fallback.

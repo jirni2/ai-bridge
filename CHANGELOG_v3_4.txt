@@ -1,0 +1,13 @@
+AI BRIDGE v3.4 — WORK ROUTE REDIRECT FIX
+
+Fix:
+- Removed /work -> /work.html asset fetch that could loop with Cloudflare Pages' canonical HTML redirects.
+- /work now redirects once to /work/.
+- Added a real /work/index.html static asset.
+- /work/ is served directly by Pages static assets.
+- Service-worker cache bumped to v3.4.
+
+Use:
+https://aibridge-aff.pages.dev/work
+or
+https://aibridge-aff.pages.dev/work/

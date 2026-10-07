@@ -1,0 +1,11 @@
+AI Bridge v5.2.2 — self-directed Agent Core
+
+- Removed Gemini as the preferred Agent controller.
+- Agent runtime now owns goal, memory, tool loop, state, limits and stopping policy.
+- Cloudflare Workers AI binding `AI` supplies the Agent Core inference engine.
+- Default core model: @cf/zai-org/glm-4.7-flash; override with AI_BRIDGE_AGENT_CORE_MODEL.
+- Gemini / Groq / OpenRouter / OpenAI / Claude / Grok are helper AIs only.
+- The Agent decides if and when to delegate; there is no automatic external-AI verification on every answer.
+- Image goals use a connected vision AI only because vision is genuinely required; control returns to Agent Core afterward.
+- /api/status now reports Agent Core readiness/model separately from helper providers.
+- UI wording changed from “Gemini Brain” to “Agent Core + optional AI helpers”.

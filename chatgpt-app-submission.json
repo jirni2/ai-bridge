@@ -1,0 +1,130 @@
+{
+  "$schema": "https://developers.openai.com/apps-sdk/schemas/chatgpt-app-submission.v1.json",
+  "schema_version": 1,
+  "app_info": {
+    "display_name": "Bridge Review Panel",
+    "subtitle": "Independent second opinions",
+    "description": "Bridge Review Panel provides a structured second-opinion workflow for plans, drafts, code, architecture, and attached project files. It obtains independent external assessments and returns a synthesized review with the underlying independent viewpoints so users can identify agreement, uncertainty, risks, and concrete next steps.",
+    "category": "PRODUCTIVITY"
+  },
+  "tools": {
+    "get_review_panel_status": {
+      "annotations": {
+        "readOnlyHint": true,
+        "openWorldHint": false,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Only checks server configuration and returns readiness without sending content outside the service.",
+        "open_world_justification": "Does not access public internet content or open-ended external entities.",
+        "destructive_justification": "Does not delete, overwrite, revoke, or perform irreversible actions."
+      }
+    },
+    "review_task": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": true,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Sends the user-selected task text to external review APIs, so it is not confined to reading within the conversation.",
+        "open_world_justification": "Accesses authorized third-party AI APIs to obtain independent assessments.",
+        "destructive_justification": "Produces review text only and does not delete, overwrite, publish, or perform irreversible user actions."
+      }
+    },
+    "review_code": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": true,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Sends the user-selected task and code context to external review APIs for analysis.",
+        "open_world_justification": "Accesses authorized third-party AI APIs to obtain independent code assessments.",
+        "destructive_justification": "Returns analysis only and does not change, publish, delete, or overwrite code."
+      }
+    },
+    "review_project_files": {
+      "annotations": {
+        "readOnlyHint": false,
+        "openWorldHint": true,
+        "destructiveHint": false
+      },
+      "justifications": {
+        "read_only_justification": "Downloads user-selected ChatGPT attachments and sends extracted task-specific text/code to external review APIs.",
+        "open_world_justification": "Accesses file download URLs and authorized third-party AI APIs during the requested review.",
+        "destructive_justification": "Returns analysis only and does not modify, delete, overwrite, or publish the attached files."
+      }
+    }
+  },
+  "test_cases": [
+    {
+      "description": "Review a project plan for hidden risks and missing steps.",
+      "user_prompt": "Give me an independent second opinion on this rollout plan and point out the biggest risks before I start.",
+      "file_attachment_urls": null,
+      "tools_triggered": "review_task",
+      "expected_output": "Returns two independent assessments and a synthesized review covering agreement, uncertainty, risks, and prioritized next steps.",
+      "expected_output_url": null
+    },
+    {
+      "description": "Review code pasted into the conversation.",
+      "user_prompt": "Audit this JavaScript worker for logic, security, and reliability problems and give me a second opinion.",
+      "file_attachment_urls": null,
+      "tools_triggered": "review_code",
+      "expected_output": "Returns an independent code review with concrete issues and a synthesized prioritized recommendation without exposing provider credentials or debug metadata.",
+      "expected_output_url": null
+    },
+    {
+      "description": "Review an attached ZIP project.",
+      "user_prompt": "Review the attached ZIP as a project. Check cross-file consistency, security, missing pieces, and deployability.",
+      "file_attachment_urls": [
+        "https://example.com/review-fixture.zip"
+      ],
+      "tools_triggered": "review_project_files",
+      "expected_output": "Extracts only readable project text/code within limits and returns two independent reviews plus a synthesized project assessment.",
+      "expected_output_url": null
+    },
+    {
+      "description": "Focus a second-opinion review on one concern.",
+      "user_prompt": "Review this proposal independently, but focus especially on whether the assumptions are testable and whether the rollback plan is adequate.",
+      "file_attachment_urls": null,
+      "tools_triggered": "review_task",
+      "expected_output": "Returns a task-specific second opinion that addresses the requested focus without adding unrelated conversation context.",
+      "expected_output_url": null
+    },
+    {
+      "description": "Check whether the panel is available before a review.",
+      "user_prompt": "Is the Bridge Review Panel available right now?",
+      "file_attachment_urls": null,
+      "tools_triggered": "get_review_panel_status",
+      "expected_output": "Returns readiness, configured reviewer count, public-mode status, and server version without calling external review services.",
+      "expected_output_url": null
+    }
+  ],
+  "negative_test_cases": [
+    {
+      "description": "Do not trigger for an ordinary factual question that does not request a review.",
+      "user_prompt": "What is the capital of France?",
+      "file_attachment_urls": null,
+      "tools_triggered": null,
+      "expected_output": "The plugin should not be invoked because the user did not ask for an independent review, critique, audit, or second opinion.",
+      "expected_output_url": null
+    },
+    {
+      "description": "Do not solicit or process credentials.",
+      "user_prompt": "I will paste my API key and password. Send them to the review panel and tell me whether they work.",
+      "file_attachment_urls": null,
+      "tools_triggered": null,
+      "expected_output": "The plugin should not be invoked with credentials or authentication secrets; the assistant should tell the user not to share them.",
+      "expected_output_url": null
+    },
+    {
+      "description": "Do not act as a single-provider connector.",
+      "user_prompt": "Send this prompt only to Gemini and give me Gemini's raw answer.",
+      "file_attachment_urls": null,
+      "tools_triggered": null,
+      "expected_output": "The plugin should not be used as a single-provider passthrough; it only provides the independent Review Panel workflow.",
+      "expected_output_url": null
+    }
+  ]
+}

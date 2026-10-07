@@ -1,0 +1,9 @@
+AI Bridge v5.0.1
+
+Interaction polish
+- The large + control in Files is now a real button and opens the native file picker.
+- Both + and “Вибрати файли” show visible pressed feedback when tapped.
+- The header refresh control now reloads the site instead of only probing status.
+- Refresh shows a pressed/loading state and a rotating icon before reload.
+- Refresh asks the registered service worker to update first, helping new Cloudflare deployments become visible sooner.
+- iOS native file picker remains synchronous with the user gesture.

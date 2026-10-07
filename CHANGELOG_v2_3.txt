@@ -1,0 +1,12 @@
+AI BRIDGE v2.3 — DIAGNOSTIC FIX
+
+• Re-audited all provider model IDs and REST request shapes against current official docs.
+• OpenAI default remains gpt-5.6-terra.
+• Claude default remains claude-sonnet-5.
+• Gemini default remains gemini-3.8-flash.
+• Grok default remains grok-4.6.
+• Kimi default remains kimi-k3.
+• Fresh installs now select OpenAI too; v2.x previously omitted OpenAI from the default checkbox set.
+• Provider status now says KEY SET instead of CONNECTED because a stored key does not prove billing/quota/model access.
+• If every selected provider fails, the exact per-provider HTTP/API error is now shown in the main error text.
+• Cache bumped to v2.3.

@@ -1,0 +1,12 @@
+AI Bridge v4.5.11
+
+Security and Connector hardening:
+- Connector UI now falls back to /api/status + OAuth metadata + /mcp probing when /api/mcp-info is missing on an older/misaligned deployment.
+- Added CSP, X-Frame-Options, HSTS, Permissions-Policy, Referrer-Policy, and nosniff headers to static pages, OAuth pages, and API responses.
+- Invalid OAuth authorization requests no longer display an active BRIDGE_ACCESS_TOKEN form.
+- Service Worker bypasses /oauth/, /.well-known/, /mcp, and /api/ and refuses to cache Cache-Control: no-store responses.
+- BRIDGE_ACCESS_TOKEN moved from persistent localStorage to sessionStorage, with legacy migration-and-delete and an explicit token removal button.
+- Provider selection JSON parsing is guarded against corrupted localStorage values.
+- Pinch zoom is re-enabled for accessibility.
+- Public navigation links now use canonical extensionless routes.
+- Added v4.5.11 security regression coverage.

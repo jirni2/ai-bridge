@@ -1,0 +1,22 @@
+AI Bridge v5.9.6 — fixes from the live self-check report (22/23, Gemini quota FAIL)
+
+• Gemini "RATE LIMIT / QUOTA": Google's free limits are counted per model, but a 429 on the
+  default model failed the whole provider. Gemini and Groq now fall back to their next model on
+  a per-model 429 (credit/billing exhaustion still stops). gemini-2.5-flash-lite — the model with
+  the largest free quota — was added to the Gemini chain.
+• An exhausted daily quota ("limit: 0", per-day) is no longer retried on the same model; the next
+  model is tried immediately (5 dead-model calls took ~6.7s before, now ~0.1s in tests).
+• Models that just returned "quota exhausted" are tried last for 10–60 minutes, so normal chats
+  do not waste a request on them.
+• Provider test now reports which model actually answered.
+• Self-check: one exhausted/slow free provider is shown as a WARNING (with "other providers
+  work, Auto falls back") instead of FAIL when at least one other provider works.
+• Self-check: every warning shows a plain "How to fix" step (KV binding AI_BRIDGE_JOBS,
+  Workers AI binding AI, Gemini quota), also included in the copied report.
+• Missing Cloudflare REST token is shown as optional (the Workers AI binding is enough) instead
+  of a duplicate warning.
+• New test guards against duplicate worker exports (a class of error `node --check` misses).
+
+Not fixable in code (Cloudflare dashboard settings, steps shown in the self-check):
+• KV namespace binding AI_BRIDGE_JOBS  -> job recovery + cross-isolate OAuth replay protection.
+• Workers AI binding AI                -> free image engine for Studio.

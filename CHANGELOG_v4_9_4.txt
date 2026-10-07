@@ -1,0 +1,81 @@
+AI Bridge v4.9.4 — Verification release (2026-09-14)
+
+This release contains no functional behavior changes relative to 4.9.3.
+It exists to record a full, reproducible re-verification of the real
+CLOUDFLARE_DEPLOY ZIP against the source tree, not against truncated
+paste excerpts.
+
+Verification performed on the real ZIP:
+
+1. Base64 decode of the attached ZIP recovered
+   AI_Bridge_v4_9_3_CLOUDFLARE_DEPLOY.zip with SHA-256
+   e632133437542d7c542f2b771266f144a77f62747f94573960b2ed41a45a70ab
+   (exact match to the published fingerprint).
+
+2. Unpacked tree confirmed present:
+   _worker.js, work-controller.js, app.js, zip-safety-core.js,
+   work-ui-core.js, tests/ (55 .mjs files including run_v493_*).
+
+3. fetch() router in _worker.js registers (exact conditions):
+   - POST /api/work/provider-stream  -> handleWorkProviderStream
+   - GET  /api/work/provider-status  -> handleWorkProviderStatus
+   - POST /api/job/submit            -> handleJobSubmit
+   - GET  /api/job/status            -> handleJobStatus
+   - POST /api/work/run, /api/work/provider, /api/work/synthesize,
+     /api/work/synthesize-stream, /api/run, /api/run-stream
+   Auth: authOK (Bearer or HttpOnly session cookie).
+   NDJSON Content-Type and event names match work-controller.js
+   expectations (provider_start / provider_attempt / provider_retry /
+   provider_retry_skipped / provider_result / provider_error /
+   provider_heartbeat + jobId + durable).
+
+4. Full test suite: 54/54 run_*.mjs files reported PASS
+   (including v4.9.2 resumable jobs, v4.9.3 production-audit fixes,
+   all adversarial suites v4.5.1–v4.5.9, ZIP safety, MCP, security).
+
+5. Syntax-check of core JS/MJS: 0 errors.
+
+6. Security re-check (code-level, no live production):
+   - job status requires authOK; unauthenticated -> 401
+   - jobId = sha256(BRIDGE_ACCESS_TOKEN|job|clientRequestId).slice(0,32)
+   - clientRequestId alone cannot overwrite another session's job
+   - provider secrets redacted in diagnosticErrorMessage
+   - vault cookies: HttpOnly; Secure; SameSite=Strict; Max-Age=180d
+   - UI innerHTML paths use esc()
+
+7. No new confirmed defects with a reproducible test were found.
+   Earlier claims of "missing provider-stream routes" were false
+   positives caused by truncated paste excerpts, not by the real ZIP.
+
+Production / live Gemini 429 RetryInfo, edge reconnect, and KV
+durability across isolates remain unverified in this environment
+(no Cloudflare deployment performed here).
+
+Version bump only: 4.9.3 -> 4.9.4 for the verified artifact.
+
+PACKAGING INTEGRITY REPAIR
+--------------------------
+A post-build comparison against the actual v4.9.3 deployment ZIP found that
+21 files had been omitted from the first v4.9.4 archive even though v4.9.4 is
+described as behavior-identical to v4.9.3. The corrected deployment artifact
+restores those files from the verified v4.9.3 package.
+
+Deployment-critical restored files include:
+- icon-180.png
+- icon-192.png
+- plugin.html
+- oauth-replay-do.js
+- SUBMISSION_CHECKLIST.txt
+
+Why this matters:
+- index.html references icon-180.png.
+- manifest.webmanifest references icon-192.png.
+- sw.js pre-caches icon-180.png and icon-192.png with cache.addAll(); missing
+  assets can reject the service-worker install promise.
+- support/plugin links expect the public plugin information page.
+- OAUTH_REPLAY_DO_SETUP.txt explicitly requires oauth-replay-do.js for the
+  separate replay-guard Worker used by public plugin mode.
+
+All other files that existed in the verified v4.9.3 deployment package were
+also restored so that the v4.9.4 package is a true packaging superset of
+v4.9.3 plus the intended version/fingerprint updates and this changelog.

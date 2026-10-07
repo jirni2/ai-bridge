@@ -1,0 +1,11 @@
+AI BRIDGE v4.0 — STRUCTURED JUDGE
+
+• Tail/head file samples now carry original start_line/end_line metadata.
+• Quote matching preserves indentation exactly; trim()-normalized evidence no longer passes.
+• Quote start/end lines are absolute original ZIP-file lines.
+• Judge requests native JSON output (Gemini JSON MIME/schema; Groq/OpenRouter JSON mode when supported).
+• Invalid structured Judge output gets one constrained repair attempt, then deterministic local JSON extraction; evidence checks never loosen.
+• Failed Judge candidate falls back to the next successful reviewer.
+• Quote matched and Claim manually confirmed are separate UI badges.
+• Static index/support/manifest/Worker versions are synchronized from bridge-version.json.
+• New tests cover absolute tail lines, indentation mismatch, cross-file evidence, JSON repair, local extraction, and Judge fallback.

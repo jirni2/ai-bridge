@@ -1,0 +1,10 @@
+AI Bridge v4.5.6
+
+- Replaces the trusted structured Judge summary with deterministic counts derived
+  from quote_matched and claim_manually_confirmed flags.
+- Removes the model-written narrative from final and structured output so it
+  cannot contradict deterministic verification state.
+- Prevents a Judge narrative such as "all findings confirmed" from overriding
+  Quote matched: NO or Claim manually confirmed: NO evidence state.
+- Adds regression coverage for mixed matched/unmatched findings.
+- Rejects long Ukrainian/English omission-only reviews observed in production.

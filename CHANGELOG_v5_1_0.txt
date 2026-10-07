@@ -1,0 +1,11 @@
+AI Bridge v5.1.0
+================
+
+- Single AI is now an exact one-provider mode with radio selection and persisted choice.
+- Improved provider error classification: exhausted OpenAI/Claude/xAI credits are shown as billing/quota instead of generic rate-limit/request errors.
+- Added AI Studio with Photo AI, text-to-image, photo animation, text-to-video, and instruction-based short-video editing through fal.ai.
+- Added encrypted FAL_KEY support in the existing HttpOnly provider-token vault or as a Cloudflare Secret.
+- Added /api/media/submit and /api/media/status with an endpoint allowlist; the browser never receives FAL_KEY.
+- Enabled same-origin camera/microphone Permissions-Policy for the existing camera/voice features.
+- CSP now permits displaying fal.media image/video results.
+- Added Studio tab and multilingual Studio labels.

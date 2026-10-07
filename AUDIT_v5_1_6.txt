@@ -1,0 +1,20 @@
+AI Bridge v5.1.6 audit / fix summary
+
+Observed production UX issue:
+- Studio correctly detected that Free Photo AI was not connected, but only displayed an error that told the user to leave Studio and configure Cloudflare elsewhere.
+
+Changes:
+- Added inline Cloudflare Workers AI REST setup to Studio when image mode is selected and neither Workers AI binding nor REST credentials are active.
+- Added Account ID + Workers AI API Token fields directly beside the image-generation workflow.
+- Added atomic Save & test endpoint: credentials are verified first, then both are encrypted into the existing HttpOnly provider vault in one Set-Cookie operation.
+- Live verification uses Cloudflare GET /user/tokens/verify and GET /accounts/{account_id}/ai/models/search. This tests token validity plus Workers AI account permission without generating/charging for an image.
+- Added Test connection and Remove REST access controls.
+- If the user fills both fields and presses Run, Studio saves/tests first and continues only after a successful connection.
+- If binding AI is configured, inline REST setup is hidden and binding remains preferred.
+- No token or Account ID is returned to the page after save.
+
+Security:
+- Same-origin mutation checks remain enforced.
+- BRIDGE_ACCESS_TOKEN/session auth is required.
+- REST credentials stay inside AES-GCM encrypted HttpOnly/Secure/SameSite=Strict provider vault.
+- Cloudflare token is sent only in the Authorization header to api.cloudflare.com during validation/runtime.

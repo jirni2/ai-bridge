@@ -1,0 +1,22 @@
+AI BRIDGE v3.7 — ORCHESTRATION FIX
+
+Implemented from the v3.6 live audit:
+• Progressive Work orchestration: Gemini, Groq and OpenRouter run as separate /api/work/provider jobs.
+• Each provider result is rendered as soon as it finishes; the page no longer waits for the slowest provider before showing useful output.
+• Retry Failed now MERGES the retried provider with previous successful results instead of deleting them.
+• Synthesis is a separate /api/work/synthesize step and reruns after retry.
+• Judge prompt is conservative: a model claim is not treated as confirmed merely because a reviewer said it.
+• Groq/OpenRouter now retry temporary 429/503/504 failures and honor Retry-After when present.
+• Gemini retry is bounded to two shorter attempts instead of potentially waiting ~275 seconds.
+• Groq is explicitly PARTIAL and receives cross-file head+tail sampling rather than only the beginning of the project.
+• ZIP context contains a project manifest and head+tail sampling of large files.
+• Public MCP discovery may be anonymous, but tools/call always requires OAuth and scope enforcement.
+• OAuth authorization codes and refresh tokens now carry jti and are one-use. OAUTH_KV gives durable replay protection; without it, protection is best-effort per Worker isolate.
+• File download validation rejects literal IPv6 and additional reserved IPv4 ranges. In public MCP mode, remote file downloads require MCP_FILE_HOST_ALLOWLIST.
+• Support page displays the live VERSION.
+• Legacy public-mode test fixture updated for ALLOW_PUBLIC_MCP=1.
+
+Still intentionally not claimed as fully solved:
+• DNS rebinding cannot be considered fully solved by string/IP checks alone. For public MCP file ingestion, configure MCP_FILE_HOST_ALLOWLIST to trusted file-host domains.
+• Durable OAuth replay protection requires a Cloudflare KV binding named OAUTH_KV.
+• Authenticated rate limiting is not yet persistent; public anonymous tools/call is now blocked instead.

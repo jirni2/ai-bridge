@@ -1,0 +1,37 @@
+AI BRIDGE v5.8.0 — SECURITY & RELIABILITY AUDIT
+Scope: _worker.js, app.js, work-controller.js, zip-safety-core.js, zip-worker.js, i18n.js,
+index.html, work.html, work/index.html, styles.css, sw.js, tests/, tools/.
+Method: code inspection + mocked runtime tests (tests/run_v580_*). No live provider, search
+engine or Cloudflare account was contacted during this audit.
+
+FINDING                                        STATUS     EVIDENCE (test)
+Test suite deleted shipped fixtures            FIXED      tools/run-all-tests.mjs restores; 0 restores needed after fix
+God Mode verifier received no evidence         FIXED      "verifier receives the real tool evidence"
+Verifier could be the writing model            FIXED      "verifier is a different provider…"; same-model case reported
+Unbounded network calls                        FIXED      withDeadline / safeDownload deadline tests
+KV write amplification by progress events      FIXED      "progress bursts write KV at most every few seconds…"
+Orphaned jobs after isolate restart            FIXED      stale report + takeover tests (server and browser)
+Work Controller decorative/missing controls    FIXED      live Pause/Resume/Stop/Reconnect test
+Secrets could reach search via Agent steps     FIXED      "Agent/God search refuses credential-like queries…"
+Role-tag prompt injection inside files         FIXED      "role/control tags inside files are neutralized"
+ZIP names with traversal/control characters    FIXED      normalizeZipEntryName tests (server + browser worker)
+Encrypted ZIP entries decoded as garbage       FIXED      "…skips encrypted entries…"
+SSRF: single-label hosts / non-443 / TEST-NET  FIXED      SSRF guard test (8 unsafe targets)
+CSRF (defence-in-depth)                        FIXED      "cookie-authenticated cross-origin job submission is blocked"
+Raw provider JSON shown to users               FIXED      publicErrorMessage test
+XSS via model output                           VERIFIED   textContent + DOM-built links; live test with <img onerror>
+Job takeover / cross-session access            VERIFIED   jobId = HMAC-like hash of secret+clientRequestId; status needs auth
+OAuth redirect validation / open redirect      VERIFIED   allowedRedirect + authorize endpoint tests
+MCP requires OAuth, metadata advertised        VERIFIED   MCP 401 + WWW-Authenticate resource_metadata test
+no-store + clickjacking (X-Frame-Options DENY) VERIFIED   header test
+Cookies HttpOnly; Secure; SameSite=Strict      VERIFIED   source inspection (sessionCookie/providerVaultCookie)
+
+RESIDUAL RISKS (NOT FIXED — DISCLOSED)
+• KV has no atomic put-if-absent: two truly simultaneous submits on different edge locations
+  can both claim a job (pre-existing, documented). A Durable Object would close it.
+• Without AI_BRIDGE_JOBS bound, job recovery and learning are BEST EFFORT (same isolate only).
+• ctx.waitUntil work is bounded by the Cloudflare plan; very long God Mode runs can exceed it.
+  The stale detector then lets the browser restart the job once; it does not make it longer.
+• DNS-based SSRF (public name resolving to a private IP) cannot be checked from a Worker;
+  Cloudflare egress does not route to private networks, which is the actual mitigation.
+• Live behaviour of third-party providers/search engines was not tested in this environment.

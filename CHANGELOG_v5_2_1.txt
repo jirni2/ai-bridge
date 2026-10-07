@@ -1,0 +1,10 @@
+AI Bridge v5.2.1 — autonomous multi-model Agent
+
+- Gemini is the preferred Agent controller when connected.
+- Agent Auto keeps other configured providers available as independent specialists.
+- Automatic delegation prefers a different model than the controller.
+- Before returning a non-trivial final result, the Agent can run an independent second-model verification pass and revise the answer when needed.
+- Controller stays coherent across steps instead of rotating models on every turn.
+- Agent is instructed to recover from failed routes and decide its own next step when possible.
+- Dedicated Agent page now defaults to 8 autonomous steps.
+- UI explicitly shows “Gemini Brain + other AIs for verification”.

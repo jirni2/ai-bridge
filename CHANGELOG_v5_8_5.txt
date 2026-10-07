@@ -1,0 +1,7 @@
+AI Bridge v5.8.5
+- Retain the safe text-file inventory from ZIP extraction and show the actual partial coverage to the user.
+- Distribute bounded context excerpts across separately attached files instead of permanently discarding later uploads.
+- State explicitly in Agent Plan that an HTTP source fetch does not prove browser rendering or button functionality.
+- Refine the mobile Files workbench and visual hierarchy.
+- Add regression coverage for large ZIP plus later TXT and ZIP manifest handling.
+Limitations: a large archive remains bounded by extraction and model context limits. Files outside the selected excerpts are listed but their contents have not been analyzed. Cloudflare Dashboard deployment and live verification are required.

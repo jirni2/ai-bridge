@@ -1,0 +1,7 @@
+AI Bridge v5.1.2
+
+- Studio is free-first: Photo AI / Create Image use Cloudflare Workers AI only by default.
+- fal.ai is never called automatically in Free Mode. Paid fallback is explicit, off by default, and hidden under Advanced.
+- Voice dictation is available directly inside the Studio image prompt.
+- Added Free Motion: a local no-API animated photo preview that never spends credits.
+- fal.ai connection moved under an Advanced paid disclosure.

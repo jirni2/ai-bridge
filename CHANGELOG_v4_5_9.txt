@@ -1,0 +1,46 @@
+AI Bridge v4.5.9
+
+Fixed following a real production smoke test at v4.5.8.
+
+- Fixes forged file-boundary injection reaching the Work Controller path
+  (the main product flow, not just the MCP tool): body.fileText posted to
+  /api/work/run, /api/work/provider, /api/work/synthesize, and
+  /api/work/synthesize-stream is client-assembled and re-parsed server-side
+  as trusted <file path="...">...</file> structure. A decoy file whose own
+  content forged a fake boundary could suppress verification of an unrelated
+  real file in the same submission (same bug class as v4.5.8's MCP fix, but
+  a different transport). Unlike the MCP path, this cannot be fixed with
+  blanket server-side content neutralization without breaking legitimate
+  submissions -- that was tried, found to regress all Work Controller
+  verification, and reverted. Fixed instead with: (1) work-controller.js now
+  neutralizes raw per-file content before wrapping it in <file> tags, at the
+  point of extraction, mirroring the v4.5.8 fix; (2)
+  projectFilesForVerification() now reports a distinct
+  "duplicate_file_boundary_conflict" reason instead of the generic
+  "file_not_found_in_source", so a real finding caught in a forged collision
+  is never silently indistinguishable from "no code was attached".
+- Hardens app.js's main-UI file-context builder (buildFileContext()) against
+  the same embedded-tag pattern, for defense in depth.
+- Hardens meaningfulProviderText() against long, well-formed responses that
+  are not a code review at all: task restatement, a generic
+  Goal/Context/Constraints breakdown, a generic checklist, or a request to
+  clarify the task / share the code. Rejection requires multiple co-occurring
+  signals and the absence of any real-code signal, so a genuine review is
+  never rejected for incidental wording.
+- buildWorkProviderPrompt() now explicitly instructs reviewers not to restate
+  the task, not to give a generic checklist, not to invent function/file/
+  symbol names, and to return exactly "NO VERIFIED FINDINGS" when nothing
+  concrete is found; when no code is attached at all, it explicitly says so
+  instead of leaving room for a reviewer to invent specifics.
+- Adds regression tests (tests/run_v459_adversarial_tests.mjs) built from the
+  production smoke-test description (Gemini/Groq generic overviews,
+  OpenRouter inventing a function name) plus the Work Controller
+  forged-boundary PoC, verified to fail against the pre-fix implementation.
+- Re-verified (no new bugs): server-side ZIP EOCD-overflow check, exact
+  central-directory/EOCD termination, encrypted-entry handling,
+  ZIP64-sentinel-size handling, local-header/central-directory size
+  disagreement, and path-traversal entry names -- all confirmed safe by new
+  adversarial tests.
+- Not verified in production: this smoke test's specific network latencies
+  and provider behavior are historical data from a live run, not reproduced
+  by this fix; no live provider calls were made while building this release.

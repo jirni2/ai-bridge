@@ -1,0 +1,9 @@
+AI BRIDGE v4.5.3 — STREAMING AND EVIDENCE FRAMING HARDENING
+
+- Rejects repetitive technical boilerplate as a non-meaningful provider review.
+- Bounds chunked MCP file downloads while streaming, before full buffering.
+- Uses an included-files manifest so omitted ZIP paths cannot be forged by embedded file tags.
+- Enforces the final serialized Work context size including manifests and wrappers.
+- Adds the missing main-UI ZIP/file size guard before arrayBuffer().
+- Rejects malformed server-side ZIP central directories instead of accepting partial archives.
+- Ignores malformed Retry-After values and reports the delay source actually used.

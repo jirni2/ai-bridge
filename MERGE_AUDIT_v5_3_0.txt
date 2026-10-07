@@ -1,0 +1,48 @@
+AI Bridge v5.3.0 — Merge Audit
+
+INPUT BRANCHES REVIEWED
+1. AI_Bridge_v5_2_0_FULL_CLOUDFLARE_DEPLOY.zip
+2. AI_Bridge_v5_2_2_SELF_DIRECTED_AGENT_CORE_CLOUDFLARE_DEPLOY.zip
+3. v5.1.3 was used as the common baseline to identify branch-specific changes.
+
+WHAT WAS KEPT FROM THE SELF-DIRECTED AGENT BRANCH
+- Dedicated Agent page/tab instead of only a Team dropdown mode.
+- Agent Core owns goal, memory, step loop, tool decisions, limits and stopping policy.
+- External Gemini/Groq/OpenRouter/OpenAI/Claude/Grok providers are optional helpers only.
+- Web search and public HTTPS page reading.
+- Files/ZIP context and image handoff to a vision helper only when required.
+- Live Agent progress, trace, conversation memory and job resume UI.
+
+WHAT WAS MERGED FROM THE FULL/RELIABILITY BRANCH
+- Recovery by clientRequestId when Safari/network drops before a jobId is saved.
+- Legacy /api/run HTTP 202 polling.
+- Retry grace for newly-created job 404s.
+- Pending marker retained on non-terminal failures.
+- Explicit retryable 503 on KV claim/storage loss instead of fake "processing".
+- Same-isolate job shadow copy around transient KV failures.
+- UTF-8 byte-based job value cap.
+- jobsPersistent/jobExecution status metadata.
+- Cloudflare Workers AI REST credentials in the mobile vault.
+- Binding-first / REST-second Cloudflare image generation and editing.
+
+ADDITIONAL UNIFICATION FIX
+- Agent Core itself now supports the same Cloudflare transport policy:
+  1) binding named AI, preferred;
+  2) Account ID + Workers AI API Token through the official REST endpoint.
+- This means Gemini or another external provider is never silently promoted to Agent controller when the AI binding is absent.
+
+INTENTIONAL CONFLICT RESOLUTION
+- The older v5.2.0 simple provider-led plan->steps->verify Agent implementation was NOT kept as a second competing controller.
+- Its user-facing "Agent" purpose is superseded by the dedicated self-directed Agent Core, which supports more context/tools and matches the desired architecture.
+- Single, Auto, Ask All, Code Review, Debate, Files, Studio, Connect, History, MCP and Work Controller flows remain available.
+
+VERIFICATION
+- JavaScript syntax checks passed for _worker.js, app.js and i18n.js.
+- All packaged regression test scripts passed after the merge: 70 passed, 0 failed.
+- Dedicated v5.3.0 tests verify that Agent Core can complete a text task through Cloudflare Workers AI REST with zero Gemini/Groq/OpenAI helpers configured.
+- Dedicated recovery tests verify lost-first-frame recovery, retryable KV failures, propagation grace and UTF-8 storage limits.
+- Dedicated Cloudflare REST tests verify mobile credentials, official account-scoped endpoint, Bearer auth and Studio normalization.
+
+DEPLOYMENT NOTE
+- For strongest operation, configure a Cloudflare Workers AI binding named AI and an AI_BRIDGE_JOBS KV namespace.
+- REST credentials are a fallback path when the AI binding is unavailable.

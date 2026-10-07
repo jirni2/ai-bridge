@@ -1,0 +1,24 @@
+AI Bridge v5.9.9 — improvement plan: gateway, usage, compare, sync, roles, simpler navigation
+(includes v5.9.8 and v5.9.7, which were never deployed separately)
+
+1. Cloudflare AI Gateway (optional). Set AI_GATEWAY_ID (+ CLOUDFLARE_ACCOUNT_ID, optional
+   AI_GATEWAY_TOKEN) and all provider calls (Gemini, Groq, OpenRouter, OpenAI, Claude, Grok) go
+   through your gateway: free logs, analytics and caching in the Cloudflare dashboard. If the
+   gateway is unreachable or misconfigured, calls go direct automatically. Shown in self-check.
+2. "AI usage" card on History: per provider — requests, success %, average speed, last error
+   (in plain words), Today / 7 days. Counted on the device, nothing sent anywhere.
+3. Answer actions: "Edit question" (puts the question back to fix it) and "Another model"
+   (re-asks the same question with a chosen provider; the previous answer stays under
+   "Previous answer — compare").
+4. History sync between devices (opt-in, off by default). Stored in your own KV
+   AI_BRIDGE_JOBS (text only, no attachment data, max 60 items). "Clear" also clears it.
+5. AI roles in Chat and Agent: 4 ready roles (Explain simply, Translator, Text editor, Small
+   business helper) + your own roles with instructions and an optional preferred model.
+6. Simpler phone navigation: Chat · Files · Studio · History · More. Agent, Team, Brain and
+   Connect moved into "More"; Chat/Agent/Team have one switch at the top. Desktop sidebar
+   still shows all sections.
+From v5.9.8: keyboard hides after Send, page scrolls to live AI progress with a step log,
+timer and "What the AI did" summary. From v5.9.7: Gemini/Groq overload fallback + accurate
+self-check fix hints.
+Tests: tests/run_v599_features_tests.mjs (gateway routing/fallback, history sync caps and
+cleaning, roles, usage counters, navigation).

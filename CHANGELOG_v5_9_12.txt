@@ -1,0 +1,13 @@
+AI Bridge v5.9.12 — Binance autonomous server bot
+
+Root cause: v5.9.11 only simulated trades in a browser setInterval. Closing or suspending the iPhone stopped it; no Binance order route existed. The label implied functionality that did not exist.
+
+- Added a separate Cloudflare Durable Object Worker with alarm-based market checks, persistent bot state, Start/Pause/Stop and an exchange order journal.
+- Binance Spot Testnet sends actual signed MARKET orders with virtual funds. The Worker checks account trade permission before Start. Live uses the same order path but is disabled unless BINANCE_LIVE_ENABLED=1, separate live keys exist, and the UI supplies LIVE confirmation.
+- Fixed USD exposure: at most 10 USDT per BUY, 20% of configured budget per UTC day, five entries per day, one tracked long position, no leverage. Closed-candle SMA 9/21 + RSI entry, polled stop 3% / take 6% / sell signal. It may lose money and polling does not guarantee a stop fill at 3%.
+- Stores a client order ID before submission; after a lost response it queries the exchange, never blindly resends POST. Unknown outcomes block new orders and require manual review.
+- Binance API key/secret stay in the separate Worker's Cloudflare Secrets; the public Worker route returns 404. Pages routes require Bridge authentication and same-origin command requests. Worker source/config are blocked as Pages assets.
+- Trade page now separates the autonomous bot from local paper simulation and displays actual installation/credential status.
+- Regression tests cover signed requests, startup, alarm order, duplicate alarm, pause, unknown result, Origin, auth and secret suppression.
+
+Deployment requires two components: deploy binance-bot Worker with its Durable Object, then bind TRADE_BOT in the Pages project and deploy the full Pages ZIP. Uploading the Pages ZIP alone does not install the bot. No real/testnet Binance order has been placed in this development session because no testnet credentials or deployment access were available. Tests use mocked exchange responses.

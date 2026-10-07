@@ -1,0 +1,51 @@
+CHANGELOG v5.9.16 (2026-09-27)
+===========================
+Feature pack based on competitor research (LiteLLM, Cloudflare AI Gateway,
+OpenRouter, NextChat/TypingMind, LibreChat, Open WebUI, Claudette).
+
+Worker (_worker.js):
+- F1 cost tracking: PRICE_TABLE ($/1M, 2026 estimates), extractUsage()
+  (OpenAI/Anthropic/Gemini shapes), recordUsage() hooked into all provider
+  call sites, KV aggregates usage:daily:YYYY-MM-DD (+ per-provider/per-model).
+- GET /api/usage (30d, totals, budget {limit,spentMonth,over}); GET/POST
+  /api/settings {monthlyBudgetUsd, gateway:{enabled,accountId,gatewayId},
+  braveKey (write-only secret)}; KV settings:v1 + in-memory fallback.
+- Budget enforcement: over monthly limit -> auto routing restricted to
+  FREE_WORK_PROVIDERS; budgetDowngraded flag in response meta.
+- F2 gateway: resolveGatewayConfig() merges env vars (priority) + KV
+  settings; aiGatewayUniversalUrl() for unmapped hosts (best-effort,
+  always falls back to direct); routed/direct counters in aiGatewayStatus().
+- F5 routing: orderProvidersByPref() (economy q<=3 / quality q>=7 / speed),
+  integrated into autoSelect(env,prompt,{pref}); sticky pin per convId
+  (KV route:sticky:<id>, 15-min TTL); sanitizeRoutingPref echoed by decideRoute.
+- F6: POST /api/fetch-url (safeDownload + extractReadableText, 8k chars);
+  POST /api/web-search (Brave API, env or settings key, no_key hint).
+- F3: GET/POST/DELETE /api/prompts + /api/projects (KV + memory fallback,
+  caps, {{var}} extraction server-side).
+- Pure exports for tests: PRICE_TABLE, estimateCost, mergeUsageDay,
+  extractUsage, renderPromptTemplate, templateVars, forkMessages,
+  extractUrlRefs, orderProvidersByPref, budgetStatus, resolveGatewayConfig.
+
+Client (app.js / i18n.js / index.html / styles.css):
+- F1: cost dashboard section (totals, daily bars, per-provider/model tables),
+  monthly budget input, persistent over-budget banner.
+- F2: gateway toggle + account/gateway ID fields, live status line.
+- F3: prompt library sheet (CRUD, {{var}} fill-in form), projects
+  (selector, pinned instructions+model+mode inherited by new chats),
+  localStorage fallbacks.
+- F4: fork button (⑂) on final/peer/history answers -> cloned run "(fork)".
+- F5: quality<->economy slider (0-10) + speed toggle; routingPref+convId
+  sent with every chat request; pinned provider badge.
+- F6: #url / bare-URL prefetch and /search preprocessing before send;
+  network payload enriched, displayPrompt/history keep original text.
+- F7: read-aloud (🔊) via speechSynthesis, UI language, toggle to stop.
+- Self-check: new /api/usage row (scUsage); gateway row shows real status.
+- i18n: V5916 key pack in uk/en/ru; all t() and data-i18n keys resolve.
+
+Tests: tests/run_v596_features_tests.mjs (154 assertions). Full suite:
+113/113 files, 1509 checks, 143/143 syntax. release-check --package:
+RELEASE READY v5.9.16.
+
+Not in this release (documented in WHAT_IS_NEW_v5_9_16_UA.txt):
+scheduled tasks (needs separate Worker for Cron Triggers), artifacts panel,
+arena/ELO, HITL approval via push, white-box memory.

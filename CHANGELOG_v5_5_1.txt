@@ -1,0 +1,7 @@
+AI Bridge v5.5.1
+
+- Agent Core now tries Groq Free and OpenRouter Free before quota-limited or paid controller providers.
+- A valid free controller decision stops the fallback chain, preventing unnecessary expensive calls.
+- Invalid JSON, quota errors, rate limits, timeouts and provider failures still advance to the next configured controller.
+- Added a regression test for free-first routing and no repeated expensive call after success.
+- Live v5.5.0 audit evidence: Search First succeeded without AI; Auto Agent failed with NO CREDITS / QUOTA; explicit Groq Free Agent completed successfully.

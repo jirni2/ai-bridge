@@ -1,0 +1,10 @@
+AI Bridge v4.8.5
+
+File task execution reliability
+- Fixed Auto file tasks being forced through strict Code Review validation, which could reject correct short answers as HTTP 502.
+- Added a reliability-first Auto file path: long-context providers race first, first usable result wins, and failed providers no longer kill the whole file task.
+- Auto file routing now prefers Gemini/OpenRouter for full project context.
+- Groq Free remains available as a bounded sampled fallback instead of receiving the entire large ZIP/project.
+- Reduced Groq completion budget for sampled file tasks to stay safer under free-tier token budgets.
+- Added response metadata when Groq input was sampled.
+- Added end-to-end worker regression tests for brief file answers, large-project failover, and Groq-only sampled processing.

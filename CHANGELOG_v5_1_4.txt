@@ -1,0 +1,9 @@
+AI Bridge v5.1.4
+
+- Added a real Agent mode with a bounded autonomous loop (up to 5 steps).
+- Agent can delegate focused subtasks across configured AI providers with automatic provider fallback.
+- Added a safe read-only web tool for public HTTPS text/HTML/JSON pages (GET only, bounded downloads, private/local targets blocked).
+- Added Agent progress phases to resumable jobs and the live NDJSON stream.
+- Agent jobs keep the existing clientRequestId/jobId persistence path so mobile reconnects do not duplicate provider calls.
+- Added Ukrainian/English Agent UI labels and provider/call estimates.
+- External mutation tools remain intentionally unavailable: Agent cannot submit forms, send mail, purchase, delete, or change third-party accounts.

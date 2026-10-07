@@ -1,0 +1,34 @@
+AI Bridge — Cloudflare Workers AI setup (Agent Core + Free Photo AI)
+
+PREFERRED: Cloudflare Workers AI binding
+1. Cloudflare Dashboard -> Workers & Pages -> your AI Bridge Pages project.
+2. Settings -> Production -> Bindings -> Add -> Workers AI.
+3. Variable name exactly: AI
+4. Save and redeploy.
+
+WHAT THE AI BINDING POWERS
+- Self-directed Agent Core inference.
+- Free Photo AI / Create Image through Cloudflare Workers AI.
+- Gemini, Groq, OpenRouter, OpenAI, Claude and Grok remain optional helper AIs. They are not the Agent controller.
+
+REST FALLBACK (if binding AI is unavailable)
+1. Open AI Bridge -> Connections.
+2. Expand "Cloudflare Workers AI via REST".
+3. Save your 32-character Cloudflare Account ID.
+4. Save a Cloudflare API token allowed to run Workers AI.
+5. Agent Core and Free Photo AI can then use the official Workers AI REST endpoint.
+
+AGENT CORE MODEL
+- Default: @cf/zai-org/glm-4.7-flash
+- Optional override environment variable: AI_BRIDGE_AGENT_CORE_MODEL
+- Binding AI is preferred over REST when both are configured.
+
+JOB DURABILITY
+- For strongest reconnect/recovery, bind a KV namespace as AI_BRIDGE_JOBS.
+- Jobs also keep a same-isolate shadow copy so a transient KV error does not immediately lose a completed result.
+- Cloudflare execution still has platform lifetime limits; this is resumable/recoverable, not an unlimited background worker.
+
+SECURITY
+- BRIDGE_ACCESS_TOKEN remains required for protected routes.
+- Phone tokens are encrypted server-side and stored in an HttpOnly/Secure cookie.
+- Do not expose Cloudflare API tokens in client-side JavaScript or source files.

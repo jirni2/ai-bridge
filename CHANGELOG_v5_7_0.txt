@@ -1,0 +1,9 @@
+AI Bridge v5.7.0 — Unfinished Work hardening
+
+- Added runtime provider-health routing. Repeated quota/rate-limit/timeout/provider failures temporarily lower that provider in Auto, Agent Core and Judge ordering; a later success immediately rehabilitates it. Health state contains only counters/error categories/cooldown timing — never prompts, responses, files, API keys or tokens.
+- /api/status now exposes providerHealth plus explicit jobRecovery: durable-kv or same-isolate-best-effort.
+- Work Controller now persists provider clientRequestId/jobId before the stream request, updates it from stream frames, and automatically attempts recovery after page reload.
+- /api/work/provider-status can recover by provider + clientRequestId, closing the reload/disconnect gap where the browser never received the first stream frame/jobId.
+- Work and Connections UIs now state whether AI_BRIDGE_JOBS gives true durable cross-isolate recovery or only best-effort same-isolate recovery.
+- Added v5.7.0 regression coverage for fresh-isolate Work recovery, provider-health degradation/rehabilitation, non-secret health snapshots and honest durability UI.
+- No automatic privilege escalation, billing changes, secret disclosure or self-deployment was added.

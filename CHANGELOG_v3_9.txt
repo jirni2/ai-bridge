@@ -1,0 +1,15 @@
+AI BRIDGE v3.9 — CLAIM GUARD
+
+1. code_evidence is checked only inside the file claimed by the model.
+2. Evidence must match complete source lines; partial/truncated fragments are rejected.
+3. start_line/end_line are derived from the real matched source.
+4. Quote match is NOT shown as a confirmed bug:
+   Quote matched: YES/NO
+   Claim manually confirmed: NO
+5. Groq/client sampling cuts at line boundaries and labels non-EOF/non-BOF fragments explicitly.
+6. Short "I cannot see/review the full file" replies are failures, not successful reviews.
+7. Retry windows have total deadlines.
+8. Live ZIP validation uses shared zip-safety-core.js.
+9. Real behavior tests cover wrong-file evidence, partial-line evidence, 181 entries, compression ratio, declared total and actual decompression byte overflow.
+
+Important: v3.9 never automatically confirms the logical truth of a model claim. It only verifies source linkage.

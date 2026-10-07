@@ -1,0 +1,43 @@
+AI BRIDGE v5.9.0 — NEW DESIGN + FEEDBACK LEARNING + BUG FIXES
+
+DESIGN (styles.css rewritten from scratch, index.html restructured, all IDs kept)
+• One design-token system with dark and light themes (auto / dark / light toggle in the header).
+• Desktop (≥1024px): sidebar workspace. Phone: 8-tab bottom bar with SVG icons.
+• Answers render as safe Markdown (markdown.js): headings, lists, task lists, tables, quotes,
+  code blocks with a Copy button. DOM-only rendering, https links only — no innerHTML.
+• Answer toolbar: Copy (original Markdown), Again, download .md, 👍 / 👎 with reason chips.
+• Follow-up chips: Shorter / More detail / Example / Simpler / Fact-check.
+• Quick-start cards + saved personal templates (☆ Template).
+• Command palette: Ctrl/Cmd+K (pages, modes, templates, actions). "/" focuses the task.
+• History search. Toast notifications. Update banner when UI and Worker versions differ.
+
+SELF-ADAPTATION / SELF-IMPROVEMENT
+• POST /api/feedback: a 👍/👎 updates the exact route record that produced the answer
+  (meta.learning.routeKey). User ratings weigh 2× in route confidence, so the router's learned
+  policy follows what the user actually finds useful. Numbers + allow-listed reason codes only.
+• Personal answer style (Learn page) is sent as `responseStyle` and appended only to the provider
+  prompt — never to routing, classification or web-search text. Markup and credential-like text
+  are stripped.
+• Adaptive style hints: repeated reasons ("too long", "not enough detail", "wrong language"…)
+  become standing hints automatically; each can be switched off.
+• Improvement Lab now reports "user_dissatisfied" routes with a proposal.
+• Learn page: learned routes with confidence bars, provider health, Improvement Lab findings,
+  on-device UI error log (self-diagnostics), "Ask AI Team to propose fixes" (fills a code-review
+  task with the report), reset learning.
+• Code is never rewritten automatically in production: proposals are validated with
+  node tools/improvement-lab.mjs (full test suite) before deploy.
+
+BUG FIXES
+• styles.css contained literal "\n" sequences; CSS parsed them as the letter "n", silently
+  breaking every Studio, Single-AI, media-token and paid-provider rule plus a media query.
+• Direct localStorage calls crashed app start in Safari private mode / blocked storage
+  (now a scoped safe wrapper with in-memory fallback).
+• Agent status line stayed red ("bad") after a later successful run.
+• Studio preview / Free Motion leaked a blob: URL (whole photo/video) on every change.
+• Service worker answered missing JS/CSS with index.html when offline; now only navigations
+  fall back to the app shell, and cross-origin requests are not intercepted.
+• A stale-job error sent as a string was shown only as "HTTP 409".
+• Resumed Agent jobs displayed "x/8" steps although the limit is 4; HTML hint said 8 steps.
+• Duplicate i18n key (supportedFiles) removed.
+
+TESTS: tests/run_v590_feedback_style_tests.mjs added. Full suite: 96/96 files pass.

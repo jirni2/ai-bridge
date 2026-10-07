@@ -1,0 +1,33 @@
+AI Bridge v5.1.4 — audit summary
+
+Scope reviewed
+- Full v5.1.3 package, including _worker.js, app.js, Work Controller, service worker, OAuth/MCP, provider routing, media paths, ZIP/file handling, resumable jobs, packaging, and regression tests.
+
+Confirmed defects fixed
+1. Legacy /api/run fallback could return HTTP 202 Processing with a jobId, while app.js treated r.ok as a finished AI answer and cleared the pending job marker.
+2. Pending-job state could be cleared after non-terminal failures (for example an auth/network interruption), preventing later recovery of a server-side job.
+3. Reload recovery required jobId. If Safari died after the POST reached the Worker but before the first stream frame delivered jobId, the existing server job could not be rediscovered from the persisted clientRequestId.
+4. A fresh KV-backed job could transiently look missing; the client treated the first 404 as terminal instead of allowing a short propagation/recovery window.
+5. KV claim failure could lead routes to report/stream a fake "processing" state even when no job record had actually been confirmed. This now returns an explicit retryable 503.
+6. A transient KV write/read error could discard a result already computed by the current Worker isolate. A bounded same-isolate shadow is now maintained even when KV is configured.
+7. Job result size checks used JavaScript string length rather than UTF-8 bytes, so non-ASCII output could exceed the intended KV soft cap.
+8. Documentation/status wording overstated what KV + ctx.waitUntil guarantees. KV persists job state; it is not an unbounded background execution engine.
+
+Reliability behavior after fixes
+- HTTP 202 from /api/run is converted into job polling, not shown as a final answer.
+- /api/job/status accepts jobId or clientRequestId for recovery.
+- Fresh 404 status reads get a short retry window.
+- Non-terminal failures keep the pending marker; only terminal completion/failure/expiry clears it.
+- Storage uncertainty is surfaced as retryable 503 instead of fake processing.
+- /api/status exposes jobsPersistent and jobExecution:"waitUntil-bounded" in addition to the legacy jobsDurable field.
+
+Verification
+- Full regression suite passes after changes.
+- All JS/MJS/CJS files pass node --check.
+- HTML duplicate-id checks pass.
+- Version/build fingerprint is synchronized before packaging.
+
+Limits honestly retained
+- Plain Workers KV cannot provide atomic cross-edge "put-if-absent" idempotency by itself.
+- KV persists job records but does not guarantee arbitrarily long provider execution after a client disconnect; long guaranteed workflows need a queue/workflow/durable execution primitive.
+- Live provider keys/quotas and the deployed pages.dev site cannot be verified from this package alone.

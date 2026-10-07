@@ -1,0 +1,8 @@
+AI Bridge v4.8.4
+
+- Replaced label-only hidden file picker with an explicit native “Вибрати файли” button.
+- The file input is no longer display:none, improving iPhone Safari/PWA compatibility.
+- Added drag/drop support on desktop.
+- Added clipboard file paste handling where the browser permits it.
+- Added direct iOS user-gesture fileInput.click() path and keyboard accessibility.
+- Added regression coverage for native file picker wiring.

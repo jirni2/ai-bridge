@@ -1,0 +1,15 @@
+AI Bridge v5.9.5 — in-browser live site self-check
+
+• New "Check the live site" panel on the Connect tab. It runs every production smoke check from
+  the user's own browser with the existing HttpOnly session: home page, security headers,
+  server/page/build versions, app files, internal files hidden (404), service worker, OAuth
+  metadata, MCP sign-in challenge, OAuth replay mode, signed-in session, configured providers,
+  job recovery, image engine, learning store, Improvement Lab, token vault (no secrets returned),
+  Cloudflare Workers AI token. Optional: one real test per free provider + one real chat run.
+• The page never reads BRIDGE_ACCESS_TOKEN or provider keys; the copyable report contains only
+  check names, HTTP statuses, versions and timings.
+• tests/run_v595_self_check_tests.mjs added.
+• Fixed (found while hunting a flaky test): when the Agent's time budget ran out before its
+  first planning step, the run returned an apology text as a *successful* answer. A run with
+  no model answer and no gathered evidence now always ends as a clear timeout error. The
+  agent-deadline test now forces this edge case, so it is deterministic.

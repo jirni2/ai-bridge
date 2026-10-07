@@ -1,0 +1,7 @@
+AI BRIDGE v2.2 — PROVIDER CALL FIX
+
+• Fixed OpenAI default model from invalid gpt-6-astra to current gpt-5.6-terra.
+• Provider status wording now says configured rather than implying a successful live API test.
+• Failed provider responses are preserved and shown in peer diagnostics instead of collapsing to only "All AI providers failed."
+• Failed runs are saved to local history so exact API errors can be reviewed.
+• Service-worker cache bumped to v2.2.

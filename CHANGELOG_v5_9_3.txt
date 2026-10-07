@@ -1,0 +1,20 @@
+AI Bridge v5.9.3 — Retrieval + Checkpoint Reliability
+
+Borrowed architectural ideas (adapted to the current Cloudflare/browser architecture, not copied code):
+- Open WebUI / LibreChat: retrieve relevant file passages instead of feeding only file prefixes.
+- LangGraph: checkpoint completed workflow steps so interrupted multi-step work can resume.
+- Dify: retry transient step failures once, then stop cleanly instead of silently continuing with incomplete evidence.
+
+Changes:
+- Task-aware file retrieval windows search all retained text and include relevant regions even when the requested symbol occurs far beyond the old prefix window.
+- No-query file fallback preserves both head and tail instead of only the beginning.
+- File ranking searches the full retained 180k characters per file rather than only the first 80k.
+- Attached-file context labels retrieval mode (full, task-windows, head-tail) for more truthful evidence handling.
+- Deep Scan checkpoints completed part notes on-device and resumes the same project/task from the first unfinished part.
+- Deep Scan retries one transient 429/499/5xx provider failure once; persistent failure stops the scan while preserving completed checkpoints instead of claiming full coverage.
+- Deep Scan UI now documents the real maximum of 10 parts and checkpoint recovery in EN/UK/RU.
+- Added v5.9.3 regression coverage for retrieval beyond prefix limits, bounded excerpts, checkpoint isolation, resume, and retry/stop behavior.
+
+Safety limits retained:
+- Per-request AI context remains bounded.
+- ZIP entry count, per-entry decompression, total decompression and compression-ratio guards remain unchanged.

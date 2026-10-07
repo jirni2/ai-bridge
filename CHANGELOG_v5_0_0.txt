@@ -1,0 +1,26 @@
+AI Bridge v5.0.0
+
+Major visual/UX refresh plus packaging hardening. Runtime orchestration and security behavior remain backward-compatible with v4.9.5.
+
+1. New AI Bridge visual system
+- Mobile-first dark navy workspace with electric blue/violet Bridge identity.
+- Main content typography raised to readable 13–16 px on phone; larger touch targets and clearer focus states.
+- Composer, provider status, answer surfaces, file workflow, Team controls, Connections and History redesigned.
+- Individual AI results become a swipeable comparison rail on mobile and stay readable on larger screens.
+
+2. Unified product surface
+- /work rebuilt to match the main PWA while retaining every stable runtime id and controller route.
+- /plugin, /privacy, /terms and /support now share one branded, readable public-document design.
+- Fixed misleading Connections copy: Cloudflare Secrets are server-side; phone tokens are encrypted and stored in HttpOnly Secure cookies.
+
+3. Current platform guidance
+- Connector guidance updated from current OpenAI documentation: full MCP custom apps on Business/Enterprise/Edu web; Pro can use read/fetch MCP in developer mode; Plus remains web-app-only for this Bridge connector.
+
+4. PWA/deploy resilience
+- Service worker precaches index.html, styles.css, app.js, zip-safety-core.js, manifest and all required icons as one core asset set.
+- Sensitive /api, /oauth, /.well-known and /mcp traffic remains network-only.
+- Existing network-first static refresh behavior is preserved.
+
+5. Compatibility
+- Existing security/session/provider-vault hardening from v4.9.5 retained.
+- Stable element ids and API routes retained for app.js/work-controller.js and inherited regression tests.

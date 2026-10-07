@@ -1,0 +1,5 @@
+AI Bridge v5.7.3
+
+- Prevents incomplete processing frames from rendering raw localization keys such as agentPhase_undefined.
+- Agent and God Mode now fall back to the normal localized thinking/progress text until a real phase is available.
+- Adds a regression test for initial and reconnect progress frames without a phase.

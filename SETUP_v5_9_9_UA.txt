@@ -1,0 +1,21 @@
+AI Bridge v5.9.9 — що налаштувати в Cloudflare (5–10 хвилин)
+
+A) KV AI_BRIDGE_JOBS — потрібен для синхронізації історії, відновлення довгих завдань і захисту OAuth
+ 1. Cloudflare → Storage & Databases → KV → Create namespace → назва: ai-bridge-jobs → Create.
+ 2. Workers & Pages → aibridge → Settings → Bindings → Add → KV namespace.
+ 3. Variable name: AI_BRIDGE_JOBS  → namespace: ai-bridge-jobs → Save.
+ 4. Deployments → зробіть новий деплой (або завантажте цей ZIP ще раз).
+
+B) Cloudflare AI Gateway — необов'язково (журнал запитів, графіки, кеш)
+ 1. Cloudflare → AI → AI Gateway → Create Gateway → назва, наприклад: aibridge → Create.
+ 2. Скопіюйте Account ID (праворуч на головній сторінці акаунта, 32 символи).
+ 3. Workers & Pages → aibridge → Settings → Variables and Secrets → Add:
+      AI_GATEWAY_ID = aibridge
+      CLOUDFLARE_ACCOUNT_ID = ваш Account ID (якщо ще не додано)
+ 4. Збережіть і зробіть новий деплой.
+ 5. На сайті: Більше → Зв'язок → Самоперевірка → рядок "Cloudflare AI Gateway" має показати назву шлюзу.
+ Якщо шлюз налаштовано неправильно, сайт просто працює напряму, як раніше.
+
+C) Після деплою на телефоні натисніть ↻ або закрийте й відкрийте вкладку.
+ Синхронізація історії вмикається вручну: Історія → "Синхронізувати історію між пристроями"
+ (на кожному пристрої, де ви входите в AI Bridge).

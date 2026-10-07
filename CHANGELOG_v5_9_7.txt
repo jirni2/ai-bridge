@@ -1,0 +1,9 @@
+AI Bridge v5.9.7 — Gemini overload fallback + accurate fix hints
+
+• Gemini/Groq "model overloaded / UNAVAILABLE" (5xx) now falls back to the next model of the
+  same provider (was: only quota errors did), without a delayed same-model retry first. The
+  overloaded model is skipped for 2 minutes. Cancellations (499) and auth errors never count.
+• Self-check "How to fix" hints now follow the real error: overload (5xx), quota (429),
+  invalid key (401), no permission (403), timeout, unavailable model. Previously Gemini always
+  showed the quota hint.
+• tests/run_v597_overload_fallback_tests.mjs added.

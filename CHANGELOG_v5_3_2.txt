@@ -1,0 +1,8 @@
+AI Bridge v5.3.2 — Agent Internal Image Engine
+
+- Agent Core can now choose a generate_image tool by itself.
+- Image pixels are generated through the same Cloudflare Workers AI connection used by Agent Core, using @cf/black-forest-labs/flux-2-klein-4b.
+- Agent image creation never delegates to Gemini, Groq, OpenRouter, OpenAI, Claude, Grok, or fal.ai.
+- Generated images appear directly inside the Agent chat with a save button.
+- Generated image base64 is intentionally not persisted in Agent localStorage conversation memory.
+- Added visible generating-image progress and Agent trace entries.

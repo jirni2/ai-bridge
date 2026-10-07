@@ -1,0 +1,8 @@
+AI Bridge v4.6.1
+
+Critical runtime fix
+- Fixed simple conversational prompts such as "привіт" / "hello" failing with HTTP 502. v4.6.0 incorrectly applied code-review quality heuristics (including a minimum response length) to every provider response.
+- Provider transport validation now rejects only empty/placeholder responses. Strict anti-refusal heuristics are applied only to code/project review contexts.
+- Auto mode recognizes greeting-only prompts, uses one free provider, and skips unnecessary synthesis.
+- Auto mode now tries the remaining configured FREE provider when both initially selected free providers fail. It never silently falls back to paid providers.
+- Added regression coverage for short greetings, short factual answers, strict code-review validation, and free-provider fallback.

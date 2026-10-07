@@ -1,0 +1,15 @@
+AI Bridge v5.11.7 — live-site audit fixes (2026-09-30)
+
+1. Real 404 page: added 404.html. Before, Cloudflare Pages answered every unknown address
+   (e.g. /robots.txt, /_worker.js) with the full app and HTTP 200, which confused search
+   engines and diagnostics. Unknown addresses now return a small 404 page.
+2. robots.txt: the private workspace asks search engines not to index it.
+3. Privacy: new section about the optional exchange connection (private app only) — requests
+   go to the exchange the owner configures, keys are the owner's, never paste keys/seed
+   phrases into chats. Terms: new "Financial risk — no investment advice" section. Both
+   re-dated September 30, 2026.
+4. Brain page privacy text no longer says task texts are "never stored" anywhere; it now says
+   the learning module stores only numbers and that history sync is separate and opt-in.
+5. tests/run_v580_ui_controls_tests.mjs was failing in v5.11.6 because mode chips moved into
+   the collapsed composer options; the test now opens them first (same checks).
+Not changed and not reviewed: the trading/Binance module, backtests and scheduler worker.

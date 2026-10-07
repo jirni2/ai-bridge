@@ -1,0 +1,11 @@
+TRADING SECURITY AND DEPLOYMENT
+
+The v5.9.11 module reads public Binance Spot market candles; it does not need a Binance API key and does not place orders. It never sends a Binance token from the phone.
+
+Bridge authentication uses the existing BRIDGE_ACCESS_TOKEN login. Session cookies are HttpOnly, Secure and SameSite=Strict. For independent signing and rotation, set a strong random SESSION_SIGNING_SECRET in Cloudflare Pages Secrets. To rotate, move the previous value to SESSION_SIGNING_SECRET_PREVIOUS, set a new SESSION_SIGNING_SECRET, deploy, and remove the previous value after at most 14 days. Store neither value in this package. Replacing BRIDGE_ACCESS_TOKEN separately also revokes bearer access.
+
+Market endpoint /api/trade/klines requires Bridge authentication. It accepts only four fixed Spot pairs and six intervals, caps returned rows at 500 and bytes at 150,000, uses a fixed official Binance public-data hostname and a 9-second deadline. No arbitrary URL, dynamic upstream host, order endpoint or token input exists. Upstream errors are sanitized. Rate limits still apply at Binance and this app has no shared, durable per-user rate limiter without a binding.
+
+Paper state and journal live in this browser's localStorage, start paused on reload, and do not run while Safari suspends the page. Backtest fills at the next candle open; paper ticks use the current fetched price after a closed-candle signal. Stop and take are checked on polling, so simulated fills may differ from real stop orders. This is a testing tool, not financial advice or a profit claim.
+
+Do not enable real trading merely by adding keys. Real execution requires a persistent atomic coordinator (such as Durable Objects), exchange order idempotency/reconciliation, Spot LOT_SIZE/MIN_NOTIONAL validation, daily risk state independent of the browser, audited trade-only API permissions, IP restrictions where possible, and a separate explicit live-mode confirmation. Withdrawals should remain disabled on any trading key.

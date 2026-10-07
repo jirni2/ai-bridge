@@ -1,0 +1,9 @@
+AI Bridge v5.1.5
+
+- Added Cloudflare Workers AI REST fallback for Photo AI / Create Image.
+- Free image generation no longer requires a Pages AI binding if Account ID + Workers AI API Token are saved in Connections.
+- Added encrypted mobile-vault fields for Cloudflare Account ID and Workers AI API Token.
+- Binding AI remains preferred when present; REST is the secondary free Cloudflare path.
+- Studio status now reports AI BINDING, REST TOKEN, or not connected.
+- Added account-id validation and REST error propagation.
+- Added regression tests for multipart REST image generation and auth failure handling.

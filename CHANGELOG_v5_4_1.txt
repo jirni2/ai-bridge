@@ -1,0 +1,8 @@
+AI Bridge v5.4.1
+
+- Added negative feedback to adaptive Agent learning.
+- Learned routes lose confidence after terminal runtime/tool failures.
+- Routes below 0.50 confidence are no longer selected.
+- Authentication, setup and missing-job errors do not poison learning.
+- The applied policy survives reload/reconnect with the pending job marker.
+- Includes the full v5.4.0 controlled adaptive Agent and all prior files.

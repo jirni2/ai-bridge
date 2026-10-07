@@ -1,0 +1,31 @@
+AI Bridge v5.3.0 — Unified Self-Directed Agent
+
+Merged the strongest parts of two branches:
+
+SELF-DIRECTED AGENT CORE
+- Dedicated Agent tab and conversation memory.
+- Agent Core owns goal, step loop, tools, stop policy and final answer.
+- Other AIs are optional specialists, not the controller.
+- Web search/fetch, file/ZIP context, image-helper routing, trace and resumable progress retained.
+- Cloudflare Workers AI binding AI is preferred for Agent Core.
+- Added official Workers AI REST fallback for Agent Core when binding AI is unavailable.
+
+RELIABLE JOB RECOVERY
+- Legacy /api/run HTTP 202 is polled instead of treated as a completed answer.
+- Job status can recover by clientRequestId when the first stream frame/jobId was lost.
+- Short propagation 404s are retryable.
+- Non-terminal failures retain the pending marker.
+- KV claim loss returns an explicit retryable 503 instead of pretending work is processing.
+- Same-isolate shadow job records reduce result loss on transient KV failures.
+- Job-size cap is measured in UTF-8 bytes.
+- Agent progress remains visible while polling/reconnecting.
+
+CLOUDFLARE WORKERS AI REST + MEDIA
+- Added phone-vault fields for Cloudflare Account ID and Workers AI API token.
+- Photo AI/Create Image prefer binding AI and can fall back to official Workers AI REST.
+- Agent Core uses the same binding-first, REST-second transport policy.
+- Status reports Agent Core transport and Cloudflare AI engine truthfully.
+
+MERGE PRINCIPLE
+- The older simple Team-dropdown Agent implementation was not restored because the dedicated self-directed Agent supersedes it and supports files/images/web/memory.
+- Existing Single, Team, Files, Studio, Connect, History and MCP/Work workflows are preserved.

@@ -1,0 +1,11 @@
+AI Bridge v5.9.11 — Binance Spot paper bot and session-key rotation
+
+- New responsive /trade/ dashboard, linked from the app's More sheet and footer.
+- Authenticated, bounded Binance public candle adapter. Fixed host, symbol and interval allowlists; no upstream credentials or arbitrary URL forwarding.
+- Paper strategy with SMA 9/21 crossover, RSI entry filter, stop/take, capped allocation, daily loss and daily trade limits, transaction fees and a local journal.
+- Closed-candle signals, next-open historical fills, 70/30 holdout report; no claim of investment performance.
+- Start, pause, stop, reset and JSON journal export. Resumes paused after reload; no background execution or live orders.
+- Optional SESSION_SIGNING_SECRET_PREVIOUS permits planned session-secret rotation without immediate logout or loss of encrypted mobile provider tokens; remove it after the old session lifetime expires.
+- Regression coverage for strategy, duplicate candle, risk exit, API auth/validation/429/failure and secret rotation.
+
+Operational limits: Browser storage is device-local and can be cleared. Cloudflare Pages Functions have no durable bot loop in the current deployment. Real orders must remain disabled until an atomic state store, idempotent order reconciliation, exchange filters, and separately authorized trading-key workflow exist. Never put Binance API secrets into browser storage or the provider vault.

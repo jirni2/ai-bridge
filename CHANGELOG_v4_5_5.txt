@@ -1,0 +1,8 @@
+AI BRIDGE v4.5.5 — LIVE RETRY AND TRUNCATED-REFUSAL FIXES
+
+- Parses Groq-style "Please try again in ...s" rate-limit hints.
+- Expands the Groq retry budget so provider delays longer than 20 seconds can
+  actually be honored.
+- Rejects short, abruptly truncated responses whose only conclusion is that
+  the Bridge omitted the middle of the relevant source file.
+- Adds regression tests from the production 4.5.4 smoke-test responses.

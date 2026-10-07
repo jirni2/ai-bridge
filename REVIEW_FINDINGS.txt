@@ -1,0 +1,31 @@
+BRIDGE REVIEW PANEL v3 — REVIEW FINDINGS
+
+1. Restricted-data solicitation
+No public MCP input field asks for payment-card data, PHI, government identifiers, passwords, API keys, MFA/OTP codes, biometrics, or precise location. The file-review tool accepts user-selected attachments, so its descriptor and privacy policy explicitly tell users not to submit restricted data.
+
+2. Tool data use
+review_task, review_code, and review_project_files send only the user-selected task-specific content to authorized external AI APIs. This is disclosed in each tool description and in privacy.html. Tool results do not return provider credentials, request IDs, trace IDs, raw API errors, or internal account identifiers.
+
+3. Tool naming and annotations
+The four public tool names match their behavior. All public tools explicitly declare readOnlyHint, openWorldHint, destructiveHint, and idempotentHint. Review tools are not marked read-only because they send content outside the conversation.
+
+4. outputSchema
+All four public MCP tools declare outputSchema. No outputSchema warning remains.
+
+5. CSP
+The public MCP submission has no ChatGPT widget/UI resource, so there is no widget CSP to review. The existing iPhone PWA is separate from the public MCP tool surface.
+
+6. Third-party integration review risk
+OpenAI's guidelines do not approve plugins that primarily function as unofficial pass-through connectors. v3 removes public provider selection, single-provider tools, generic Ask All, and public Debate. The public MCP now exposes a fixed independent-review workflow with two independent assessments and a synthesis. This materially improves standalone value, but final approval is still OpenAI's decision.
+
+7. Manual blockers before Submit
+- Set PUBLIC_PLUGIN_MODE=1 in Cloudflare.
+- Set a real SUPPORT_EMAIL.
+- Confirm GOOGLE_API_KEY, GROQ_API_KEY, and OPENROUTER_API_KEY work in the live deployment.
+- Verify developer/business identity in OpenAI Platform.
+- Ensure Apps Management: Write permission.
+- Complete the portal's domain verification using OPENAI_APPS_CHALLENGE.
+- Run all five positive live tests before submitting.
+
+8. Reliability limitation
+The automated local suite validates MCP metadata, schemas, auth-mode behavior, and status output. It cannot validate live calls to third-party APIs because deployment secrets are not available in this build environment. Live end-to-end review calls must be tested after deployment.

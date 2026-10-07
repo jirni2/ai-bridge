@@ -1,0 +1,40 @@
+AI Bridge v5.11.1 — «Безпека команди + виконання» (2026-10-01)
+
+Patch: закриття підтверджених дірок авторизації /api/team/* і завершення
+реалізації команди з 24 агентів за 8-роздільною специфікацією.
+
+БЕЗПЕКА (дірки v5.11.0, підтверджені в коді):
+- Централізована матриця TEAM_ACL (default deny): перетин прав ролі × scope токена.
+- Єдина ідентичність team:<roleId>: самосхвалення через «photo» vs «team:photo» більше не обходиться.
+- Scope токена в KV (team:token:<id> {agentId, scope[], exp, revoked}), revoke + expiry.
+- TEAM_TOKEN_SECRET обов'язковий: без нього командні токени → 503 (fallback-секрету в коді немає).
+- Автор релізу/завдання визначається сервером (authorRole з тіла запиту ігнорується).
+- Керування токенами — лише user.
+- Тести: tests/run_v5111_auth_tests.mjs (43 перевірки через повний HTTP-вхід).
+
+ВИКОНАННЯ ЗАВДАНЬ:
+- task.kind: "diagnostic"|"agent" (default diagnostic); критерії criteria[] з гейтом доказів — done лише з реальними доказами.
+- Агентні раннери: coordinator (triage/delegate), tester (іменовані детерміновані перевірки), knowledge, analytics, security, docs, binance (перевірка межі, угод не виконує).
+- research в agent-режимі чесно повертає blocked (немає вебу в Worker) — вигаданих знахідок немає.
+- Делегування: дочірнє завдання з parentId, батько → waiting, teamProcessWaiting розбирає.
+- Релізи: contentHash при створенні; схвалення фіксує approvedHash; зміна вмісту анулює рішення (→pending); tester → blocked; markDeployed лише з deployRef.
+- teamBuildReport: 7 категорій (verified/found/prepared/tested/fixed/published/blocked).
+- Матриця дій 24 ролей у TEAM_CONTRACT.md + тест, що доводить.
+- Тести: tests/run_v5111_exec_tests.mjs (84), tests/run_v5111_e2e_tests.mjs (20, включаючи негативний кейс «дефектна зміна не доходить до production»).
+
+РОЗКЛАД:
+- scheduled() додано в default export (Pages не підтримує cron triggers — тільки Workers; перевірено по доках Cloudflare).
+- Окремий scheduler-worker/ (cron */5 → POST /api/team/scheduled-tick з CRON_SECRET) + SCHEDULER_DEPLOY.md.
+- Чесні локи (KV без CAS — межа задокументована), heartbeat/ретраї з backoff, реальне застосування бюджету, Stop All з легальними переходами.
+- Тести: tests/run_v5111_sched_tests.mjs (76).
+
+ІНШЕ:
+- tools/release-v451.mjs відновлено дослівно з ZIP v5.9.16 (випав при чистці v5.10.x; одноразовий скрипт bump'у 4.5.1).
+
+Тести: повний regression suite — 120 файлів PASS, 0 FAIL, 2096 pass-рядків, syntax 158/158.
+
+ВИМОГИ ДО ДЕПЛОЮ (не виконано тут): на production виставити TEAM_TOKEN_SECRET в env
+(інакше командні токени — 503); розгорнути scheduler-worker окремо (потрібні
+Cloudflare credentials); cron */5 для scheduled() виставити вручну в дашборді.
+
+Видалень функцій/тестів/changelog: немає.

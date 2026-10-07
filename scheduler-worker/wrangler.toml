@@ -1,0 +1,19 @@
+# scheduler-worker/wrangler.toml
+# Окремий Worker-планувальник для AI Bridge.
+# Деплой: wrangler deploy   (з каталогу scheduler-worker/)
+# Секрети: wrangler secret put CRON_SECRET   (див. SCHEDULER_DEPLOY.md)
+
+name = "aibridge-scheduler"
+main = "worker.js"
+compatibility_date = "2026-09-30"
+
+[triggers]
+# Кожні 5 хвилин (UTC). Зміна вимагає повторного деплою.
+crons = ["*/5 * * * *"]
+
+[vars]
+# Production-адреса Pages-застосунку (без слеша в кінці).
+SITE_URL = "https://aibridge-aff.pages.dev"
+
+# CRON_SECRET НЕ писати сюди — тільки через `wrangler secret put CRON_SECRET`
+# або Dashboard → Worker → Settings → Variables → Secrets.

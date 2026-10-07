@@ -1,0 +1,108 @@
+AI BRIDGE v5.8.0 — SUPER ORCHESTRATOR / GOD MODE
+Base: v5.7.4 PRODUCTION SMOKE HARDENED (ZIP SHA-256 5207cd1c277df585a8f8b394dcf9d91325f980051e79a7477f2f55a1827921d8)
+Nothing was rebuilt from scratch. No baseline file was removed.
+
+ROOT CAUSES FOUND AND FIXED
+1. Lost test fixtures. Four historical tests used a fixed temp filename that was identical
+   to a fixture shipped in the release (tests/worker-v38-under-test.mjs, worker-v41-test.mjs,
+   worker-v41-provider.mjs, worker-v452-adversarial.mjs) and deleted it after running. Any
+   package built after running the suite silently lost those files.
+   Fix: unique temp names in those tests + tools/run-all-tests.mjs snapshots and restores
+   every pre-existing file + tools/inventory-check.mjs compares against the baseline.
+2. God Mode verifier was blind. agentVerifyDraft() was called with observations:[], so the
+   "independent" verifier never saw the search results or fetched pages it was meant to check,
+   and it could be the same model that wrote the draft.
+   Fix: the Agent Core returns its tool evidence (non-enumerable, never serialized); the
+   verifier receives it labelled OBSERVED_TOOL vs HELPER_MODEL_CLAIM (advisory, not proof),
+   prefers a provider that did not write the draft, and returns a structured
+   OBSERVED / INFERRED / UNVERIFIED classification. Single-provider setups are reported
+   honestly as "same model as the writer".
+3. God Mode did not search first. It relied on the model deciding to search.
+   Fix: classify -> Search First (when freshness/facts matter and no private data) ->
+   plan -> tools -> AI -> verify -> correction pass -> learn, with early stop when search
+   alone answers a simple fact (0 AI calls) and source-only degradation when every AI fails.
+4. Network calls without timeouts (infinite spinner risk): safeDownload (Agent fetch_url,
+   public search fallback, MCP file download), Agent Core REST, Workers AI binding calls,
+   Cloudflare image REST, fal.ai. All are now bounded (15–90 s).
+5. KV quota exhaustion. Every progress event of a job was written to Workers KV (God Mode
+   emits 10+ per run; KV free plans allow ~1000 writes/day). Progress now stays in memory and
+   is persisted at most every 3 s plus a 15 s liveness heartbeat; terminal states are always
+   written. A failed KV write downgrades that job to durable:false instead of claiming it.
+6. Jobs orphaned by a Worker isolate restart stayed "processing" for 45 minutes.
+   Fix: heartbeat + stale detection (120 s > heartbeat + KV propagation). Status reports
+   "stale"; a resubmit with the SAME clientRequestId takes the job over once. The browser keeps
+   the submitted payload (IndexedDB, bounded, same device) and resubmits automatically once,
+   also after a reload before the first jobId arrived.
+7. Work Controller had no Pause/Resume/Stop/Reconnect and its stream reader had no inactivity
+   timeout. Added all four controls (each with a real effect) and a 45 s idle timeout that
+   falls back to status polling.
+8. Classifier bug found by the new tests: "check https://… and summarize it" was classified as
+   a rewrite task because "summarize" was matched before the URL. URLs are now checked first.
+
+NEW CAPABILITIES
+• Super Orchestrator router: DIRECT / SEARCH_ONLY / SEARCH_AI / AGENT / GOD chosen from a task
+  classifier (greeting, translation, rewrite, code, files, image, url_task, creative,
+  current_info, factual, research, general). Trivial questions never launch an Agent workflow.
+• Auto escalates "check/read/summarize https://…" to the Agent fetch_url tool (a chat model
+  cannot read a URL); disable per request with autoEscalate:false.
+• SEARCH -> AI answers pass a deterministic citation verifier (no extra AI call): must cite a
+  retrieved source and must not invent links to hosts that were never retrieved.
+• Free-first routing: Auto chat starts with Groq Free, then Gemini/OpenRouter; Agent Core order
+  Groq -> OpenRouter -> Gemini -> paid. Provider health now tracks latency (EWMA) and a
+  distinct malformed_output failure kind (invalid action JSON / unusable text).
+• Safe self-improvement: structured lessons (task category, route, providers, tools,
+  success/failure, verification result, latency, failure kinds, timestamp) with positive AND
+  negative learning (Laplace confidence). No prompts, answers, file contents, conversations,
+  passwords, tokens, keys or headers are stored. Persisted to AI_BRIDGE_JOBS KV (key learn:v1)
+  when bound, hydrated by fresh isolates. Learned routes apply only when the user selected no
+  providers and sent no policy — new user intent always wins.
+• Improvement Lab: GET /api/improvement-lab (auth) explains findings such as
+  "gemini: 7 failed vs 0 successful recent calls; groqfree succeeded meanwhile" and emits
+  PROPOSALS only. tools/improvement-lab.mjs validates a patch in an isolated copy:
+  apply -> regression -> full suite -> security tests -> baseline comparison. Nothing is ever
+  applied to production automatically.
+• GET/DELETE /api/learning (auth; DELETE is same-origin only) to inspect or reset learning.
+• Studio: honest image engine state (IMAGE ENGINE NOT CONFIGURED / paid opt-in only / ready).
+  Workers AI is no longer the only image path: with the explicit paid opt-in, AI Bridge
+  automatically uses a configured Gemini image or OpenAI image provider before fal.ai. Paid
+  engines are never called without the opt-in. No image is ever faked.
+• /api/status: orchestrator routes, free-first order, BEST EFFORT vs DURABLE label, image
+  engine state.
+
+SECURITY
+• Credential-like text is never sent to a public search engine, including queries proposed
+  by Agent/God Mode steps (search_secret_blocked).
+• Prompt injection: role/chat-template tags (<system>, <assistant>, <user>, <developer>,
+  <user_goal>, <im_start>, …) are neutralized inside file content (client + server); file path
+  attributes are re-sanitized server-side; "ignore previous instructions"-style text is flagged
+  to the model as data (EN/UK/RU).
+• ZIP: entry names normalized (no ../, absolute paths, drive letters, control chars);
+  encrypted entries skipped; Web Worker failure falls back to the chunked main-thread extractor.
+• SSRF: also blocks single-label hosts, *.internal/*.localhost/*.lan/*.home.arpa, non-443
+  ports and TEST-NET ranges.
+• CSRF defence-in-depth: cookie-authenticated API mutations with a foreign Origin are refused
+  (session cookie was already HttpOnly; Secure; SameSite=Strict).
+• Raw provider JSON is reduced to short, redacted, human-readable errors in job results.
+
+UI / DESIGN
+• Live God Mode pipeline SEARCH → PLAN → TOOLS → AI → VERIFY → LEARN in the progress card.
+• Route badge (NO AI USED / AI + SOURCES / GOD MODE / AGENT / AUTO → AGENT).
+• "What was verified" panel: verifier, independence, OBSERVED / INFERRED / UNVERIFIED claims,
+  verifier issues, citation check result.
+• Answer URLs are clickable, built with DOM APIs (model output can never inject HTML).
+• God chip in the quick mode row; the row scrolls with an edge fade instead of clipping.
+• Status dot colour reflects the real state (online / needs token / error / checking).
+• Compact mobile hero; reduced-motion support.
+
+TESTS
+• tests/run_v580_super_orchestrator_tests.mjs — 100 assertions (router, search-only,
+  search→AI + citation verifier, secret guard, provider health/free-first/recovery,
+  401/429/quota/timeout fallback, God Mode pipeline/verifier/revision/early stop/degradation,
+  positive+negative learning, override, KV persistence, fresh isolate, Improvement Lab,
+  jobs: duplicate submit, clientRequestId recovery, 401, CSRF, KV throttle, KV failure,
+  stale takeover; prompt injection, ZIP path/encryption/bomb/corrupt; Studio honesty and
+  paid opt-in; OAuth redirect/metadata/open-redirect; MCP auth; headers; status secrets).
+• tests/run_v580_ui_controls_tests.mjs — static UI contract + live Chromium checks at iPhone
+  width (pipeline, badges, verification panel, safe links/XSS, reload + stale-job
+  resubmission, Work Controller Pause/Resume/Stop). Live checks are reported as SKIPPED when
+  Chromium is unavailable, never as passed.

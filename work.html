@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#050812">
+<title>AI Bridge Work Controller v5.11.100</title>
+<link rel="stylesheet" href="/styles.css?v=5.11.100">
+</head>
+<body>
+<div class="workShell">
+  <div class="workTop">
+    <div>
+      <div class="workLabel">ADVANCED MULTI‑MODEL CONTROLLER</div>
+      <h1>AI Bridge <span>Free Team</span></h1>
+      <p>Незалежний аудит через кілька моделей із Claim Guard: збіг цитати перевіряється у конкретному файлі, але сам по собі не вважається підтвердженим дефектом.</p>
+      <a class="workBack" href="/">← Повернутися в AI Bridge</a>
+    </div>
+    <div id="workOverall" class="badge" aria-live="polite">Перевіряю…</div>
+  </div>
+
+  <div class="workCard">
+    <div class="workLabel">BRIDGE ACCESS</div>
+    <div class="accessRow">
+      <input id="workToken" type="password" autocomplete="off" placeholder="BRIDGE_ACCESS_TOKEN" aria-label="Bridge access token">
+      <button id="saveWorkToken" class="toolBtn">Авторизувати</button>
+      <button id="clearWorkToken" class="toolBtn">Видалити</button>
+    </div>
+    <div class="smallNote">Після авторизації Bridge створює захищену HttpOnly/Secure сесію на 14 днів. Сам BRIDGE_ACCESS_TOKEN не зберігається в JavaScript/localStorage. Серверні ключі провайдерів залишаються в Cloudflare Secrets.</div>
+  </div>
+
+  <div class="workCard">
+    <div class="workLabel">FREE PROVIDERS</div>
+    <div class="workGrid">
+      <div id="provGemini" class="providerBox"><b><span class="dot"></span>Gemini</b><span id="modelGemini">—</span></div>
+      <div id="provGroq" class="providerBox"><b><span class="dot"></span>Groq Free</b><span id="modelGroq">—</span></div>
+      <div id="provOpenRouter" class="providerBox"><b><span class="dot"></span>OpenRouter Free</b><span id="modelOpenRouter">—</span></div>
+    </div>
+    <div class="toolbar"><button id="testFreeProvidersBtn" class="toolBtn">Перевірити реальний API</button></div>
+    <div id="providerHealthText" class="smallNote">KEY SET означає лише, що секрет налаштований. Реальний API ще не перевірено.</div>
+  </div>
+
+  <div class="workCard">
+    <div class="workLabel">TASK</div>
+    <textarea id="workTask" placeholder="Введи завдання. Наприклад: перевір код, знайди помилки, порівняй рішення і дай конкретний план виправлення."></textarea>
+    <div style="margin-top:13px">
+      <div class="workLabel">CODE / ZIP (OPTIONAL)</div>
+      <input id="workFile" class="workFileInput" type="file" accept=".zip,.txt,.md,.js,.mjs,.cjs,.ts,.tsx,.jsx,.json,.html,.css,.py,.go,.rs,.java,.kt,.swift,.php,.rb,.xml,.yaml,.yml,.toml,.sql,.sh,.csv,.ini,.cfg,.conf,.env.example">
+      <div id="fileStatus" class="smallNote">Можна вибрати ZIP усього AI Bridge або окремий файл коду.</div>
+    </div>
+    <div class="modeRow">
+      <button class="modeBtn active" data-work-mode="review">Review</button>
+      <button class="modeBtn" data-work-mode="code">Code Review</button>
+      <button class="modeBtn" data-work-mode="research">Deep Check</button>
+    </div>
+    <div class="toolbar">
+      <button id="pasteBtn" class="toolBtn">Вставити</button>
+      <button id="clearBtn" class="toolBtn">Очистити</button>
+      <button id="refreshBtn" class="toolBtn">Оновити статус</button>
+    </div>
+    <button id="runFreeTeam" class="runBtn">▶ Run Free Team</button>
+    <div class="toolbar runControls" role="group" aria-label="Run controls">
+      <button id="pauseBtn" class="toolBtn" type="button" disabled>⏸ Pause</button>
+      <button id="resumeBtn" class="toolBtn" type="button" disabled>▶ Resume</button>
+      <button id="stopBtn" class="toolBtn" type="button" disabled>■ Stop</button>
+      <button id="reconnectBtn" class="toolBtn" type="button" disabled>↻ Reconnect</button>
+    </div>
+  </div>
+
+  <div id="workProgress" class="workCard progress" aria-live="polite">
+    <div class="spin"></div>
+    <div><b class="workProgressTitle">Free Team працює…</b><div id="progressText" class="smallNote">Надсилаю завдання трьом безкоштовним провайдерам.</div></div>
+  </div>
+
+  <div id="resultsWrap" class="hidden">
+    <div class="workCard final resultCard">
+      <div class="resultHead"><b>FINAL SYNTHESIS</b><span id="finalJudge">—</span></div>
+      <div id="finalText" class="resultBody"></div>
+      <div id="judgeEvidencePanel" class="judgeEvidencePanel"><div class="smallNote">Structured Judge findings will appear here.</div></div>
+    </div>
+    <div class="workCard">
+      <div class="workLabel">PROVIDER RESULTS</div>
+      <div id="providerResults" class="resultGrid"></div>
+      <div class="toolbar"><button id="retryFailedBtn" class="toolBtn">Повторити тільки помилки</button><button id="copyFinalWork" class="toolBtn">Копіювати фінал</button></div>
+    </div>
+    <div class="workCard"><div class="workLabel">DIAGNOSTICS</div><div id="workDiag" class="diag"></div></div>
+  </div>
+</div>
+<script src="/zip-safety-core.js"></script>
+<script src="/work-ui-core.js"></script>
+<script src="/work-controller.js"></script>
+</body>
+</html>

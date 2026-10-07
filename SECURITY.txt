@@ -1,0 +1,59 @@
+AI BRIDGE v2 — SECURITY
+
+Provider API secrets:
+• never put provider keys in app.js/index.html/ZIP screenshots
+• store only in Cloudflare Secrets
+
+BRIDGE_ACCESS_TOKEN:
+• use a long unique random password
+• it protects the PWA API and is also the private one-user OAuth login secret
+• changing it invalidates previously issued signed MCP tokens when OAUTH_SIGNING_SECRET is not configured
+• do not reuse an email/banking/social password
+
+MCP:
+• /mcp requires a signed OAuth access token
+• authorization code uses PKCE S256
+• ChatGPT callback redirects are allowlisted to chatgpt.com connector paths
+• OAuth tokens are HMAC-signed with OAUTH_SIGNING_SECRET when set, otherwise BRIDGE_ACCESS_TOKEN
+• access tokens expire after 7 days; refresh tokens after 90 days
+• provider API keys are never returned by status or MCP tools
+• unknown browser Origins are rejected at /mcp
+• tool descriptions disclose that external provider calls consume API quota/cost
+
+For a public/multi-user product, replace the one-user auth system with a dedicated identity provider and
+production OAuth authorization service. This v2 auth is intentionally designed for one owner's private Bridge.
+
+
+CHATGPT CONNECTOR
+• OAuth access is audience-bound to this exact /mcp URL.
+• Authorization only accepts ChatGPT CIMD client IDs and ChatGPT callback URLs.
+• Provider-call MCP tools are classified as external-data-transfer / non-read-only operations.
+• Attached file URLs must be HTTPS; obvious private-network targets are rejected.
+• File and extracted-context size limits are enforced.
+• Rotating OAUTH_SIGNING_SECRET invalidates signed OAuth tokens; when that secret is absent, rotating BRIDGE_ACCESS_TOKEN invalidates them.
+
+BROWSER SESSION (v4.9.5):
+• ai_bridge_session never contains BRIDGE_ACCESS_TOKEN itself.
+• The browser session is a 14-day HMAC-signed token with expiry and nonce.
+• Set SESSION_SIGNING_SECRET to isolate browser-session signing from the master Bridge password.
+• SameSite=Strict + Secure + HttpOnly remain enforced.
+• Cross-origin login/logout mutations are rejected.
+
+MOBILE PROVIDER VAULT (v4.9.5):
+• Set PROVIDER_VAULT_SECRET to isolate AES-GCM provider-token encryption from BRIDGE_ACCESS_TOKEN.
+• Legacy fallback secrets remain decrypt-only candidates during migration; new vault writes use the highest-priority configured secret.
+
+SUPER ORCHESTRATOR (v5.8.0):
+• Web search never receives credential-like text (API keys, tokens, passwords, private keys, JWTs),
+  private file contents or images — this also applies to queries proposed by Agent/God Mode steps.
+• Uploaded files are untrusted data: role/chat-template tags are neutralized, file names are
+  normalized and re-sanitized server-side, and instruction-injection text is flagged to the model.
+• Learning memory stores only structured outcomes (category, route, provider ids, tool names,
+  counts, latency, failure kinds). Never prompts, answers, files, conversations or secrets.
+• Improvement Lab only proposes changes. Patches are validated in an isolated copy by
+  tools/improvement-lab.mjs and are never applied to production automatically.
+• Paid image engines (Gemini image, OpenAI image, fal.ai) are called only with the explicit
+  per-device paid opt-in. Gemini keys are sent in a header, never in a URL.
+• Cookie-authenticated API mutations with a foreign Origin are refused (defence-in-depth on top of
+  HttpOnly; Secure; SameSite=Strict session cookies).
+• Every outbound network call has a timeout. Agent/URL fetches accept public HTTPS on port 443 only.

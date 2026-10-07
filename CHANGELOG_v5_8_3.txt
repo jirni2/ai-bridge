@@ -1,0 +1,5 @@
+AI Bridge v5.8.3 — ZIP context coverage and evidence labels
+
+- Limit each ZIP source excerpt to 36,000 characters in both the Web Worker and mobile Safari fallback. Large archives now supply a broader sample within the existing 350,000-character context budget, preserving head, middle and tail snippets of large files.
+- The file-task response contract explicitly labels partial project samples and requires findings to be tied to supplied excerpts. External provider/model availability requires a real provider response or current official evidence.
+- Add a real multi-entry ZIP regression verifying at least eight distinct excerpts fit, plus matching extraction paths and response guidance.

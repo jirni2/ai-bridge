@@ -1,0 +1,12 @@
+AI Bridge v5.2.0
+
+- Added a dedicated visible Agent tab and autonomous Agent chat instead of hiding Agent only inside Team mode.
+- Added local Agent conversation memory for follow-up tasks.
+- Agent can plan and execute up to 8 bounded steps.
+- Added read-only public web search with DuckDuckGo -> Bing RSS fallback.
+- Agent can read specific public HTTPS pages through the bounded fetch tool.
+- Agent can delegate subtasks to configured AI providers and recover through provider fallback.
+- Agent supports current photos and Files/ZIP context.
+- Added live Agent phases, a visible execution trace, and resumable Agent jobs.
+- Agent provider can be Auto or an explicitly selected configured provider.
+- External mutation remains blocked: no form submit, login, purchase, deletion, email send, shell, or arbitrary code execution without a separately implemented action tool.

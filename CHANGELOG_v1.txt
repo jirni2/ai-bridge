@@ -1,0 +1,19 @@
+AI BRIDGE v1 — CHANGELOG
+
+• New standalone iPhone PWA.
+• Cloudflare _worker.js API gateway.
+• Secure secret-backed provider connections.
+• Claude, Gemini, Grok, Kimi + optional OpenAI.
+• Auto Router.
+• Ask All.
+• Code Review team.
+• Debate mode with critique round.
+• Optional final Judge/Synthesis.
+• Text/code file attachments.
+• Local ZIP repository extraction in Safari.
+• Repository filters for node_modules/.git/dist/build/binaries.
+• Context-size guardrails.
+• IndexedDB local run history.
+• Connection health screen with model IDs.
+• Bridge Access Token authentication.
+• Offline app shell and service-worker update reload.

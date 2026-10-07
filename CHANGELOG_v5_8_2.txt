@@ -1,0 +1,18 @@
+AI Bridge v5.8.2 — safer reconnect and honest job recovery
+
+- A retry with the same clientRequestId now checks the task and attachment
+  fingerprint. Identical retries resume the same job; changed content returns
+  HTTP 409 without another provider call or a stale answer. JSON key order is
+  ignored when calculating the fingerprint. Fingerprints do not expose files.
+- The same guard applies to Work Controller provider streams. Temporary KV
+  failure now returns a retryable 503 instead of opening an endless stream.
+- KV is presented as cross-isolate job-record recovery with bounded waitUntil
+  execution. It is not labelled durable execution because provider steps are
+  not independently checkpointed. Existing KV records and recovery remain.
+- The Search First status order matches the actual Bing then DuckDuckGo
+  fallback order introduced in v5.8.1.
+- All earlier project files, tools, tests, and changelogs remain in the ZIP.
+
+Architecture reference: Cloudflare Workflows and LangGraph persistence document
+step checkpoints and resumption without rerunning completed steps. The current
+AI Bridge release does not depend on, claim, or secretly install either system.

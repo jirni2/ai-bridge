@@ -1,0 +1,19 @@
+AI Bridge v5.11.76 — Ядро: Q&A на BM25 (2026-10-04)
+
+1. answer() переведено з ad-hoc перекриття (hits/sqrt-нормалізація) на Okapi BM25 —
+   стандартне ранжування релевантності (Lucene/Elasticsearch): IDF по реченнях
+   контексту, tf через stemMatch, довжинна нормалізація k1=1.2/b=0.75. Чистий JS,
+   zero dependencies, офлайн.
+2. Якість (A/B евал, 10 QA-кейсів uk/en/ru, old=pristine v5.11.75 vs new):
+   top-1 accuracy old 6/7 → new 7/7. Дискримінуючий кейс: питання «про що шторм?»
+   — стара формула брала 2-слівне «Шторм минув.», BM25 бере інформативне речення
+   з 5 згадками терміна (tf-saturation + нормалізація довжини). Регресій немає.
+3. Збережено: український стеммінг («витягує»→«витягують»), порожнє питання → [],
+   топ-n у вихідному порядку, бюджет часу/DoS-ліміти, verifyIntegrity().
+4. Новий тест tests/run_v51176_core_bm25_tests.mjs: 16 перевірок (tf-saturation,
+   IDF, стеммінг, детермінізм, порядок, крайні випадки, en/ru, цілісність).
+   Ядро: 58 + 49 + 43 (shield) + 16 (bm25) — все зелене.
+5. Версія синхронізована: bridge-version.json, _worker.js, app.js,
+   work-controller.js, sw.js (cache ai-bridge-v5-11-76), manifest, index.html.
+   Екран «Що нового» дописано (changelog-app.json, запис 5.11.76 першим).
+Not changed and not reviewed: trade/, binance-bot/, backtests/, scheduler-worker/, trade-core.mjs.

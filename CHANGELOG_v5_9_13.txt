@@ -1,0 +1,51 @@
+AI Bridge v5.9.13 — security audit + bot hardening (2026-09-27)
+
+Повний аудит коду v5.9.12: _worker.js, app.js, binance-bot/engine.mjs +
+worker.mjs + wrangler.toml, trade/*.js, trade-core.mjs, index.html, sw.js.
+Повний регресійний набір: 110 тестових файлів, 1290 перевірок — усі PASS.
+
+ВИПРАВЛЕНО
+1. Журнал угод бота записував накопичений денний P/L (dayPnl) у поле pnl
+   кожної SELL-угоди замість P/L саме цієї угоди. Тепер журнал зберігає
+   per-trade pnl = quote - cost. (binance-bot/engine.mjs, reconcile)
+2. У tick() після перевірки свіжого стану бот міг тихо вийти без
+   перепланування alarm, якщо з'явився pending-ордер, — це назавжди
+   зупиняло цикл звірки. Тепер pending завжди переплановує alarm через
+   60 с (fail-safe: бот ніколи не залишається без майбутнього alarm,
+   доки є незвірений ордер). (binance-bot/engine.mjs, tick)
+3. Версія синхронізована до 5.9.13 у всіх місцях (bridge-version.json,
+   _worker.js, app.js, work-controller.js, sw.js CACHE, manifest,
+   index.html, work.html, support.html) через tools/sync-version.mjs;
+   перераховано build fingerprint і MANIFEST.sha256.json.
+
+ПІДТВЕРДЖЕНО АУДИТОМ (проблем не знайдено)
+- Жодних захардкоджених секретів у коді, тестах чи документації;
+  Binance ключі живуть лише у Cloudflare Secrets окремого Worker.
+- Підписи Binance (HMAC SHA-256, recvWindow 5000, timestamp) коректні;
+  X-MBX-APIKEY надсилається лише на підписані ендпоїнти, ніколи на
+  публічні klines; секрет ніде не потрапляє у відповіді/журнали.
+- Ідемпотентність ордерів: clientOrderId зберігається до POST; після
+  втраченої відповіді — лише GET-запит статусу, повторний POST заборонено;
+  невідомий результат блокує нові ордери (fail closed).
+- Маршрути /api/trade/bot вимагають Bridge-автентифікації, same-origin
+  Origin для команд, ліміт тіла 2000 байт; публічний маршрут Worker —
+  404; вихідний код/конфіг бота заблоковані як Pages-ассети.
+- XSS: app.js екранує через esc(), trade UI використовує textContent /
+  createElement; eval() відсутній (лише коментар про tiny grammar).
+- sw.js не кешує /api/, /oauth/, /mcp; навігаційний fallback лише для
+  page navigations.
+- Ліміти ризику: BUY ≤ 10 USDT, ≤ 20% бюджету/день (UTC), ≤ 5 входів/день,
+  одна long-позиція, стоп 3% / тейк 6%, без плеча; live вимкнено без
+  BINANCE_LIVE_ENABLED=1, окремих live-ключів і введення LIVE в UI.
+
+ВІДОМІ ОБМЕЖЕННЯ (без змін, задокументовано)
+- Немає спільного durable per-user rate limiter у Pages-шарі; серіалізацію
+  тікiв гарантує busy-flag Durable Object.
+- CORS-префлайт /mcp відповідає Access-Control-Allow-Origin: * (потрібно
+  для ChatGPT-конектора); самі POST запити проходять перевірку Origin.
+- Polling кожні ~60 с не гарантує виконання стопу рівно на 3% при гепах.
+
+Деплой: як v5.9.12 — спочатку npx wrangler deploy у binance-bot/
+(aibridge-binance-bot), секрети BINANCE_TESTNET_API_KEY/SECRET у Worker,
+прив'язка TRADE_BOT у Pages, потім деплой Pages ZIP. Жоден реальний
+ордер під час аудиту не створювався (тести на моках біржі).

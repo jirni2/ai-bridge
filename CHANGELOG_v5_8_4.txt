@@ -1,0 +1,7 @@
+AI Bridge v5.8.4 — Agent Plan checks its own deployment
+
+- Agent Core receives the trusted public origin of this AI Bridge deployment when deciding how to inspect its own site.
+- A namesake external domain cannot be fetched as evidence for a request to inspect this AI Bridge site. The blocked attempt appears in the trace as a tool error, with the correct origin, without consuming the fetch budget.
+- Preserve an explicitly supplied URL in the user's task, and permit unrelated external documentation for other goals.
+- Add an execution regression reproducing the live Agent Plan mistake on aibridge.io, then checking that the real deployed URL is fetched.
+- Includes all v5.8.3 ZIP coverage changes and every file from the full prior package.

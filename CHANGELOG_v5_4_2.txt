@@ -1,0 +1,7 @@
+AI Bridge v5.4.2
+================
+
+- Prevent provider diagnostics from exposing raw upstream JSON or JavaScript error text in the UI.
+- Show bounded, actionable labels for rate limits, invalid keys, permissions, timeouts, and temporary provider failures.
+- Make temporary provider failures explicitly state that normal provider fallback remains available.
+- Add regression coverage for diagnostic response sanitization and truthful timeout copy.

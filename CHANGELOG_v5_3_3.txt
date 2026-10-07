@@ -1,0 +1,10 @@
+AI BRIDGE v5.3.3
+
+- Agent Plan no longer requires Cloudflare Workers AI.
+- AI Bridge owns the autonomous goal/state/tool loop and routes each structured
+  controller decision through configured providers.
+- Controller order prefers Gemini, then Groq Free and OpenRouter Free, with
+  OpenAI, Grok and Claude as later fallbacks.
+- Invalid planner JSON and provider failures fall through to the next configured
+  provider instead of leaving the Agent unavailable.
+- Workers AI remains optional for Cloudflare-hosted image generation only.

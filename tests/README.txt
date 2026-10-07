@@ -1,0 +1,2 @@
+Tests validate the public MCP metadata contract, output schemas, tool annotations, public/private auth behavior, provider-boundary rules, and status tool. Live third-party API calls require deployed Cloudflare secrets and must be tested before submission.
+v5.8.0: run_v580_super_orchestrator_tests.mjs (backend, mocked network) and run_v580_ui_controls_tests.mjs (UI; live Chromium checks are SKIPPED when unavailable). Run everything with: node tools/run-all-tests.mjs

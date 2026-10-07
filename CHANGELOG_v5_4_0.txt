@@ -1,0 +1,10 @@
+AI Bridge v5.4.0
+
+- Added a controlled adaptive policy for Agent Core.
+- Successful routes are aggregated by task type with bounded confidence.
+- Similar future tasks can reuse proven tool and helper ordering.
+- Raw prompts, file contents, tokens and model answers are never stored as learned policy.
+- Failed, fallback, tool-error and unverified web runs are not learned.
+- Learned policy is advisory only and cannot override the current user goal.
+- No autonomous code rewrite or production deployment permission is granted.
+- Includes all v5.3.9 fixes and the complete prior project package.

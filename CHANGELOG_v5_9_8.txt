@@ -1,0 +1,20 @@
+AI Bridge v5.9.8 — no keyboard pop-up after Send + live "what the AI is doing" view
+(includes all v5.9.7 changes, which were never deployed separately)
+
+Chat and Agent
+• After Send the input is no longer re-focused, so the phone keyboard hides and stays hidden.
+• The page scrolls to the progress card (Chat) or the live agent status (Agent) at the top of
+  the screen; empty-space padding is added while AI runs so this works on short pages too.
+• New live step log under the progress bar: each step (planning, web search, which provider is
+  working, retries/fallbacks) is added with the time since start. A running timer is shown.
+• When the answer arrives the page scrolls to the answer's first line (Chat and Agent), and a
+  collapsible "What the AI did: N steps in T" summary stays under the answer.
+• Agent status line now also names the provider that is working on the step.
+
+From v5.9.7
+• Gemini/Groq "model overloaded / UNAVAILABLE" (5xx) falls back to the next model of the same
+  provider without a delayed same-model retry; the overloaded model is skipped for 2 minutes.
+• Self-check "How to fix" hints follow the real error (overload, quota, key, permission,
+  timeout, model).
+
+Tests: tests/run_v598_send_ux_tests.mjs added (with v597 overload tests). Full suite 106/106 test files.

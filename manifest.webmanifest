@@ -1,0 +1,89 @@
+{
+  "name": "AI Bridge v5.11.100 — Work Controller",
+  "short_name": "AI Bridge",
+  "description": "Private multi-model AI orchestration workspace for routing, review, files, and resilient team synthesis.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#050812",
+  "theme_color": "#050812",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "share_target": {
+    "action": "./?share=1",
+    "method": "GET",
+    "enctype": "application/x-www-form-urlencoded",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  },
+  "file_handlers": [
+    {
+      "action": "./?openfile=1",
+      "accept": {
+        "text/markdown": [
+          ".md"
+        ],
+        "text/plain": [
+          ".txt",
+          ".md"
+        ]
+      }
+    }
+  ],
+  "protocol_handlers": [
+    {
+      "protocol": "web+ai-bridge",
+      "url": "./?proto=%s"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Новий чат",
+      "short_name": "Новий чат",
+      "description": "Почати новий діалог у AI Bridge",
+      "url": "./?shortcut=new",
+      "icons": [
+        {
+          "src": "icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Команда агентів",
+      "short_name": "Команда",
+      "description": "Відкрити команду агентів",
+      "url": "./?shortcut=team",
+      "icons": [
+        {
+          "src": "icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Швидке питання",
+      "short_name": "Питання",
+      "description": "Швидко запитати AI Bridge",
+      "url": "./?shortcut=ask",
+      "icons": [
+        {
+          "src": "icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ]
+}

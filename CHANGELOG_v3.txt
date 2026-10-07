@@ -1,0 +1,13 @@
+AI BRIDGE v3 — REVIEW PANEL SUBMISSION EDITION
+
+• Public MCP redesigned from generic AI connector into a fixed independent Review Panel workflow.
+• Public MCP exposes only 4 tools: status, task review, code review, and project-file review.
+• Removed provider selection, single-provider passthrough, generic Ask All, and public Debate from submission surface.
+• Public review path is restricted to Gemini, Groq Free, and OpenRouter Free.
+• Two independent assessments + synthesis, with provider brands hidden from result structure.
+• Explicit outputSchema for every public MCP tool.
+• Explicit readOnlyHint/openWorldHint/destructiveHint/idempotentHint on every tool.
+• PUBLIC_PLUGIN_MODE supports unauthenticated public MCP scanning while preserving private PWA token protection.
+• Added privacy.html, terms.html, plugin.html, dynamic /support page, and OpenAI domain verification challenge endpoint.
+• Added submission JSON with exactly 5 positive and 3 negative test cases.
+• Added submission checklist for iPhone/Cloudflare deployment and OpenAI review.

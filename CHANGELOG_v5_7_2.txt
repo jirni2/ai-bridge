@@ -1,0 +1,7 @@
+AI Bridge v5.7.2 — God Mode verification lifecycle
+
+- God Mode now emits a visible independent-verification phase immediately after the Agent draft.
+- Independent verification has a bounded 25-second budget and per-provider aborts, preventing an invisible multi-minute locked UI.
+- If verification times out, the verified draft is returned with honest verificationTimedOut metadata instead of leaving the UI blocked.
+- Mentor Doctrine now requires exact-URL goals to fetch the named target first and forbids substituting namesake-product search results.
+- Added regression coverage for exact-target identity and bounded verifier timeout.
