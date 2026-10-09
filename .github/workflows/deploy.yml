@@ -12,6 +12,10 @@ on:
 permissions:
   contents: read
 
+defaults:
+  run:
+    shell: bash   # bash -eo pipefail: помилка wrangler не ховається за tee
+
 concurrency:
   group: deploy-${{ github.ref_name }}
   cancel-in-progress: true
@@ -22,8 +26,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
           cache: npm
@@ -44,8 +48,8 @@ jobs:
       BRANCH: ${{ github.ref_name }}
       SHA: ${{ github.sha }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: 22
       - name: Prepare site folder
@@ -59,6 +63,10 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo "::error::Немає секрету CLOUDFLARE_API_TOKEN або CLOUDFLARE_ACCOUNT_ID у Settings → Secrets and variables → Actions"
+            exit 1
+          fi
           npx --yes wrangler@4 pages deploy "$RUNNER_TEMP/site" \
             --project-name=aibridge-aff \
             --branch="$BRANCH" \
