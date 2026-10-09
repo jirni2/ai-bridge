@@ -20,7 +20,7 @@ const $=id=>document.getElementById(id);
 const I18N=globalThis.AIBridgeI18n||null;
 I18N?.init?.();
 const t=(key,vars)=>I18N?.t?.(key,vars)??key;
-const UI_VERSION="5.11.100";
+const UI_VERSION="5.11.104";
 // v5.9.0: storage can throw (Safari private mode, quota, blocked site data).
 // Every new read/write goes through these helpers so one failure can never
 // stop the whole interface from booting.
@@ -308,6 +308,7 @@ async function putRun(run){
 async function saveRun(run){
   // v5.11.68: історія оновилася — інвалідуємо кеш списку діалогів для @@пошуку.
   ctxRunsCache=null;
+  branchRunsCache=null; // v5.11.103: і для стрілок гілок
   // v5.11.39: тимчасовий діалог (інкогніто) — нічого не пишемо: ні IndexedDB,
   // ні лічильник usage, ні хмарна синхронізація.
   if(run?.meta?.temporary)return null;
@@ -555,8 +556,11 @@ function renderProviders(){
     :items.filter(([id])=>id!=="openai"||status.providers?.openai).map(([id,p])=>
     `<div class="miniProvider"><span class="statusDot ${status.providers?.[id]?"on":""}"></span>${p.name}</div>`
   ).join("");
-  /* v5.11.49: пігулка мережі в топбарі — налаштовано/всього */
-  try{const _nc=$("netCount");if(_nc){const apiTotal=Object.keys(PROVIDERS).filter(id=>!LOCAL_PROVIDER_IDS.has(id)).length;_nc.textContent=needAuth?"?":apiProviderIds().length+"/"+apiTotal;}}catch(e){}
+  /* v5.11.49: пігулка мережі в топбарі — доступно/всього (усі 8 провайдерів).
+     v5.11.102: Muse і Ядро — вбудовані й завжди доступні (сервер звітує true),
+     тож пігулка рахує ВСІХ провайдерів, а не лише API. Чесний API-лічильник
+     лишився там, де UI буквально каже "API keys" (topStatus) і в оцінках. */
+  try{const _nc=$("netCount");if(_nc){_nc.textContent=needAuth?"?":Object.keys(PROVIDERS).filter(id=>status.providers?.[id]).length+"/"+Object.keys(PROVIDERS).length;}}catch(e){}
 
   let selected=["gemini","groqfree","openrouter"];
   try{const saved=JSON.parse(localStorage.getItem("ai_bridge_selected")||"null");if(Array.isArray(saved))selected=saved.filter(x=>typeof x==="string")}catch(e){localStorage.removeItem("ai_bridge_selected")}
@@ -1539,12 +1543,10 @@ function renderDataMap(){
   `<div class="card dmRow"><div class="dmIcon" aria-hidden="true">💾</div><div><b>${esc(t("dmPersistT"))}</b><p>${esc(t("dmPersistD"))}</p><span class="privStatus" id="persistStatusLine">${esc(persistStatusText())}</span></div></div>`+
   /* v5.11.95: пам'ять Асистента Ядра — окремий рядок із лічильником і кнопкою очищення. */
   (()=>{let info={facts:0,docs:0};try{info=coreAssistant()?.memoryInfo()||info}catch(e){}
-    return `<div class="card dmRow"><div class="dmIcon" aria-hidden="true">⚙️</div><div><b>${esc(t("dmCoreT"))}</b><p>${esc(t("dmCoreD",{f:info.facts||0,d:info.docs||0}))}</p><p>${esc(t("dmCoreD2",{q:info.qa||0,tq:info.taught||0,l:info.lists||0,k:info.knowledge||0}))}</p><button class="tinyBtn" type="button" id="clearCoreMemoryBtn">${esc(t("clear"))}</button> <button class="tinyBtn" type="button" id="coreLearnToggleBtn" aria-pressed="${coreLearningOn()?"true":"false"}">${esc(t(coreLearningOn()?"coreLearnOn":"coreLearnOff"))}</button> <button class="tinyBtn" type="button" id="coreTrainBtn">${esc(t("coreTrainBtn"))}</button></div></div>`})()+
+    return `<div class="card dmRow"><div class="dmIcon" aria-hidden="true">⚙️</div><div><b>${esc(t("dmCoreT"))}</b><p>${esc(t("dmCoreD",{f:info.facts||0,d:info.docs||0}))}</p><button class="tinyBtn" type="button" id="clearCoreMemoryBtn">${esc(t("clear"))}</button></div></div>`})()+
   `<p class="dmFoot">${esc(t("dmFoot"))}</p>`;
   $("clearPromptHistBtn").onclick=()=>clearPromptHistory();
   $("clearCoreMemoryBtn").onclick=()=>{try{coreAssistant()?.forget("")}catch(e){}try{localStorage.removeItem(CORE_MEMORY_KEY)}catch(e){}renderDataMap();toast(t("dmCoreCleared"),"good")};
-  $("coreLearnToggleBtn").onclick=()=>{try{if(coreLearningOn())localStorage.setItem(CORE_LEARN_OFF_KEY,"1");else localStorage.removeItem(CORE_LEARN_OFF_KEY)}catch(e){}renderDataMap()};
-  $("coreTrainBtn").onclick=async()=>{const n=await coreTrainFromHistory(true);renderDataMap();toast(n>0?t("coreTrainedToast",{n}):t("coreTrainNone"),n>0?"good":"")};
   // Оновити статус, щойно прийде відповідь storage.persist().
   ensureStoragePersist().then(()=>{const s=$("persistStatusLine");if(s)s.textContent=persistStatusText()});
 }
@@ -2943,52 +2945,13 @@ function saveCoreMemory(){
   catch(e){toast(t("coreMemoryFull"),"bad")}
 }
 /* Наміри, які Ядро закриває саме й точно — їх не варто відправляти в хмару. */
-const CORE_INSTANT_INTENTS=new Set(["math","units","date","time","name","help","identity","memory.remember","memory.forget","memory.list","memory.learn","teach","feedback","list","stats","multi"]);
+const CORE_INSTANT_INTENTS=new Set(["math","units","date","time","name","help","identity","memory.remember","memory.forget","memory.list","memory.learn"]);
 function coreCanHandleAlone(r){
   if(!r||r.error||!r.handled||r.escalate)return false;
   if(CORE_INSTANT_INTENTS.has(r.intent))return true;
   /* відповідь із власної пам'яті/нотаток/вивченого документа — лише коли Ядро впевнене */
-  /* v5.11.99: те, чого людина навчила прямо («коли я питаю…, відповідай…»), — теж одразу.
-     Вбудовані знання й вивчене з відповідей хмари хмару НЕ випереджають: вона може знати свіжіше. */
-  return r.intent==="answer"&&Number(r.confidence)>=0.8&&["facts","notes","doc","taught"].includes(r.sources?.[0]?.type);
+  return r.intent==="answer"&&Number(r.confidence)>=0.8&&["facts","notes","doc"].includes(r.sources?.[0]?.type);
 }
-/* v5.11.99: САМОНАВЧАННЯ ЯДРА. Після кожної вдалої відповіді хмарної моделі Ядро запам'ятовує
-   пару «питання → відповідь» у localStorage ЦЬОГО пристрою (нікуди не надсилається) і наступного
-   разу — офлайн або коли хмара відмовила — відповідає саме, з позначкою, звідки це знає.
-   Не вчиться з: інкогніто, помилок, файлів/зображень, агента, відповідей із контекстом іншого чату. */
-const CORE_LEARN_OFF_KEY="ai_bridge_core_learn_off",CORE_TRAINED_KEY="ai_bridge_core_trained_v1";
-function coreLearningOn(){try{return localStorage.getItem(CORE_LEARN_OFF_KEY)!=="1"}catch(e){return true}}
-function saveCoreMemoryQuiet(){if(!_coreAssistant)return false;try{localStorage.setItem(CORE_MEMORY_KEY,_coreAssistant.exportMemory());return true}catch(e){return false}}
-function coreLearnFromRun(run,opts){
-  try{
-    if(!run||(!opts?.force&&!coreLearningOn()))return false;
-    const m=run.meta||{};
-    if(m.error||m.temporary||m.localResponder||m.truncated||m.imported)return false;
-    if((run.attachments||[]).length||(run.ctxChats||[]).length||run.continueRoot)return false;
-    if(["agent","deep-scan"].includes(run.mode))return false;
-    const q=String(run.prompt||"").trim(),a=String(run.final||"").trim();
-    if(!q||!a)return false;
-    const A=coreAssistant();if(!A||typeof A.learnQA!=="function")return false;
-    const pid=run.judge||(run.results||[]).find(r=>r.ok)?.provider||(run.providers||[])[0];
-    const r=A.learnQA(q,a,{source:PROVIDERS[pid]?.name||"AI",ts:run.created});
-    if(!r)return false;
-    if(!opts?.noSave)saveCoreMemoryQuiet();
-    return true;
-  }catch(e){return false}
-}
-/* Одноразово (або кнопкою в «Карті даних») — вивчити відповіді з уже наявної історії чатів. */
-async function coreTrainFromHistory(force){
-  if(!force){try{if(localStorage.getItem(CORE_TRAINED_KEY)||!coreLearningOn())return 0}catch(e){return 0}}
-  let n=0;
-  try{
-    const runs=await getRuns(1000);
-    for(const run of runs.slice().reverse())if(coreLearnFromRun(run,{noSave:true,force}))n++;
-    if(n)saveCoreMemoryQuiet();
-    try{localStorage.setItem(CORE_TRAINED_KEY,String(Date.now()))}catch(e){}
-  }catch(e){}
-  return n;
-}
-setTimeout(()=>{coreTrainFromHistory(false).then(n=>{if(n>0)toast(t("coreTrainedToast",{n}),"good")}).catch(()=>{})},5000);
 /* Запитати Ядро. Повертає результат асистента або null (ядро недоступне). Не малює. */
 function askCore(rawPrompt,context,title){
   const A=coreAssistant();if(!A)return null;
@@ -3000,7 +2963,7 @@ function renderCoreReply(prompt,r,noteKey){
   let final=r.text;
   if(!r.handled&&r.escalate&&Object.values(status.providers||{}).some(Boolean))final+=`\n\n${t("coreAskCloud")}`;
   final+=`\n\n_${t(noteKey||"coreLocalNote")}_`;
-  const run={uid:"core-"+Date.now(),created:Date.now(),prompt,final,selectedProviders:["core"],results:[],meta:{localResponder:true,coreCard:true,coreIntent:r.intent,coreEscalate:!!r.escalate,coreQaId:r.qaId||null},mode:"single"};
+  const run={uid:"core-"+Date.now(),created:Date.now(),prompt,final,selectedProviders:["core"],results:[],meta:{localResponder:true,coreCard:true,coreIntent:r.intent,coreEscalate:!!r.escalate},mode:"single"};
   currentRun=run; /* щоб «Інша модель» і «Змінити питання» працювали з цим питанням */
   renderAnswer(run);
 }
@@ -3123,7 +3086,7 @@ async function sendTask(options={}){
     let r=null;try{r=askCore(prompt,"","")}catch(e){r=null}
     if(coreCanHandleAlone(r)){
       if(promptEl){promptEl.value="";autoGrowTextarea(promptEl);renderAttachChips();saveComposerDrafts()}
-      updateCallEstimate();dismissKeyboard();
+      pushPromptHistory(rawPrompt);updateCallEstimate();dismissKeyboard();
       renderCoreReply(prompt,r,"coreFirstNote");
       return;
     }
@@ -3136,7 +3099,7 @@ async function sendTask(options={}){
     runLocalCore(rawPrompt,source,coreCtx);
     return;
   }
-  /* v5.11.100: a simple deterministic request must not fail merely because
+  /* v5.11.101: a simple deterministic request must not fail merely because
      God/Agent mode was left selected while no cloud API key is configured.
      Core handles only intents it can answer exactly (math, units, date,
      memory, etc.); unsupported requests still require a real provider. */
@@ -3304,8 +3267,6 @@ async function sendTask(options={}){
     if((j.budgetDowngraded||j.meta?.budgetDowngraded)&&!budgetDowngradedToasted){budgetDowngradedToasted=true;toast(t("budgetDowngraded"),"bad")}
     maybeRefreshBudget();
     await saveRun(currentRun);
-    /* v5.11.99: Ядро вчиться з цієї відповіді (лише звичайний чат без файлів і зображень) */
-    if(source==="chat"&&!submittedImages.length&&!continueFrom)coreLearnFromRun(currentRun);
     clearPendingJob();
     sweepPasteStore(); // v5.11.28: вставки відправлено — чистимо сховище
     markDoneHidden(); // v5.11.23: бейдж PWA, якщо завдання фінішувало у фоні
@@ -3844,6 +3805,7 @@ function renderAnswer(run){
   renderModeBadge(run);
   renderRoleBadge(run); // v5.11.64: бейдж ролі автора відповіді
   renderPinnedBadge(run.pinned||run.meta?.pinned||run.meta?.pinnedRoute);
+  renderBranchBadge(run); // v5.11.103: стрілки гілок діалогу
   // v5.11.39: бейдж «Тимчасовий» у шапці діалогу-інкогніто.
   const tb=$("tempBadge");
   if(tb){if(run?.meta?.temporary){tb.textContent=t("tempChatBadge");tb.classList.remove("hidden")}else tb.classList.add("hidden")}
@@ -3929,6 +3891,7 @@ async function renderHistory(){
   const host=$("historyList");
   if(host&&!host.dataset.loaded)showSkel(host,"rows",4); // v5.10.0 skeleton
   const all=await getRuns(),q=($("historySearch")?.value||"").trim().toLowerCase();
+  branchRunsCache=all; // v5.11.103: кеш для стрілок гілок діалогу
   const pinnedRunIds=loadPinned(PINNED_RUNS_KEY);
   const unreadMap=loadHistUnread(); // v5.11.46: крапки «непрочитане»
   const bmIds=new Set(loadBookmarks().map(b=>b.id)); // v5.11.30: закладки
@@ -4098,10 +4061,6 @@ async function postFeedback(body){
 }
 async function sendFeedback(rating,reason=null){
   const run=currentRun;if(!run)return;
-  /* v5.11.99: 👎 на вивченій відповіді Ядра — Ядро її забуває */
-  if(rating==="down"&&!reason&&run.meta?.coreQaId){
-    try{if(coreAssistant()?.forgetQA(run.meta.coreQaId)){saveCoreMemoryQuiet();run.meta.coreQaId=null;toast(t("coreForgotAnswer"),"good")}}catch(e){}
-  }
   const previous=feedbackState.rating,st=$("feedbackStatus");
   if(!reason&&previous===rating)return;
   if(!reason){
@@ -4463,6 +4422,133 @@ async function translateAnswer(){
   }catch(e){toast(`${t("translateFail")} ${e?.message||e}`,"bad")}
   finally{translateBusy=false;btn?.classList.remove("busy")}
 }
+/* v5.11.104: перевірка тексту на ШІ-маркери (anti-AI-tell, ідея scout).
+   Локальний словник uk/en — слова й фрази, що в машинних текстах трапляються
+   приблизно вдвічі частіше, ніж у людських (дослідження Graphite, 10/2026),
+   + людяні заміни. Жодних викликів моделей — текст нікуди не надсилається. */
+const AI_TELL_DICT=[
+  {p:"важливо зазначити",lang:"uk",alt:{uk:"просто скажи це прямо",en:"just say it directly",ru:"просто скажи это прямо"}},
+  {p:"варто зазначити",lang:"uk",alt:{uk:"просто скажи це прямо",en:"just say it directly",ru:"просто скажи это прямо"}},
+  {p:"слід зазначити",lang:"uk",alt:{uk:"просто скажи це прямо",en:"just say it directly",ru:"просто скажи это прямо"}},
+  {p:"підсумовуючи",lang:"uk",alt:{uk:"отже",en:"so / to sum up",ru:"итак"}},
+  {p:"на завершення",lang:"uk",alt:{uk:"наостанок",en:"finally",ru:"напоследок"}},
+  {p:"у сучасному світі",lang:"uk",alt:{uk:"сьогодні",en:"today",ru:"сегодня"}},
+  {p:"безперечно",lang:"uk",alt:{uk:"точно / справді",en:"certainly",ru:"точно / действительно"}},
+  {p:"відіграє важливу роль",lang:"uk",alt:{uk:"важливий для",en:"matters for",ru:"важен для"}},
+  {p:"ключову роль",lang:"uk",alt:{uk:"головне",en:"the key thing",ru:"главное"}},
+  {p:"широкий спектр",lang:"uk",alt:{uk:"багато різних",en:"many different",ru:"много разных"}},
+  {p:"зануримося",lang:"uk",alt:{uk:"розберемося",en:"let's dig in",ru:"разберёмся"}},
+  {p:"розкрити потенціал",lang:"uk",alt:{uk:"використати на повну",en:"use fully",ru:"использовать на полную"}},
+  {p:"безпрецедентний",lang:"uk",alt:{uk:"такого ще не було",en:"never seen before",ru:"такого ещё не было"}},
+  {p:"більше того",lang:"uk",alt:{uk:"і ще",en:"what's more",ru:"и ещё"}},
+  {p:"крім того",lang:"uk",alt:{uk:"також",en:"also",ru:"также"}},
+  {p:"з огляду на",lang:"uk",alt:{uk:"зважаючи на",en:"given",ru:"учитывая"}},
+  {p:"delve",lang:"en",alt:{uk:"дослідити / копнути глибше",en:"explore / dig into",ru:"изучить глубже"}},
+  {p:"tapestry",lang:"en",alt:{uk:"переплетення / суміш",en:"mix / blend",ru:"переплетение"}},
+  {p:"landscape",lang:"en",alt:{uk:"сфера / галузь",en:"field / area",ru:"сфера"}},
+  {p:"leverage",lang:"en",alt:{uk:"використовувати",en:"use",ru:"использовать"}},
+  {p:"robust",lang:"en",alt:{uk:"надійний / потужний",en:"strong / reliable",ru:"надёжный"}},
+  {p:"seamless",lang:"en",alt:{uk:"плавний",en:"smooth",ru:"плавный"}},
+  {p:"cutting-edge",lang:"en",alt:{uk:"найсучасніший",en:"latest",ru:"новейший"}},
+  {p:"game-changer",lang:"en",alt:{uk:"переломний момент",en:"big shift",ru:"переломный момент"}},
+  {p:"paradigm shift",lang:"en",alt:{uk:"кардинальна зміна",en:"major change",ru:"кардинальное изменение"}},
+  {p:"in today's fast-paced world",lang:"en",alt:{uk:"сьогодні",en:"today",ru:"сегодня"}},
+  {p:"it's important to note",lang:"en",alt:{uk:"просто скажи це прямо",en:"just say it directly",ru:"просто скажи это прямо"}},
+  {p:"in conclusion",lang:"en",alt:{uk:"отже",en:"to sum up",ru:"итак"}},
+  {p:"moreover",lang:"en",alt:{uk:"і ще / також",en:"also",ru:"также"}},
+  {p:"furthermore",lang:"en",alt:{uk:"також",en:"also",ru:"также"}},
+  {p:"additionally",lang:"en",alt:{uk:"також",en:"also",ru:"также"}},
+  {p:"unlock",lang:"en",alt:{uk:"відкрити / досягти",en:"open up",ru:"открыть"}},
+  {p:"elevate",lang:"en",alt:{uk:"підняти / покращити",en:"improve / raise",ru:"улучшить"}},
+  {p:"embark",lang:"en",alt:{uk:"почати",en:"start / begin",ru:"начать"}},
+  {p:"utilize",lang:"en",alt:{uk:"використовувати",en:"use",ru:"использовать"}},
+  {p:"facilitate",lang:"en",alt:{uk:"допомогти / сприяти",en:"help / enable",ru:"помочь"}},
+  {p:"harness",lang:"en",alt:{uk:"використати",en:"use",ru:"использовать"}},
+  {p:"realm",lang:"en",alt:{uk:"сфера",en:"area / field",ru:"сфера"}}
+];
+function aiTellEscape(s){return String(s).replace(/[.*+?^${}()|[\]\\]/g,"\\$&")}
+/* Чиста: шукає маркери за межами слів (Unicode), повертає [{marker,lang,count,alt}]. */
+function findAiTells(text){
+  const low=String(text||"").toLowerCase();
+  const out=[];
+  for(const e of AI_TELL_DICT){
+    const re=new RegExp("(^|[^\\p{L}\\p{N}_])"+aiTellEscape(String(e.p).toLowerCase())+"([^\\p{L}\\p{N}_]|$)","giu");
+    let m,count=0,guard=0;
+    while((m=re.exec(low))!==null&&guard<500){
+      guard++;count++;
+      if(m[0].length===0){re.lastIndex++;continue}
+      re.lastIndex=m.index+m[0].length-1;
+    }
+    if(count>0)out.push({marker:e.p,lang:e.lang,count,alt:e.alt});
+  }
+  out.sort((a,b)=>b.count-a.count||a.marker.localeCompare(b.marker));
+  return out;
+}
+function checkAiTells(){
+  const box=$("aiTellBox");if(!box)return;
+  const txt=(currentRun?.final||currentRun?.results?.find(r=>r.ok)?.text||$("finalAnswer")?.innerText||"").trim();
+  const lang=(I18N&&I18N.getLanguage&&I18N.getLanguage())||"uk";
+  const head=title=>`<div class="trHead"><b>${esc(title)}</b><button type="button" class="tinyBtn" data-aitell-close>${esc(t("translateClose"))}</button></div>`;
+  if(!txt){
+    box.innerHTML=head(t("aiTellBtn"))+`<div class="trBody">${esc(t("aiTellEmpty"))}</div>`;
+  }else{
+    const hits=findAiTells(txt);
+    if(!hits.length){
+      box.innerHTML=head(t("aiTellBtn"))+`<div class="trBody">${esc(t("aiTellNone"))}</div>`;
+    }else{
+      const rows=hits.map(h=>`<div class="aiTellRow"><span class="aiTellMark">${esc(h.marker)}</span><span class="aiTellCount">×${h.count}</span><span class="aiTellAlt">${esc(t("aiTellInstead"))} <b>${esc((h.alt&&h.alt[lang])||(h.alt&&h.alt.en)||"")}</b></span></div>`).join("");
+      box.innerHTML=head(t("aiTellTitle",{n:hits.length}))+`<div class="aiTellList">${rows}</div>`;
+    }
+  }
+  box.classList.remove("hidden");
+  const c=box.querySelector("[data-aitell-close]");if(c)c.onclick=()=>{box.classList.add("hidden");box.innerHTML=""};
+  try{box.scrollIntoView({behavior:"smooth",block:"nearest"})}catch(e){}
+}
+/* v5.11.104: чесні стани дозволів (ідея scout: «Say the microphone was never
+   asked for, instead of refused»). Permissions API лише ЧИТАЄ стан — запиту не
+   тригерить; на платформах без нього (iOS) стан лишається "unknown".
+   Кнопки мікрофона/камери показують чесний title: ще не запитували /
+   заборонено / недоступно — замість тихої невдачі. */
+const PERM_STATE={mic:"unknown",cam:"unknown"};
+async function queryPermState(name){
+  try{
+    const P=navigator.permissions;
+    if(!P||typeof P.query!=="function")return "unknown";
+    const r=await P.query({name});
+    const s=String(r&&r.state||"").toLowerCase();
+    return s==="granted"||s==="denied"||s==="prompt"?s:"unknown";
+  }catch(e){return "unknown"}
+}
+function permEffective(kind){
+  if(kind==="mic"&&!(window.SpeechRecognition||window.webkitSpeechRecognition))return "unavailable";
+  if(kind==="cam"&&!document.getElementById("cameraInput"))return "unavailable";
+  return PERM_STATE[kind]||"unknown";
+}
+function permLabelKey(kind,state){
+  const base=kind==="mic"?"permMic":"permCam";
+  if(state==="denied")return base+"Denied";
+  if(state==="prompt")return base+"NotAsked";
+  if(state==="unavailable")return base+"Unavailable";
+  return null; // granted / unknown → звичайний підпис кнопки
+}
+function applyPermToButton(btnId,kind,defaultKey){
+  const btn=document.getElementById(btnId);if(!btn)return;
+  const st=permEffective(kind);
+  btn.dataset.perm=st;
+  const key=permLabelKey(kind,st);
+  const label=key?t(key):t(defaultKey);
+  btn.setAttribute("title",label);btn.setAttribute("aria-label",label);
+}
+function refreshPermissionStates(){
+  applyPermToButton("voiceBtn","mic","voiceAria");
+  applyPermToButton("fileVoiceBtn","mic","voiceAria");
+  applyPermToButton("cameraBtn","cam","cameraAria");
+}
+async function initPermissionStates(){
+  try{PERM_STATE.mic=await queryPermState("microphone")}catch(e){/* unknown */}
+  try{PERM_STATE.cam=await queryPermState("camera")}catch(e){/* unknown */}
+  refreshPermissionStates();
+}
 /* v5.11.65: long-press на відповіді → меню дій «•••» (ідея scout, мобільний
    UX-звіт 2026: long-press як доступна альтернатива кебаб-меню на 390px).
    Поріг 500 мс, рух >12px скасовує; pre/code/button/a жест не чіпає.
@@ -4520,6 +4606,8 @@ function cmdkCommands(){
     {group:t("cmdkActions"),icon:"◐",label:t("themeToggle"),run:cycleTheme},
     {group:t("cmdkActions"),icon:"⧉",label:t("cmdkCopyAnswer"),run:()=>$("copyFinalBtn")?.click()},
     {group:t("cmdkActions"),icon:"❝",label:t("quoteBtn"),run:()=>$("quoteFinalBtn")?.click()},
+    // v5.11.104: перевірка на ШІ-маркери.
+    {group:t("cmdkActions"),icon:"🔎",label:t("aiTellBtn"),run:()=>$("aiTellBtn")?.click()},
     {group:t("cmdkActions"),icon:"🖼️",label:t("quoteCardBtn"),run:()=>$("quoteCardBtn")?.click()},
     // v5.11.40: «Запустити як завдання» — міст із відповіді в команду агентів.
     {group:t("cmdkActions"),icon:"🚀",label:t("runAsTask"),run:()=>$("taskFromAnswerBtn")?.click()},
@@ -5103,6 +5191,8 @@ $("copyRichBtn").onclick=()=>copyRichFrom($("finalAnswer"),$("copyRichBtn")?.que
 /* v5.11.43: спільна логіка цитування фінальної відповіді — кнопка «Цитувати» і свайп вліво. */
 function quoteFinalAnswer(){const txt=currentRun?.final||currentRun?.results?.find(r=>r.ok)?.text||$("finalAnswer").textContent||"",q=buildQuoteBlock(txt),p=$("prompt");if(!q||!p)return;p.value=q+(p.value||"");p.dispatchEvent(new Event("input",{bubbles:true}));showPage("chat");try{p.focus({preventScroll:true})}catch(e){try{p.focus()}catch(_){}}try{p.setSelectionRange(p.value.length,p.value.length)}catch(e){}setTimeout(()=>{try{p.scrollIntoView({behavior:"smooth",block:"center"})}catch(e){}},60)}
 $("quoteFinalBtn").onclick=()=>quoteFinalAnswer();
+// v5.11.104: перевірка відповіді на ШІ-маркери (anti-AI-tell).
+$("aiTellBtn").onclick=()=>checkAiTells();
 /* v5.11.43: свайп вліво по фінальній відповіді → цитата (Telegram-патерн).
    Тільки горизонталь: touch-action: pan-y лишає вертикальний скрол браузеру;
    код-блоки, кнопки й посилання жест не чіпає. На порозі — один тактильний
@@ -5147,6 +5237,10 @@ $("saveNoteBtn")?.addEventListener("click",saveAnswerAsNote);
 $("noteSaveFullBtn")?.addEventListener("click",()=>{closeSheet("noteSaveSheet");if(noteSavePending)saveNoteText(noteSavePending.full);noteSavePending=null});
 $("noteSaveListBtn")?.addEventListener("click",()=>{closeSheet("noteSaveSheet");if(noteSavePending)saveNoteText(noteSavePending.list);noteSavePending=null});
 initLongPressMenu(); // v5.11.65: довге натискання по відповіді → меню «•••»
+initPermissionStates(); // v5.11.104: чесні стани дозволів на кнопках мікрофона/камери
+// v5.11.104: чесні підписи дозволів перераховуються після зміни мови
+// (i18n apply() перезаписує title/aria-label з data-i18n-атрибутів).
+window.addEventListener("aibridge:languagechange",()=>refreshPermissionStates());
 /* v5.11.40: «Запустити як завдання» — міст із відповіді в команду агентів.
    Разово → POST /api/team/tasks (queued, видно в панелі «Команда агентів»);
    щодня → POST /api/schedules (регулярний промпт, як у «Регулярних завданнях»). */
@@ -5715,6 +5809,8 @@ function forkRun(run,peerIndex=null){
   }
   delete clone.id;
   clone.uid=newUid();clone.created=Date.now();clone.updated=Date.now();
+  /* v5.11.103: зв'язок гілки з батьківським діалогом для стрілок навігації. */
+  clone.forkFrom=run.id;if(peerIndex!=null)clone.forkFromPeer=peerIndex;
   const base=String(clone.title||clone.prompt||"").replace(/\s+/g," ").trim().slice(0,80);
   clone.title=`${base} (fork)`;
   saveRun(clone).then(()=>{
@@ -5722,6 +5818,60 @@ function forkRun(run,peerIndex=null){
     showPage("chat",{keepScroll:true});renderAnswer(clone);renderHistory();
     toast(t("forkDone",{title:clone.title}),"good");
   }).catch(()=>{toast(t("forkNoRun"),"bad")});
+}
+
+/* ---------- v5.11.103: стрілки гілок діалогу (branch arrows) ----------
+   Форки Bridge — це окремі діалоги; цей блок дає навігацію ◀ ▶ між
+   «родиною» гілок (батько + його форки) без пошуку в історії.
+   Нові форки несуть forkFrom (id батька); старі знаходимо за суфіксом
+   назви " (fork)", який forkRun додає автоматично. Список діалогів кешує
+   renderHistory (як ctxRunsCache для @@пошуку); якщо кешу ще немає —
+   довантажуємо асинхронно й перемальовуємо бейдж. */
+let branchRunsCache=null;
+function branchParentOf(run,list){
+  if(!run)return null;
+  const arr=Array.isArray(list)?list:[];
+  if(run.forkFrom){const p=arr.find(x=>String(x.id)===String(run.forkFrom));if(p)return p}
+  const title=String(run.title||"");
+  if(title.endsWith(" (fork)")){
+    const base=title.slice(0,-7);
+    const p=arr.find(x=>x!==run&&String(x.title||"")===base);
+    if(p)return p;
+  }
+  return null;
+}
+function branchFamilyOf(run,list){
+  const arr=Array.isArray(list)?list:[];
+  const root=branchParentOf(run,arr)||run;
+  const rid=String(root.id||"");
+  const kids=arr.filter(x=>x!==root&&(
+    (x.forkFrom&&String(x.forkFrom)===rid)||
+    (String(x.title||"").endsWith(" (fork)")&&String(x.title).slice(0,-7)===String(root.title||""))
+  ));
+  kids.sort((a,b)=>(Number(a.created)||0)-(Number(b.created)||0));
+  const fam=[root,...kids];
+  return {fam,idx:Math.max(0,fam.indexOf(run))};
+}
+function renderBranchBadge(run){
+  const el=$("branchBadge");if(!el)return;
+  const list=branchRunsCache;
+  if(!Array.isArray(list)){
+    try{getRuns(500).then(all=>{branchRunsCache=all;renderBranchBadge(run)}).catch(()=>{})}catch(e){}
+    el.classList.add("hidden");return;
+  }
+  const {fam,idx}=branchFamilyOf(run,list);
+  if(fam.length<2){el.classList.add("hidden");el.innerHTML="";return}
+  el.innerHTML=`<button type="button" class="branchArrow" data-branch-go="-1" title="${esc(t("branchPrev"))}" aria-label="${esc(t("branchPrev"))}">◀</button>`+
+    `<span class="branchCount" title="${esc(t("branchNav"))}">⑂ ${esc(t("branchOf",{i:idx+1,n:fam.length}))}</span>`+
+    `<button type="button" class="branchArrow" data-branch-go="1" title="${esc(t("branchNext"))}" aria-label="${esc(t("branchNext"))}">▶</button>`;
+  el.classList.remove("hidden");
+  el.querySelectorAll("[data-branch-go]").forEach(b=>b.onclick=()=>{
+    const d=Number(b.dataset.branchGo);
+    const n=(idx+d+fam.length)%fam.length;
+    const target=fam[n];if(!target||target===run)return;
+    currentRun=target;resetConvId();$("prompt").value=target.prompt||"";
+    showPage("chat",{keepScroll:true});renderAnswer(target);renderHistory();
+  });
 }
 
 /* ---------- F6: #url + /search preprocessing (before send) ---------- */

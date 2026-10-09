@@ -9,7 +9,7 @@ const app=read("app.js"),i18n=read("i18n.js");
 
 ok(app.includes('const LOCAL_PROVIDER_IDS=new Set(["muse","core"])'),"Muse/Core are explicitly classified as local capabilities");
 ok(app.includes("const n=apiProviderIds(j.providers).length"),"top status counts only real API providers");
-ok(app.includes("apiProviderIds().length+\"/\"+apiTotal"),"provider badge excludes local capabilities from its API-key ratio");
+ok(app.includes("Object.keys(PROVIDERS).filter(id=>status.providers?.[id]).length+\"/\"+Object.keys(PROVIDERS).length"),"v5.11.102: provider badge counts ALL providers (built-in Muse/Core included), denominator is full PROVIDERS");
 ok(app.includes('source==="chat"&&["auto","agent","god"].includes(mode)')&&app.includes("coreCanHandleAlone(r)"),"simple Chat questions can use deterministic Core in Auto/Agent/God without cloud keys");
 ok(app.includes('t(_sendOutcome==="error"?"activityFailed":"activityDone")'),"activity summary reports failure instead of unconditional success");
 for(const lang of ["en","uk","ru"])ok(new RegExp(`${lang}:\\{[^}]*activityFailed:`).test(i18n),`${lang} has an activity failure label`);

@@ -58,7 +58,7 @@ r=mk({notes:["Код домофона 4821, під'їзд 2","Лікар при�
 /* довідка про AI Bridge */
 r=mk().respond("як додати ключ?");ok("вбудована довідка",r.intent==="answer"&&r.sources[0].type==="help"&&/Зв'язок/.test(r.text));
 /* чесність: не знає → не вигадує, а сигналить */
-for(const q of ["Хто виграв учорашній матч?","напиши вірш про осінь","Explain quantum physics","Почему небо голубое?"]){r=mk().respond(q);ok("не вигадує: "+q,r.handled===false&&r.escalate===true&&r.confidence===0,r)}
+for(const q of ["Яка столиця Австралії?","напиши вірш про осінь","Explain quantum physics","Почему небо голубое?"]){r=mk().respond(q);ok("не вигадує: "+q,r.handled===false&&r.escalate===true&&r.confidence===0,r)}
 r=mk().respond("Що вирішили щодо зарплати?",{context:doc});ok("слабкий збіг → escalate, а не впевнена відповідь",r.escalate===true,r);
 /* стійкість */
 const bad=[];A=mk();const big=("Це речення про тестування ядра системи номер. ").repeat(4000);

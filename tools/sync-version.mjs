@@ -3,7 +3,6 @@ const root=path.resolve(new URL("..",import.meta.url).pathname),meta=JSON.parse(
 function edit(f,fn){const p=path.join(root,f);fs.writeFileSync(p,fn(fs.readFileSync(p,"utf8")))}
 edit("_worker.js",x=>x.replace(/const VERSION="[^"]+";/,`const VERSION="${v}";`));
 edit("_worker.js",x=>x.replace(/const BUILD_SHA256="[^"]+";/,`const BUILD_SHA256="${build}";`));
-edit("core.js",x=>x.replace(/const VERSION="[^"]+";/,`const VERSION="${v}";`));
 
 for(const f of ["app.js","work-controller.js"])edit(f,x=>x.replace(/const UI_VERSION="[^"]+"/,`const UI_VERSION="${v}"`));
 for(const f of ["work.html","work/index.html"])edit(f,x=>x.replace(/AI Bridge Work Controller v\d+\.\d+(?:\.\d+)?/g,`AI Bridge Work Controller v${v}`));

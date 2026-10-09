@@ -1,19 +1,54 @@
 # AI Bridge — статус релізів
 
-## v5.11.100 (2026-10-06)
-Production honesty hotfix after a real browser test on aibridge-aff.pages.dev.
-- `app.js`: Muse and local Core no longer inflate the configured API-key count; the header and provider ratio now count only cloud API providers.
-- Simple deterministic questions can fall back to local Core in Auto/Agent/God when no cloud key is available, instead of ending in HTTP 503.
-- Failed requests now end the activity log with “no answer received”, not the false “answer ready”.
-- `tests/run_v511100_production_honesty_tests.mjs`: regression coverage for all three defects.
-- Production v5.11.99 accepted and parsed the full 425-entry release ZIP (417 text/code files); this fix does not reduce ZIP safety limits.
+## v5.11.103 (2026-10-09)
+- app.js: стрілки гілок діалогу — бейдж ⑂ «Гілка i з n» з ◀ ▶ у шапці відповіді (ansBadges); forkRun тепер штампує forkFrom (id батька) + forkFromPeer; старі форки знаходяться за суфіксом " (fork)"; навігація з зацикленням; кеш списку діалогів від renderHistory (інвалідація в saveRun)
+- crew.js + _worker.js: критерії прийняття завдань команди — дія set-criteria (POST /api/team/tasks/:id, лише queued/paused, perm task.create), клієнтський чек-лист з вердиктами ✓/✗/· (вердикт раннера → expectEvidence → не оцінено), інлайн-редактор «по одному в рядку»
+- core.js (робота brain-агента, влито в реліз): токенізатор тримає дефіс між літерами — «бізнес-план», «well-known» один токен (тейлоринг UAX #29); дефіс біля цифр/тире — розрив як раніше; VERSION 5.11.103
+- i18n.js: ключі branchNav/branchPrev/branchNext/branchOf, crewCrit* (uk+en); styles.css: .branchBadge/.branchArrow, .crew-crit
+- tests/run_v511103_branch_arrows_tests.mjs (21/21) + tests/run_v511103_acceptance_criteria_tests.mjs (41/41)
+- changelog-app.json: запис 5.11.103 (персистентність перевірено: md5 + git diff --stat)
+- Інвентаризація файлів: 0 видалених; ZIP releases/AI_Bridge_v5.11.103.zip (443 файли, без .wrangler/ — вкладений scheduler-worker/.wrangler/ виключено вручну)
+- Гейт: RELEASE READY 201/201 файлів, 5953 перевірки, ESLint чистий. Деплой preview+production; жива перевірка: /api/version → 5.11.103, живий app.js — branch-навігація, crew.js — критерії, core.js — VERSION 5.11.103
+- Коміт 881a51f
 
-## v5.11.99 (2026-10-05)
-Ядро: більше автономності — вбудовані знання, самонавчання, пряме навчання, списки, кілька команд.
-- core.js: блок «ЗНАННЯ ЯДРА» (194 країни uk/ru/en + 78 фактів × 3 мови), `learnQA/forgetQA/findLearned`, teach/feedback, синоніми, одруківки, списки, multi; exportMemory v2.
-- app.js: `coreLearnFromRun()` (вчиться з відповідей хмари), `coreTrainFromHistory()` (одноразово з історії + кнопка), перемикач самонавчання в «Карті даних», 👎 → forgetQA.
-- i18n.js: V51199 (en/uk/ru). Тест: `tests/run_v51199_core_learning_tests.mjs` (69).
-- Торговий модуль не змінювався. Деталі: CHANGELOG_v5_11_99.txt.
+## v5.11.102 (2026-10-06)
+Фікс реакції Сергія «було 8 провайдерів, зараз 6, де Ядро»: v5.11.101 звузив пігулку netCount до API-only (X/6) — виглядало як зникнення Muse і Ядра.
+- app.js: пігулка знову доступно/всього по ВСІХ провайдерах (X/8); Muse і Ядро (сервер звітує true) повернулися в лічильник
+- Без змін (чесні): топ-статус «N API keys configured» лишився API-only; configuredIds в оцінках — API-only; список провайдерів і так показував усі 8 з бейджами «Асистент»/«Офлайн»
+- tests/run_v511102_provider_count_tests.mjs: 16 перевірок (8 провайдерів, пігулка /8, список не фільтрує built-in, сервер звітує muse/core); honesty-тест оновлено під нову пігулку
+- Інвентаризація файлів: 0 видалених між v5.11.101 і v5.11.102 (515/515)
+- Гейт: RELEASE READY 198/198 файлів, 5887 перевірок, ESLint чистий. ZIP releases/AI_Bridge_v5.11.102.zip (443 файли, без .wrangler/)
+- Деплой preview+production; жива перевірка коду: /api/version → 5.11.102, живий app.js містить нову пігулку X/8 і UI_VERSION 5.11.102, живий core.js — VERSION 5.11.102 і EXPORT_VERSION = VERSION
+- Коміт 6a7db50
+
+## v5.11.101 (2026-10-05)
+Мердж «production honesty hotfix» іншого AI (AI_Bridge_v5_11_100_FINAL.zip, базувався на v5.11.99 — перенесено тільки 3 зміни на моє дерево v5.11.100).
+- app.js: LOCAL_PROVIDER_IDS (muse/core) + apiProviderIds() — Muse і Ядро більше не рахуються як «налаштовані API-ключі» (4 місця: топ-статус, knownCount, пігулка netCount, configuredIds)
+- app.js: детерміноване питання (математика, одиниці, дата, пам'ять…) відповідає локальне Ядро, навіть якщо лишено Auto/Agent/God без хмарного ключа (доповнює CORE_RESCUE v5.11.97, не дублює)
+- app.js + i18n.js (en/uk/ru): саммарі активності каже «Зупинено — відповідь не отримано» після HTTP/провайдерних помилок замість безумовного «Готово»
+- tests/run_v511100_production_honesty_tests.mjs: 8 перевірок трьох фіксів
+- Критично: EXPORT_VERSION=VERSION збережено (їхній core.js мав старий хардкод 5.11.72 — не тягнув); core.js VERSION бампнуто вручну до 5.11.101 (sync-version його не чіпає); тест run_v51144 оновлено: pushPromptHistory 6→7 місць
+- Гейт: RELEASE READY 197/197 файлів, 5867 перевірок, ESLint чистий. Деплой preview+production, /api/version → 5.11.101 на обох. Коміт 9153347
+
+## v5.11.100 (2026-10-05)
+Мердж аудиту іншого AI (AI_Bridge_v5_11_99_FINAL.zip): єдиний фікс — core.js модуль 34.
+- core.js: `const EXPORT_VERSION = VERSION;` (було захардкоджено `"5.11.72"`) — JSON-експорт аналізу тепер несе поточну версію ядра
+- tests/run_v511100_export_version_tests.mjs: новий регресійний тест (5 перевірок: версія експорту === C.VERSION, не хардкод, null-вхід, parseAnalysis round-trip)
+- «Не зміг» аудитора закрито повністю: повний регресійний сьют (196/196, 5855 перевірок), ESLint gate чистий, Playwright без SKIP, release-check до кінця
+- changelog-app.json: запис v5.11.100 трьома мовами (uk/en/ru)
+- Гейт: RELEASE READY: 196/196 файлів, 5855 перевірок, ESLint чистий, browser tests not skipped
+- Деплой: preview + production, /api/version → 5.11.100 на обох, buildSha256 670d60b4 збігається; живий production core.js містить `const EXPORT_VERSION = VERSION;` і `VERSION="5.11.100"`
+- Коміт 4d8841a. ZIP: releases/AI_Bridge_v5.11.100.zip (438 файлів, без .wrangler/)
+
+## v5.11.98 (2026-10-05)
+М'які фейди країв скрольованих панелей + аудит тач-цілей і зума полів вводу.
+- app.js: scroll-fade — JS відстежує краї скрольованих панелей (історія, «Що нового», листи, палітра, журнал прогресу, прев'ю інструментів) і виставляє data-fade-top/bottom; маска — чистий CSS
+- styles.css: `.scroll-fade` mask-image з токенами `--sf-top`/`--sf-bottom` (26px); усі кнопки, чипи, вкладки, іконки топбару — min-height ≥44px; усі поля вводу — font-size ≥16px (iOS більше не зумить екран при фокусі); `.emptyState` gap 8→12px (design-evolver — індиго-сяйву емодзі було тісно)
+- changelog-app.json: запис v5.11.98 трьома мовами (uk/en/ru)
+- Гейт: перший прогін — FAIL run_v5118_d1_tokens_tests.mjs (var(--sf-top)/var(--sf-bottom) не були токенами D1); виправлено чесно — додано як :root-токени (код не чіпав тести); повторний прогін — RELEASE READY: 194/194 файлів, 5847 перевірок, ESLint чистий
+- Деплой: preview (chat-simplify) ✓ + production (main) ✓ — /api/version = 5.11.98 на обох, buildSha256 bd014410 збігається; живий app.js production містить scroll-fade і UI_VERSION 5.11.98, styles.css — scroll-fade mask і 44px тач-цілі ✓ (перевірено код фічі в живих файлах, не лише версію)
+- ZIP: releases/AI_Bridge_v5.11.98.zip (423 файли, без директорії .wrangler/; 2 легітимні wrangler.toml на місці)
+- Коміт: 5991eb4 (дерево чисте)
 
 ## v5.11.97 (2026-10-05)
 Мердж аудиту CORE_RESCUE: коли всі хмарні моделі відмовили — Ядро підхоплює розмову локально.

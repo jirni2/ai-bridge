@@ -48,7 +48,7 @@ const agentStatusLabel=(s)=>t({idle:"crewStIdle",running:"crewStRunning",paused:
 const taskStatusLabel=(s)=>t({queued:"crewTsQueued",running:"crewTsRunning",paused:"crewTsPaused",done:"crewTsDone",failed:"crewTsFailed",cancelled:"crewTsCancelled"}[s]||"crewStUnknown");
 const relStatusLabel=(s)=>t({pending:"crewRelPending",approved:"crewRelApprovedSt",rejected:"crewRelRejectedSt",deployed:"crewRelDeployed"}[s]||"crewStUnknown");
 
-const state={agents:null,tasks:null,events:null,chain:null,releases:null,config:null,media:null,taskFilter:"all"};
+const state={agents:null,tasks:null,events:null,chain:null,releases:null,config:null,media:null,taskFilter:"all",critEditId:null};
 
 function crewToast(message,kind){
   try{
@@ -151,6 +151,10 @@ function renderTasks(){
     const det=(x.input||x.result)?`<details class="crew-det"><summary>${esc(t("crewInput"))} / ${esc(t("crewResult"))}</summary><pre>${esc(typeof x.input==="string"?x.input:JSON.stringify(x.input??"",null,1))}</pre>${x.result?`<pre>${esc(typeof x.result==="string"?x.result:JSON.stringify(x.result,null,1))}</pre>`:""}</details>`:"";
     const ev=(x.evidence&&x.evidence.length)?`<div class="crew-ev">${x.evidence.slice(0,5).map((e)=>`<span>🔗 ${esc(String(e).slice(0,80))}</span>`).join("")}</div>`:"";
     const snz=(x.status==="blocked"&&Number(x.snoozedUntil))?`<span class="crew-snz">⏸ ${esc(t("crewSnoozedUntil",{d:fmtTime(x.snoozedUntil)}))}</span>`:"";
+    /* v5.11.103: критерії прийняття + інлайн-редактор (тільки queued/paused). */
+    const crit=critBlock(x);
+    const critEd=critEditorBlock(x);
+    const critBtn=(x.status==="queued"||x.status==="paused")?`<button type="button" class="crew-btn" data-crit-edit="${esc(x.id)}">${esc(t("crewCritEdit"))}</button>`:"";
     /* v5.11.86: обгортка для свайп-дій (вправо — дія, вліво — відкласти). */
     const sw=taskSwipeActions(x.status);
     const under=(sw.right||sw.left)?`<div class="crew-under crew-under-right">${sw.right?`<span>${esc(swipeActionLabel(sw.right))}</span>`:""}</div><div class="crew-under crew-under-left">${sw.left?`<span>${esc(swipeActionLabel(sw.left))}</span>`:""}</div>`:"";
@@ -158,12 +162,62 @@ function renderTasks(){
       <div class="crew-otask st-${esc(x.status)}">
       <div class="t">${esc(x.title||"—")}</div>
       <div class="m"><span class="pill ${taskPillClass(x.status)}">${esc(taskStatusLabel(x.status))}</span><span>${esc(roleName(x.role))} · ${fmtTime(x.updatedAt||x.createdAt)}</span>${snz}</div>
-      ${det}${ev}
-      <div class="crew-btns">${acts}${appr}</div>
+      ${det}${ev}${crit}${critEd}
+      <div class="crew-btns">${acts}${appr}${critBtn}</div>
     </div></div>`;
   }).join("");
   initTaskSwipe(box); // v5.11.86: свайп-дії
   renderStats();
+}
+
+/* v5.11.103: критерії прийняття завдань команди (acceptance checklist).
+   Клієнтський аналог серверного teamEvaluateCriteria: вердикт раннера
+   (result.criteriaChecks за id) → expectEvidence (підрядок у evidence) →
+   інакше — не оцінено. */
+function criteriaVerdicts(x){
+  const list=Array.isArray(x.criteria)?x.criteria:[];
+  const checks=(x.result&&Array.isArray(x.result.criteriaChecks))?x.result.criteriaChecks:[];
+  const byId={};
+  for(const c of checks){const id=String((c&&c.id)||"");if(id&&!byId[id])byId[id]=c}
+  const ev=(x.result&&Array.isArray(x.result.evidence))?x.result.evidence.map((e)=>String(e).toLowerCase()):[];
+  return list.map((c,i)=>{
+    const text=typeof c==="string"?c:String((c&&c.text)||"");
+    const id=String((c&&c.id)||("c"+(i+1)));
+    const g=byId[id];
+    if(g)return{text,id,st:g.verdict==="pass"?"pass":"fail",note:String((g&&g.note)||"")};
+    const ee=(c&&typeof c==="object"&&c.expectEvidence!=null)?String(c.expectEvidence):"";
+    if(ee){
+      const hit=ev.some((e)=>e.includes(ee.toLowerCase()));
+      return{text,id,st:hit?"pass":"fail",note:hit?("✓ "+ee):("✗ "+ee)};
+    }
+    return{text,id,st:"pending",note:""};
+  });
+}
+function critBlock(x){
+  const list=Array.isArray(x.criteria)?x.criteria:[];
+  if(!list.length)return "";
+  const v=criteriaVerdicts(x);
+  const n=v.filter((c)=>c.st==="pass").length;
+  const items=v.map((c)=>{
+    const mark=c.st==="pass"?"✓":(c.st==="fail"?"✗":"·");
+    const cls=c.st==="pass"?"pass":(c.st==="fail"?"fail":"pending");
+    const stLabel=c.st==="pass"?t("crewCritPass"):(c.st==="fail"?t("crewCritFail"):t("crewCritUneval"));
+    return `<li class="${cls}"><span class="mk" aria-hidden="true">${mark}</span><span class="tx">${esc(c.text)}<small>${esc(stLabel)}${c.note?": "+esc(c.note.slice(0,80)):""}</small></span></li>`;
+  }).join("");
+  return `<div class="crew-crit"><div class="ch"><span>${esc(t("crewCritTitle"))}</span><span class="cnt">${esc(t("crewCritPassed",{n,m:list.length}))}</span></div><ul>${items}</ul></div>`;
+}
+function critEditorBlock(x){
+  if(state.critEditId!==x.id)return "";
+  const cur=(Array.isArray(x.criteria)?x.criteria:[])
+    .map((c)=>typeof c==="string"?c:String((c&&c.text)||"")).filter((s)=>s.trim()).join("\n");
+  return `<div class="crew-crit-ed"><textarea rows="4" maxlength="4000" data-crit-text="${esc(x.id)}" placeholder="${esc(t("crewCritHint"))}">${esc(cur)}</textarea><div class="hint">${esc(t("crewCritHint"))}</div><div class="crew-btns"><button type="button" class="crew-btn ok" data-crit-save="${esc(x.id)}">${esc(t("save"))}</button><button type="button" class="crew-btn" data-crit-cancel="${esc(x.id)}">${esc(t("cancelBtn"))}</button></div></div>`;
+}
+async function saveCriteria(id){
+  const ta=document.querySelector(`[data-crit-text="${CSS.escape(id)}"]`);
+  const lines=String(ta&&ta.value||"").split("\n").map((s)=>s.trim()).filter(Boolean).slice(0,20);
+  const ok=await mutate(api(`/tasks/${encodeURIComponent(id)}`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({action:"set-criteria",criteria:lines})}),t("crewCritSaved"));
+  state.critEditId=null;
+  if(ok)renderTasks();
 }
 
 /* ---------------- events ---------------- */
@@ -470,6 +524,13 @@ function bind(){
     if(ex){exportEventsJsonl();return}
     const tb=e.target.closest("[data-task]");
     if(tb&&tb.dataset.act){onTaskAction(tb.dataset.task,tb.dataset.act);return}
+    /* v5.11.103: редактор критеріїв прийняття */
+    const ce=e.target.closest("[data-crit-edit]");
+    if(ce){state.critEditId=ce.dataset.critEdit;renderTasks();return}
+    const cs=e.target.closest("[data-crit-save]");
+    if(cs){saveCriteria(cs.dataset.critSave);return}
+    const cc=e.target.closest("[data-crit-cancel]");
+    if(cc){state.critEditId=null;renderTasks();return}
     const rb=e.target.closest("[data-release]");
     if(rb&&rb.dataset.act){onReleaseAction(rb.dataset.release,rb.dataset.act);return}
     /* v5.11.77: клік по картці агента → форма нового завдання з його роллю (не при виділенні тексту) */

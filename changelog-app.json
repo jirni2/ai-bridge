@@ -1,43 +1,97 @@
 [
   {
-    "v": "5.11.100",
-    "date": "2026-10-06",
+    "v": "5.11.104",
+    "date": "2026-10-09",
     "uk": [
-      "Muse і локальне Ядро більше не рахуються як API-ключі — статус показує реальну кількість хмарних провайдерів",
-      "Прості точні питання можуть отримати локальну відповідь Ядра в Auto, Agent або God навіть без хмарного ключа",
-      "Після помилки журнал чесно пише, що відповідь не отримано, замість неправдивого «Готово»"
+      "Перевірка тексту на ШІ-маркери: кнопка 🔎 «Перевірити на ШІ-маркери» в меню «•••» під відповіддю шукає в тексті характерні ШІ-слова й фрази (локальний словник uk/en) і пропонує людяні заміни — корисно для текстів TikTok/YouTube; перевірка повністю локальна, без викликів моделей",
+      "Чесні стани дозволів: кнопки мікрофона й камери тепер показують чесний стан дозволу — «ще не запитували» (бурштинова крапка), «заборонено» (червона крапка, підказка де увімкнути), «недоступно на пристрої» — замість тихої невдачі"
     ],
     "en": [
-      "Muse and local Core no longer count as API keys — status now shows the real cloud-provider count",
-      "Simple deterministic questions can use local Core in Auto, Agent or God even without a cloud key",
-      "After a failed request the activity log says that no answer arrived instead of falsely reporting success"
+      "AI-marker check: the 🔎 button in the “•••” menu scans the answer for characteristic AI words and phrases (local uk/en dictionary) and suggests human replacements — handy for TikTok/YouTube copy; fully local, no model calls",
+      "Honest permission states: the microphone and camera buttons now show the honest permission state — “not asked yet” (amber dot), “denied” (red dot with a hint where to enable), “unavailable on this device” — instead of failing silently"
+    ]
+  },
+  {
+    "v": "5.11.103",
+    "date": "2026-10-09",
+    "uk": [
+      "Стрілки гілок діалогу: у шапці відповіді з'явився навігатор ⑂ «Гілка 1 з 3» — стрілки ◀ ▶ перемикають між форками діалогу без пошуку в історії; форки тепер пам'ятають батьківський діалог",
+      "Критерії прийняття завдань команди: картка завдання показує чек-лист критеріїв з галочками ✓/✗ (вердикт раннера або перевірка доказів); критерії можна додати й змінити до запуску завдання",
+      "Ядро: токенізатор тримає дефіс між літерами — «бізнес-план», «well-known» тепер один токен (тейлоринг UAX #29); дефіс біля цифр і тире — як раніше розрив"
+    ],
+    "en": [
+      "Dialog branch arrows: the answer header now shows a ⑂ “Branch 1 of 3” navigator — ◀ ▶ arrows switch between dialog forks without searching history; forks now remember their parent dialog",
+      "Team task acceptance criteria: the task card shows a criteria checklist with ✓/✗ marks (runner verdict or evidence check); criteria can be added and edited before the task starts",
+      "Core: the tokenizer keeps hyphens between letters — “бізнес-план”, “well-known” are now one token (UAX #29 tailoring); hyphens near digits and dashes still break as before"
     ],
     "ru": [
-      "Muse и локальное Ядро больше не считаются API-ключами — статус показывает реальное число облачных провайдеров",
-      "Простые точные вопросы могут получить локальный ответ Ядра в Auto, Agent или God даже без облачного ключа",
-      "После ошибки журнал честно пишет, что ответ не получен, вместо ложного «Готово»"
+      "Стрелки веток диалога: в шапке ответа появился навигатор ⑂ «Ветка 1 из 3» — стрелки ◀ ▶ переключают между форками диалога без поиска в истории; форки теперь помнят родительский диалог",
+      "Критерии приёмки задач команды: карточка задачи показывает чек-лист критериев с галочками ✓/✗ (вердикт раннера или проверка доказательств); критерии можно добавить и изменить до запуска задачи",
+      "Ядро: токенизатор держит дефис между буквами — «бизнес-план», «well-known» теперь один токен (тейлоринг UAX #29); дефис у цифр и тире — как раньше разрыв"
+    ]
+  },
+  {
+    "v": "5.11.102",
+    "date": "2026-10-06",
+    "uk": [
+      "Пігулка провайдерів у топбарі знову показує всіх 8: Muse і Ядро повернулися в лічильник (доступно/всього)",
+      "Muse і Ядро лишились видимими у списку провайдерів з позначками «Асистент»/«Офлайн» — вони вбудовані й не потребують ключа",
+      "Чесний лічильник «API keys configured» без змін — рахує лише справжні хмарні ключі"
+    ],
+    "en": [
+      "Topbar provider badge shows all 8 again: Muse and Core are back in the counter (available/total)",
+      "Muse and Core stay visible in the provider list with “Assistant”/“Offline” badges — built-in, no key needed",
+      "Honest “API keys configured” counter unchanged — counts only real cloud keys"
+    ],
+    "ru": [
+      "Бейдж провайдеров в топбаре снова показывает всех 8: Muse и Ядро вернулись в счётчик (доступно/всего)",
+      "Muse и Ядро остались видимыми в списке провайдеров с метками «Ассистент»/«Офлайн» — встроенные, ключ не нужен",
+      "Честный счётчик «API keys configured» без изменений — считает только настоящие облачные ключи"
+    ]
+  },
+  {
+    "v": "5.11.101",
+    "date": "2026-10-05",
+    "uk": [
+      "Чесність production: Muse і Ядро більше не рахуються як «налаштовані API-ключі» — лічильник показує лише справжні хмарні ключі",
+      "Просте детерміноване питання (математика, одиниці, дата, пам'ять) відповідає локальне Ядро, навіть якщо лишився режим Auto/Agent/God без хмарного ключа",
+      "Живий саммарі активності більше не каже «відповідь отримано» після помилок HTTP/провайдерів (знахідки зовнішнього аудиту)"
+    ],
+    "en": [
+      "Production honesty: Muse and Core no longer count as “configured API keys” — the counter shows only real cloud keys",
+      "A simple deterministic question (math, units, date, memory) is answered by local Core even if Auto/Agent/God mode was left selected with no cloud key",
+      "The live activity summary no longer says “answer received” after HTTP/provider failures (external audit findings)"
+    ],
+    "ru": [
+      "Честность production: Muse и Ядро больше не считаются «настроенными API-ключами» — счётчик показывает только настоящие облачные ключи",
+      "Простой детерминированный вопрос (математика, единицы, дата, память) отвечает локальное Ядро, даже если остался режим Auto/Agent/God без облачного ключа",
+      "Живое саммари активности больше не говорит «ответ получен» после ошибок HTTP/провайдеров (находки внешнего аудита)"
+    ]
+  },
+  {
+    "v": "5.11.100",
+    "date": "2026-10-05",
+    "uk": [
+      "Виправлено версію в JSON-експорті аналізу ядра: замість застарілої захардкодженої тепер завжди поточна версія (знахідка зовнішнього аудиту)"
+    ],
+    "en": [
+      "Fixed the version in the core analysis JSON export: now always the current version instead of a stale hard-coded one (external audit finding)"
+    ],
+    "ru": [
+      "Исправлена версия в JSON-экспорте анализа ядра: теперь всегда текущая вместо устаревшей захардкоженной (находка внешнего аудита)"
     ]
   },
   {
     "v": "5.11.99",
     "date": "2026-10-05",
     "uk": [
-      "Ядро стало розумнішим: знає столиці всіх країн і базові факти (наука, географія, Канада, Україна, кухонні міри) — без інтернету",
-      "Ядро вчиться саме: запам'ятовує відповіді хмарних моделей і вашу історію чатів, щоб потім відповісти без них",
-      "Ядро можна навчити прямо: «коли я питаю …, відповідай …», а на помилку сказати «неправильно»",
-      "Списки («додай молоко в список покупок») і кілька команд підряд («порахуй … і запам'ятай результат»)"
+      "Нова функція ядра: ключові фрази — витягає багатослівні терміни («штучний інтелект», «машинне навчання») за алгоритмом RAKE, доповнюючи ключові слова й резюме"
     ],
     "en": [
-      "The Core got smarter: it knows every country's capital and basic facts (science, geography, Canada, Ukraine, kitchen measures) — offline",
-      "The Core learns by itself: it remembers cloud models' answers and your chat history so it can answer without them later",
-      "You can teach the Core directly: \"when I ask …, answer …\", and say \"wrong\" to correct it",
-      "Lists (\"add milk to my shopping list\") and several commands in a row (\"calculate … and remember the result\")"
+      "New core feature: keyphrases — extracts multi-word terms (\"artificial intelligence\", \"machine learning\") with the RAKE algorithm, complementing keywords and summaries"
     ],
     "ru": [
-      "Ядро стало умнее: знает столицы всех стран и базовые факты (наука, география, Канада, Украина, кухонные меры) — без интернета",
-      "Ядро учится само: запоминает ответы облачных моделей и вашу историю чатов, чтобы потом ответить без них",
-      "Ядро можно научить прямо: «когда я спрашиваю …, отвечай …», а на ошибку сказать «неправильно»",
-      "Списки («добавь молоко в список покупок») и несколько команд подряд («посчитай … и запомни результат»)"
+      "Новая функция ядра: ключевые фразы — извлекает многословные термины («искусственный интеллект», «машинное обучение») по алгоритму RAKE, дополняя ключевые слова и резюме"
     ]
   },
   {

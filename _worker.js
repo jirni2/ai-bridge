@@ -8,8 +8,8 @@ const PROVIDER_META={
   openrouter:{key:"OPENROUTER_API_KEY",keys:["OPENROUTER_API_KEY"],modelKey:"OPENROUTER_MODEL",defaultModel:"openrouter/free",fallbackModels:[]}
 };
 const VAULT_TOKEN_IDS=[...Object.keys(PROVIDER_META),"fal","cloudflare_ai","cloudflare_account"];
-const VERSION="5.11.100";
-const BUILD_SHA256="2aa095a7b69f0012843a13f842f4110811a6cca31069f730645e3c37884465d7";
+const VERSION="5.11.104";
+const BUILD_SHA256="e74767aef9d4b4a6d1b6c5f823c7ed82b2df99b8e2de6c60602a9da9994453a8";
 const PUBLIC_SUPPORT_EMAIL="aibridge.support@gmail.com";
 const FREE_WORK_PROVIDERS=["gemini","groqfree","openrouter"];
 const MCP_VERSION="2025-11-25";
@@ -6731,6 +6731,7 @@ function teamAuthorize(env,actor,route,method,ctx){
   if(rule==="action"){
     const a=String(c.action||"");
     if(a==="cancel")return need("task.cancel");
+    if(a==="set-criteria")return need("task.create");
     if(a==="execute"||a==="start"||a==="pause"||a==="resume"||a==="process-waiting")return need("task.assign");
     return deny("Unknown task action");
   }
@@ -7566,6 +7567,16 @@ async function handleTeam(req,env,url){
       const b=await body(),action=String(b.action||"");
       if(action==="execute"){const t=await teamExecuteTask(env,mt[1],actor);return json({version:VERSION,task:t})}
       if(action==="process-waiting"){const r=await teamProcessWaiting(env);return json({version:VERSION,resolved:r})}
+      /* v5.11.103: редагування критеріїв прийняття — лише до запуску (queued/paused). */
+      if(action==="set-criteria"){
+        const t=await teamTaskGet(env,mt[1]);
+        if(!t)return json({version:VERSION,error:"Not found"},404);
+        if(t.status!=="queued"&&t.status!=="paused")throw teamErr("CRITERIA_LOCKED","criteria locked after start",409);
+        t.criteria=teamNormalizeCriteria(b.criteria);
+        await teamTaskSave(env,t);
+        await teamEventLog(env,"task",actor,"criteria updated: "+t.title);
+        return json({version:VERSION,task:t});
+      }
       /* v5.11.86: snooze передає until (мітка повернення). */
       const t=await teamTaskTransition(env,mt[1],action,actor,{until:b.until});return json({version:VERSION,task:t});
     }

@@ -34,6 +34,7 @@ const APP_ALLOW = [
   /\.test\(q\)\)s\.(detail|example)/, // скоринг чипів продовження (regex)
   /MODE_BADGE_LABEL/,              // ідентифікатори режимів (Auto/Team/Code — власні назви)
   /FILE_TASK_STOPWORDS/,           // стоп-слова для файлів
+  /^\s*\{p:"[^"]+",lang:"(uk|en)",alt:\{/, // v5.11.104: записи словника ШІ-маркерів (дані, не UI-текст)
   /name:"Ядро"/,                      // v5.11.70: власна назва провайдера «Ядро»
 ];
 appNoComments.split("\n").forEach((ln, i) => {

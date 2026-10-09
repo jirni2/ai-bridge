@@ -56,7 +56,7 @@ ok(app.includes('!e.isComposing') , "keydown: повага до IME");
 ok(app.includes("if(e.isTrusted)promptHistIdx=-1"), "input: скидання індексу лише на довірений ввід");
 { // push лише при реальній відправці, всі гілки sendTask
   const n = (app.match(/pushPromptHistory\(rawPrompt\)/g) || []).length;
-  ok(n === 6, "sendTask: pushPromptHistory у 6 місцях (research + звичайна + Muse-картка v5.11.62 + Ядро v5.11.70 + Ядро-офлайн v5.11.95 + Ядро-першим v5.11.95), знайдено " + n);
+  ok(n === 7, "sendTask: pushPromptHistory у 7 місцях (research + звичайна + Muse-картка v5.11.62 + Ядро v5.11.70 + Ядро-офлайн v5.11.95 + Ядро-першим v5.11.95 + Ядро-детерміноване v5.11.101), знайдено " + n);
 }
 
 /* --- 4. app.js: синхронізація селектора мови входу --- */
