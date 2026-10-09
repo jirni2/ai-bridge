@@ -125,7 +125,7 @@ const strip=x=>x.replace(/\s*\(.*\)\s*$/,"").replace(/,.*$/,"");
 }
 /* --- інтеграція в застосунок --- */
 const app=fs.readFileSync(path.join(root,"app.js"),"utf8"),i18n=fs.readFileSync(path.join(root,"i18n.js"),"utf8");
-ok("app: вчиться лише зі звичайного чату без зображень",/if\(source==="chat"&&!submittedImages\.length&&!continueFrom\)coreLearnFromRun\(currentRun\)/.test(app));
+ok("app: вчиться лише зі звичайного чату без зображень",/if\(source==="chat"&&!submittedImages\.length&&!continueFrom\)\{?\s*(?:const learned=)?coreLearnFromRun\(currentRun/.test(app)); /* v5.11.107: + прапорець coreAsked */
 {
   const body=app.slice(app.indexOf("function coreLearnFromRun"),app.indexOf("async function coreTrainFromHistory"));
   ok("app: не вчиться з інкогніто, помилок, файлів, агента, чужого контексту",/m\.error\|\|m\.temporary\|\|m\.localResponder/.test(body)&&/run\.attachments/.test(body)&&/ctxChats/.test(body)&&/"agent","deep-scan"/.test(body));

@@ -1,4 +1,4 @@
-const CACHE="ai-bridge-v5-11-106";
+const CACHE="ai-bridge-v5-11-107";
 // v5.9.15: Web Push — "task ready" notifications.
 self.addEventListener("push",e=>{
   let data={};

@@ -20,7 +20,7 @@ const $=id=>document.getElementById(id);
 const I18N=globalThis.AIBridgeI18n||null;
 I18N?.init?.();
 const t=(key,vars)=>I18N?.t?.(key,vars)??key;
-const UI_VERSION="5.11.106";
+const UI_VERSION="5.11.107";
 // v5.9.0: storage can throw (Safari private mode, quota, blocked site data).
 // Every new read/write goes through these helpers so one failure can never
 // stop the whole interface from booting.
@@ -1543,11 +1543,12 @@ function renderDataMap(){
   `<div class="card dmRow"><div class="dmIcon" aria-hidden="true">💾</div><div><b>${esc(t("dmPersistT"))}</b><p>${esc(t("dmPersistD"))}</p><span class="privStatus" id="persistStatusLine">${esc(persistStatusText())}</span></div></div>`+
   /* v5.11.95: пам'ять Асистента Ядра — окремий рядок із лічильником і кнопкою очищення. */
   (()=>{let info={facts:0,docs:0};try{info=coreAssistant()?.memoryInfo()||info}catch(e){}
-    return `<div class="card dmRow"><div class="dmIcon" aria-hidden="true">⚙️</div><div><b>${esc(t("dmCoreT"))}</b><p>${esc(t("dmCoreD",{f:info.facts||0,d:info.docs||0}))}</p><p>${esc(t("dmCoreD2",{q:info.qa||0,tq:info.taught||0,l:info.lists||0,k:info.knowledge||0}))}</p><button class="tinyBtn" type="button" id="clearCoreMemoryBtn">${esc(t("clear"))}</button> <button class="tinyBtn" type="button" id="coreLearnToggleBtn" aria-pressed="${coreLearningOn()?"true":"false"}">${esc(t(coreLearningOn()?"coreLearnOn":"coreLearnOff"))}</button> <button class="tinyBtn" type="button" id="coreTrainBtn">${esc(t("coreTrainBtn"))}</button></div></div>`})()+
+    return `<div class="card dmRow"><div class="dmIcon" aria-hidden="true">⚙️</div><div><b>${esc(t("dmCoreT"))}</b><p>${esc(t("dmCoreD",{f:info.facts||0,d:info.docs||0}))}</p><p>${esc(t("dmCoreD2",{q:info.qa||0,tq:info.taught||0,l:info.lists||0,k:info.knowledge||0}))}</p><button class="tinyBtn" type="button" id="clearCoreMemoryBtn">${esc(t("clear"))}</button> <button class="tinyBtn" type="button" id="coreLearnToggleBtn" aria-pressed="${coreLearningOn()?"true":"false"}">${esc(t(coreLearningOn()?"coreLearnOn":"coreLearnOff"))}</button> <button class="tinyBtn" type="button" id="coreTrainBtn">${esc(t("coreTrainBtn"))}</button> <button class="tinyBtn" type="button" id="coreAskToggleBtn" aria-pressed="${coreAskCloudOn()?"true":"false"}">${esc(t(coreAskCloudOn()?"coreAskOn":"coreAskOff"))}</button></div></div>`})()+
   `<p class="dmFoot">${esc(t("dmFoot"))}</p>`;
   $("clearPromptHistBtn").onclick=()=>clearPromptHistory();
   $("clearCoreMemoryBtn").onclick=()=>{try{coreAssistant()?.forget("")}catch(e){}try{localStorage.removeItem(CORE_MEMORY_KEY)}catch(e){}renderDataMap();toast(t("dmCoreCleared"),"good")};
   $("coreLearnToggleBtn").onclick=()=>{try{if(coreLearningOn())localStorage.setItem(CORE_LEARN_OFF_KEY,"1");else localStorage.removeItem(CORE_LEARN_OFF_KEY)}catch(e){}renderDataMap()};
+  $("coreAskToggleBtn").onclick=()=>{try{if(coreAskCloudOn())localStorage.removeItem(CORE_ASK_KEY);else localStorage.setItem(CORE_ASK_KEY,"1")}catch(e){}renderDataMap();toast(t(coreAskCloudOn()?"coreAskOnToast":"coreAskOffToast"),"good")};
   $("coreTrainBtn").onclick=async()=>{const n=await coreTrainFromHistory(true);renderDataMap();toast(n>0?t("coreTrainedToast",{n}):t("coreTrainNone"),n>0?"good":"")};
   // Оновити статус, щойно прийде відповідь storage.persist().
   ensureStoragePersist().then(()=>{const s=$("persistStatusLine");if(s)s.textContent=persistStatusText()});
@@ -2962,6 +2963,16 @@ function coreCanHandleAlone(r){
    Не вчиться з: інкогніто, помилок, файлів/зображень, агента, відповідей із контекстом іншого чату. */
 const CORE_LEARN_OFF_KEY="ai_bridge_core_learn_off",CORE_TRAINED_KEY="ai_bridge_core_trained_v1";
 function coreLearningOn(){try{return localStorage.getItem(CORE_LEARN_OFF_KEY)!=="1"}catch(e){return true}}
+/* v5.11.107: «Ядро питає хмару». Коли обрано лише Ядро і воно не знає відповіді, Ядро само ставить
+   це питання одній хмарній моделі (спершу безкоштовні) і запам'ятовує відповідь на цьому пристрої.
+   Вмикає людина в «Карті даних» (типово вимкнено): без її згоди Ядро текст питання в хмару НЕ надсилає. */
+const CORE_ASK_KEY="ai_bridge_core_ask_cloud";
+const CORE_TEACHER_ORDER=["groqfree","openrouter","gemini","claude","openai","grok"];
+function coreAskCloudOn(){try{return localStorage.getItem(CORE_ASK_KEY)==="1"}catch(e){return false}}
+function coreTeacherProvider(){
+  const ready=apiProviderIds();
+  return CORE_TEACHER_ORDER.find(id=>ready.includes(id))||ready[0]||null;
+}
 function saveCoreMemoryQuiet(){if(!_coreAssistant)return false;try{localStorage.setItem(CORE_MEMORY_KEY,_coreAssistant.exportMemory());return true}catch(e){return false}}
 function coreLearnFromRun(run,opts){
   try{
@@ -3012,6 +3023,10 @@ function runLocalCore(rawPrompt,source,context){
   const clean=String(rawPrompt||"").trim();
   try{
     const r=askCore(clean,context,attachments?.[0]?.name);
+    if(r&&!r.handled&&r.escalate&&source==="chat"&&!context&&coreAskCloudOn()){
+      const teacher=coreTeacherProvider();
+      if(teacher){sendTask({source:"chat",promptText:clean,forceProvider:teacher,coreAsked:true});return}
+    }
     if(r){renderCoreReply(clean,r);return}
   }catch(e){
     /* v5.11.75: чесні помилки Ядра — ліміт вводу / таймаут. Не мовчимо. */
@@ -3304,12 +3319,16 @@ async function sendTask(options={}){
       currentRun.continueRoot=continueFrom.question;
     }
     if(tempRun)currentRun.meta.temporary=true; // v5.11.39: інкогніто — saveRun пропустить
+    if(options.coreAsked)currentRun.meta.coreAsked=true; // v5.11.107: питання поставило Ядро
     // v5.9.16: budget-downgraded routing is surfaced once per conversation.
     if((j.budgetDowngraded||j.meta?.budgetDowngraded)&&!budgetDowngradedToasted){budgetDowngradedToasted=true;toast(t("budgetDowngraded"),"bad")}
     maybeRefreshBudget();
     await saveRun(currentRun);
     /* v5.11.99: Ядро вчиться з цієї відповіді (лише звичайний чат без файлів і зображень) */
-    if(source==="chat"&&!submittedImages.length&&!continueFrom)coreLearnFromRun(currentRun);
+    if(source==="chat"&&!submittedImages.length&&!continueFrom){
+      const learned=coreLearnFromRun(currentRun,options.coreAsked?{force:true}:undefined);
+      if(options.coreAsked&&learned){const pid=(currentRun.results||[]).find(r=>r.ok)?.provider||currentRun.providers?.[0];toast(t("coreAskedToast",{p:PROVIDERS[pid]?.name||"AI"}),"good")}
+    }
     clearPendingJob();
     sweepPasteStore(); // v5.11.28: вставки відправлено — чистимо сховище
     markDoneHidden(); // v5.11.23: бейдж PWA, якщо завдання фінішувало у фоні

@@ -1,5 +1,24 @@
 [
   {
+    "v": "5.11.107",
+    "date": "2026-10-09",
+    "uk": [
+      "Ядро тепер може саме спитати хмарну модель, коли не знає відповіді, і запам'ятати її — увімкніть у «Карті даних»",
+      "Спершу Ядро питає безкоштовні моделі (Groq Free, OpenRouter Free)",
+      "Без вашої згоди Ядро питання в хмару не надсилає; в інкогніто нічого не запам'ятовує"
+    ],
+    "en": [
+      "The Core can now ask a cloud AI when it doesn't know an answer, and remember it — turn it on in Data Map",
+      "The Core asks free models first (Groq Free, OpenRouter Free)",
+      "Without your consent the Core never sends questions to the cloud; in incognito it remembers nothing"
+    ],
+    "ru": [
+      "Ядро теперь может само спросить облачную модель, когда не знает ответа, и запомнить его — включите в «Карте данных»",
+      "Сначала Ядро спрашивает бесплатные модели (Groq Free, OpenRouter Free)",
+      "Без вашего согласия Ядро вопросы в облако не отправляет; в инкогнито ничего не запоминает"
+    ]
+  },
+  {
     "v": "5.11.106",
     "date": "2026-10-09",
     "uk": [

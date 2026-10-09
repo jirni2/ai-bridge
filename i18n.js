@@ -713,6 +713,13 @@ const V51199={
   ru:{coreTrainedToast:"Ядро выучило ответов из вашей истории чатов: {n}",coreTrainNone:"В истории нет новых ответов для обучения",coreForgotAnswer:"Ядро забыло этот ответ",dmCoreD2:"Выученные ответы: {q} (вы научили сами: {tq}) · списки: {l} · встроенные знания: {k} записей.",coreLearnOn:"Самообучение: включено",coreLearnOff:"Самообучение: выключено",coreTrainBtn:"Обучить на истории"}
 };
 for(const [lang,strings] of Object.entries(V51199)){if(lang==="en")Object.assign(EN,strings);else if(PACKS[lang])Object.assign(PACKS[lang],strings)}
+/* v5.11.107: Ядро питає хмару, коли не знає. */
+const V511107={
+  en:{coreAskOn:"Core asks the cloud when unsure: ON",coreAskOff:"Core asks the cloud when unsure: OFF",coreAskOnToast:"Now when the Core doesn't know an answer, it will ask a cloud AI and remember the reply",coreAskOffToast:"The Core will no longer send questions to the cloud by itself",coreAskedToast:"The Core didn't know — it asked {p} and remembered the answer"},
+  uk:{coreAskOn:"Ядро питає хмару, коли не знає: увімк.",coreAskOff:"Ядро питає хмару, коли не знає: вимк.",coreAskOnToast:"Тепер, коли Ядро не знає відповіді, воно спитає хмарну модель і запам'ятає відповідь",coreAskOffToast:"Ядро більше не надсилатиме питання в хмару саме",coreAskedToast:"Ядро не знало — запитало {p} і запам'ятало відповідь"},
+  ru:{coreAskOn:"Ядро спрашивает облако, когда не знает: вкл.",coreAskOff:"Ядро спрашивает облако, когда не знает: выкл.",coreAskOnToast:"Теперь, когда Ядро не знает ответа, оно спросит облачную модель и запомнит ответ",coreAskOffToast:"Ядро больше не будет само отправлять вопросы в облако",coreAskedToast:"Ядро не знало — спросило {p} и запомнило ответ"},
+};
+for(const [lang,strings] of Object.entries(V511107)){if(lang==="en")Object.assign(EN,strings);else if(PACKS[lang])Object.assign(PACKS[lang],strings)}
 for(const [lang,meta] of Object.entries(LANGUAGES)){
   const target=lang==="en"?EN:PACKS[lang];if(!target)continue;
   for(const [k,v] of Object.entries(meta)){if(k==="code"||k==="name"||k==="locale"||k==="voice"||typeof v!=="string")continue;if(target[k]===undefined)target[k]=v}
