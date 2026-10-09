@@ -20,7 +20,7 @@ const $=id=>document.getElementById(id);
 const I18N=globalThis.AIBridgeI18n||null;
 I18N?.init?.();
 const t=(key,vars)=>I18N?.t?.(key,vars)??key;
-const UI_VERSION="5.11.100";
+const UI_VERSION="5.11.106";
 // v5.9.0: storage can throw (Safari private mode, quota, blocked site data).
 // Every new read/write goes through these helpers so one failure can never
 // stop the whole interface from booting.

@@ -1,5 +1,11 @@
 # AI Bridge — статус релізів
 
+## v5.11.106 (2026-10-09)
+Злиття двох гілок Ядра: основа — ядро сайту (зі знаннями й самонавчанням v5.11.99), з паралельної гілки 5.11.103–105 перенесено дефіс у словах, keyphrases() (RAKE) і захист від «уламка» на початку резюме.
+- Пряма заміна core.js на 5.11.105 ламала самонавчання — тому лише перенесення змін.
+- Тести: +run_v511106_core_merge, +run_v511103_core_hyphen, +run_v51199_core_keyphrases; оновлено run_v51178_core_apos.
+- Перша зміна, зроблена через GitHub (гілка core-merge). Деталі: CHANGELOG_v5_11_106.txt.
+
 ## v5.11.100 (2026-10-06)
 Production honesty hotfix after a real browser test on aibridge-aff.pages.dev.
 - `app.js`: Muse and local Core no longer inflate the configured API-key count; the header and provider ratio now count only cloud API providers.

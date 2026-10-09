@@ -8,8 +8,8 @@ const PROVIDER_META={
   openrouter:{key:"OPENROUTER_API_KEY",keys:["OPENROUTER_API_KEY"],modelKey:"OPENROUTER_MODEL",defaultModel:"openrouter/free",fallbackModels:[]}
 };
 const VAULT_TOKEN_IDS=[...Object.keys(PROVIDER_META),"fal","cloudflare_ai","cloudflare_account"];
-const VERSION="5.11.100";
-const BUILD_SHA256="2aa095a7b69f0012843a13f842f4110811a6cca31069f730645e3c37884465d7";
+const VERSION="5.11.106";
+const BUILD_SHA256="76323c88d23881148481e04e414504dfed00f50aeedf41be7ce9b0ee4c21b2ca";
 const PUBLIC_SUPPORT_EMAIL="aibridge.support@gmail.com";
 const FREE_WORK_PROVIDERS=["gemini","groqfree","openrouter"];
 const MCP_VERSION="2025-11-25";

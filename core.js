@@ -30,7 +30,7 @@
    НІЯКИХ мережевих викликів. */
 const BridgeCore=(()=>{
 "use strict";
-const VERSION="5.11.100";
+const VERSION="5.11.106";
 
 /* === v5.11.75 «Захист Ядра» — чистий JS, zero dependencies. ===
    1. DoS-захист: ліміт вхідного тексту (MAX_INPUT_CHARS) + бюджет часу (TIME_BUDGET_MS).
@@ -159,13 +159,24 @@ function __splitBlocks(t){
 /* Токенізація: літери (unicode), нижній регістр, без стоп-слів і сміття.
    v5.11.78: апостроф усередині слова — частина слова (UAX #29, як в Intl.Segmenter):
    «ім'я», «м'яч», «п'єса», «don't» більше не розриваються на сміття;
-   крайові апострофи («'цитата'») зрізаються. */
+   крайові апострофи («'цитата'») зрізаються.
+   v5.11.106 (з гілки 5.11.103): дефіс МІЖ ЛІТЕРАМИ — частина слова (тейлоринг UAX #29,
+   U+002D/U+2010/U+2011 як MidLetter): «бізнес-план», «будь-який», «well-known» — один
+   токен; дефіс біля цифр/пробілів і тире — як раніше розрив. */
+const __HYPH_IN=/([\p{L}])[-\u2010\u2011](?=[\p{L}])/gu; /* тейлоринг UAX #29: ці дефіси як MidLetter (WB6/WB7) */
+const __HYPH_PH="\uE000";                               /* плейсхолдер (private-use) */
+/* Спільний низькорівневий розбір слів для tokenize()/keyphrases(): викликач вже
+   зробив toLowerCase; повертає сирі слова (порожні відфільтровано). */
+function __splitWords(lower){
+  return lower.replace(__HYPH_IN,"$1"+__HYPH_PH)
+    .replace(/[^\p{L}\p{N}'\u2019\u02BC\uE000]+/gu," ")
+    .split(" ")
+    .map(w=>w.replace(/^['\u2019\u02BC\uE000-]+|['\u2019\u02BC\uE000-]+$/g,"").replace(/\uE000/g,"-").trim())
+    .filter(w=>w.length>0);
+}
 function tokenize(text){
   const _t=guardInput(text);
-  return _t.toLowerCase()
-    .replace(/[^\p{L}\p{N}'\u2019\u02BC]+/gu," ")
-    .split(" ")
-    .map(w=>w.replace(/^['\u2019\u02BC]+|['\u2019\u02BC]+$/g,"").trim())
+  return __splitWords(_t.toLowerCase())
     .filter(w=>w.length>2&&!STOP.has(w)&&!/\d/.test(w));
 }
 
@@ -290,6 +301,59 @@ function __groupWordForms(sorted){
   return groups;
 }
 
+/* Ключові фрази (multi-word) — RAKE (Rose et al., 2010), чистий JS.
+   v5.11.99: доповнює keywords() (одиночні токени) і summarize() (речення) —
+   витягає багатослівні терміни на кшталт «машинне навчання», «штучний інтелект».
+   Алгоритм: текст → речення (роздільники фраз) → кандидати = максимальні
+   послідовності змістовних токенів, розділені стоп-словами (той самий набір STOP,
+   що в tokenize()); score(w)=deg(w)/freq(w), де deg — сума довжин кандидатів
+   зі словом (співвходження включно із самим словом); оцінка фрази — сума
+   оцінок слів. Детерміновано: сортування за оцінкою ↓, довжиною ↓, лексикографічно.
+   Тайм-аут — частковий результат (як summarize); tooLarge — чесна CoreError. */
+function keyphrases(text,n){
+  n=__clampInt(n,10,1,30);
+  const t=guardInput(text);
+  const budget=makeBudget();
+  const sentences=splitSentences(t);
+  /* Кандидати: послідовності змістовних слів (ті самі правила, що в tokenize:
+     довжина>2, не стоп-слово, без цифр). Межа фрази — стоп-слово або речення. */
+  const cand=[];let cur=[],i=0;
+  const flush=()=>{if(cur.length){cand.push(cur);cur=[];}};
+  try{
+    for(const s of sentences){
+      /* v5.11.103: ті самі правила, що в tokenize() — включно з дефісом між літерами (UAX #29). */
+      const toks=__splitWords(s.toLowerCase());
+      for(const w of toks){
+        if(w.length>2&&!STOP.has(w)&&!__HAS_DIGIT_RE.test(w))cur.push(w);
+        else flush();
+      }
+      flush();
+      if((++i&255)===0)budget.check();
+    }
+  }catch(e){if(!e||!e.isCoreError)throw e;} /* timeout → рахуємо з того, що зібрали */
+  /* RAKE-скоринг. */
+  const freq=new Map(),deg=new Map();
+  for(const c of cand){
+    for(const w of c){
+      freq.set(w,(freq.get(w)||0)+1);
+      deg.set(w,(deg.get(w)||0)+c.length);
+    }
+  }
+  const wordScore=new Map();
+  for(const [w,f] of freq)wordScore.set(w,deg.get(w)/f);
+  const seen=new Map(); /* фраза → оцінка (та сама фраза = ті самі слова = та сама оцінка) */
+  for(const c of cand){
+    const phrase=c.join(" ");
+    if(seen.has(phrase))continue;
+    let sc=0;for(const w of c)sc+=wordScore.get(w);
+    seen.set(phrase,{phrase,score:sc,len:c.length});
+  }
+  return [...seen.values()]
+    .sort((a,b)=>b.score-a.score||b.len-a.len||a.phrase.localeCompare(b.phrase))
+    .slice(0,n)
+    .map(({phrase,score})=>({phrase,score:+score.toFixed(3)}));
+}
+
 /* Екстрактивне резюме: оцінка речень за позицією, частотою слів, довжиною.
    v5.11.75: бюджет часу — при вичерпанні повертає частковий результат. */
 /* Вага позиції речення i (0-based) серед total — lead-bias для резюме.
@@ -312,6 +376,20 @@ function leadBiasPos(i,total){
   return +(1.0-depth*0.3).toFixed(2);
 }
 
+/* v5.11.105: детектор «речення-фрагмента» на початку вводу.
+   Прийом за зразком lead-baseline з ACL L16-1493: позиційний бонус чесний,
+   лише коли «лід» — справжнє речення, а не уламок (межа чанка в analyze(),
+   артефакт витягнення). Чанкер analyzeChunkRanges ріже на межі слова/рядка —
+   перший «фрагмент» чанка k>0 часто починається з малої літери (це продовження
+   речення з попереднього чанка). Такому фрагменту ×2.0 не належить: він не
+   лід, інакше уламок регулярно виграє top-1 чанка у справжніх речень.
+   Консервативно: фрагмент = перший непробільний символ — мала літера.
+   Цифри/великі літери/лапки — не фрагмент (пункти списків «2. …», абревіатури). */
+function __fragHead(text){
+  const s=String(text==null?"":text).replace(/^[\s\uFEFF\u200B]+/,"");
+  return s.length>0&&/\p{Ll}/u.test(s[0]);
+}
+
 function summarize(text,maxSentences){
   maxSentences=__clampInt(maxSentences,3,1,10);
   guardInput(text);
@@ -322,13 +400,14 @@ function summarize(text,maxSentences){
   const freq=wordFreq(tokenize(text));
   const total=sentences.length;
   const scored=[];
+  const fragHead=__fragHead(text); /* v5.11.105: фрагменту — без lead-бонуса */
   for(let i=0;i<sentences.length;i++){
     try{budget.check();}catch(e){break;} /* час вичерпано — частковий результат */
     const s=sentences[i];
     const toks=tokenize(s);
     if(!toks.length)continue;
     const freqSum=toks.reduce((a,w)=>a+(freq.get(w)||0),0)/toks.length;
-    const posBonus=leadBiasPos(i,total);
+    const posBonus=(i===0&&fragHead)?1.0:leadBiasPos(i,total);
     /* Штраф за надто короткі/довгі речення. */
     /* v5.11.93: 1–2 змістовні слова — це заголовок чи підпис, а не речення для резюме. */
     const lenPenalty=toks.length<3?0.15:(toks.length<4?0.4:(toks.length>40?0.7:1.0));
@@ -621,13 +700,14 @@ function __analyzeChunk(chunk){
   if(sentences.length===1)top=sentences[0];
   else if(sentences.length>1){
     const total=sentences.length,scored=[];
+    const fragHead=__fragHead(chunk); /* v5.11.105 */
     for(let i=0;i<sentences.length;i++){
       try{budget.check();}catch(e){break;} /* час вичерпано — частковий результат */
       const s=sentences[i];
       const toks=tokenize(s);
       if(!toks.length)continue;
       const freqSum=toks.reduce((a,w)=>a+(freq.get(w)||0),0)/toks.length;
-      const posBonus=leadBiasPos(i,total);
+      const posBonus=(i===0&&fragHead)?1.0:leadBiasPos(i,total);
       /* Штраф за надто короткі/довгі речення. */
       const lenPenalty=toks.length<3?0.15:(toks.length<4?0.4:(toks.length>40?0.7:1.0));
       const score=freqSum*posBonus*lenPenalty;
@@ -6285,7 +6365,7 @@ function createAssistant(opts){
   };
 }
 
-const __rawExports={VERSION,createAssistant,detectLang,stats,keywords,summarize,answer,analyze,analyzeChunkRanges,tokenizeQA,composeBudgetedSummary,splitSentences,tokenize,escapeHtml,guardInput,verifyIntegrity,MAX_INPUT_CHARS,TIME_BUDGET_MS,...(__imp1.functions||{}),...(__imp2.functions||{}),...(__imp3.functions||{}),...(__imp4.functions||{}),...(__imp5.functions||{}),...(__imp6.functions||{}),...(__imp7.functions||{}),...(__imp8.functions||{}),...(__imp9.functions||{}),...(__imp10.functions||{}),...(__imp11.functions||{}),...(__imp12.functions||{}),...(__imp13.functions||{}),...(__imp14.functions||{}),...(__imp15.functions||{}),...(__imp16.functions||{}),...(__imp17.functions||{}),...(__imp18.functions||{}),...(__imp19.functions||{}),...(__imp20.functions||{}),...(__imp21.functions||{}),...(__imp22.functions||{}),...(__imp23.functions||{}),...(__imp24.functions||{}),...(__imp25.functions||{}),...(__imp26.functions||{}),...(__imp27.functions||{}),...(__imp28.functions||{}),...(__imp29.functions||{}),...(__imp30.functions||{}),...(__imp31.functions||{}),...(__imp32.functions||{}),...(__imp33.functions||{}),...(__imp34.functions||{}),...(__imp35.functions||{}),...(__imp36.functions||{}),...(__imp37.functions||{}),...(__imp38.functions||{}),...(__imp39.functions||{}),};
+const __rawExports={VERSION,createAssistant,detectLang,stats,keywords,keyphrases,summarize,answer,analyze,analyzeChunkRanges,tokenizeQA,composeBudgetedSummary,splitSentences,tokenize,escapeHtml,guardInput,verifyIntegrity,MAX_INPUT_CHARS,TIME_BUDGET_MS,...(__imp1.functions||{}),...(__imp2.functions||{}),...(__imp3.functions||{}),...(__imp4.functions||{}),...(__imp5.functions||{}),...(__imp6.functions||{}),...(__imp7.functions||{}),...(__imp8.functions||{}),...(__imp9.functions||{}),...(__imp10.functions||{}),...(__imp11.functions||{}),...(__imp12.functions||{}),...(__imp13.functions||{}),...(__imp14.functions||{}),...(__imp15.functions||{}),...(__imp16.functions||{}),...(__imp17.functions||{}),...(__imp18.functions||{}),...(__imp19.functions||{}),...(__imp20.functions||{}),...(__imp21.functions||{}),...(__imp22.functions||{}),...(__imp23.functions||{}),...(__imp24.functions||{}),...(__imp25.functions||{}),...(__imp26.functions||{}),...(__imp27.functions||{}),...(__imp28.functions||{}),...(__imp29.functions||{}),...(__imp30.functions||{}),...(__imp31.functions||{}),...(__imp32.functions||{}),...(__imp33.functions||{}),...(__imp34.functions||{}),...(__imp35.functions||{}),...(__imp36.functions||{}),...(__imp37.functions||{}),...(__imp38.functions||{}),...(__imp39.functions||{}),};
 const __safeExports={};
 for(const __k of Object.keys(__rawExports)){
   const __v=__rawExports[__k];
