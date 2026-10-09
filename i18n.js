@@ -706,6 +706,13 @@ const V51104={
   ru:{aiTellBtn:"Проверить на ИИ-маркеры",aiTellTitle:"Возможные ИИ-маркеры: {n}",aiTellNone:"ИИ-маркеров не найдено — звучит по-человечески ✓",aiTellInstead:"лучше так:",aiTellEmpty:"Нечего проверять",permMicNotAsked:"Микрофон: разрешение ещё не запрашивали — нажми, чтобы запросить",permMicDenied:"Микрофон: доступ запрещён — включи в настройках браузера или системы",permMicUnavailable:"Микрофон: недоступен на этом устройстве",permCamNotAsked:"Камера: разрешение ещё не запрашивали — нажми, чтобы запросить",permCamDenied:"Камера: доступ запрещён — включи в настройках браузера или системы",permCamUnavailable:"Камера: недоступна на этом устройстве",permUnknown:"Состояние разрешения неизвестно"}
 };
 for(const [lang,strings] of Object.entries(V51104)){if(lang==="en")Object.assign(EN,strings);else if(PACKS[lang])Object.assign(PACKS[lang],strings)}
+/* v5.11.99: самонавчання Ядра. */
+const V51199={
+  en:{coreTrainedToast:"The Core learned {n} answers from your chat history",coreTrainNone:"No new answers to learn from history",coreForgotAnswer:"The Core forgot this answer",dmCoreD2:"Learned answers: {q} (taught by you: {tq}) · lists: {l} · built-in knowledge: {k} entries.",coreLearnOn:"Self-learning: on",coreLearnOff:"Self-learning: off",coreTrainBtn:"Learn from history"},
+  uk:{coreTrainedToast:"Ядро вивчило відповідей з вашої історії чатів: {n}",coreTrainNone:"В історії немає нових відповідей для навчання",coreForgotAnswer:"Ядро забуло цю відповідь",dmCoreD2:"Вивчені відповіді: {q} (ви навчили самі: {tq}) · списки: {l} · вбудовані знання: {k} записів.",coreLearnOn:"Самонавчання: увімкнено",coreLearnOff:"Самонавчання: вимкнено",coreTrainBtn:"Навчити з історії"},
+  ru:{coreTrainedToast:"Ядро выучило ответов из вашей истории чатов: {n}",coreTrainNone:"В истории нет новых ответов для обучения",coreForgotAnswer:"Ядро забыло этот ответ",dmCoreD2:"Выученные ответы: {q} (вы научили сами: {tq}) · списки: {l} · встроенные знания: {k} записей.",coreLearnOn:"Самообучение: включено",coreLearnOff:"Самообучение: выключено",coreTrainBtn:"Обучить на истории"}
+};
+for(const [lang,strings] of Object.entries(V51199)){if(lang==="en")Object.assign(EN,strings);else if(PACKS[lang])Object.assign(PACKS[lang],strings)}
 for(const [lang,meta] of Object.entries(LANGUAGES)){
   const target=lang==="en"?EN:PACKS[lang];if(!target)continue;
   for(const [k,v] of Object.entries(meta)){if(k==="code"||k==="name"||k==="locale"||k==="voice"||typeof v!=="string")continue;if(target[k]===undefined)target[k]=v}

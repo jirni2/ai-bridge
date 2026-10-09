@@ -20,7 +20,7 @@ const $=id=>document.getElementById(id);
 const I18N=globalThis.AIBridgeI18n||null;
 I18N?.init?.();
 const t=(key,vars)=>I18N?.t?.(key,vars)??key;
-const UI_VERSION="5.11.104";
+const UI_VERSION="5.11.106";
 // v5.9.0: storage can throw (Safari private mode, quota, blocked site data).
 // Every new read/write goes through these helpers so one failure can never
 // stop the whole interface from booting.
@@ -1543,10 +1543,12 @@ function renderDataMap(){
   `<div class="card dmRow"><div class="dmIcon" aria-hidden="true">💾</div><div><b>${esc(t("dmPersistT"))}</b><p>${esc(t("dmPersistD"))}</p><span class="privStatus" id="persistStatusLine">${esc(persistStatusText())}</span></div></div>`+
   /* v5.11.95: пам'ять Асистента Ядра — окремий рядок із лічильником і кнопкою очищення. */
   (()=>{let info={facts:0,docs:0};try{info=coreAssistant()?.memoryInfo()||info}catch(e){}
-    return `<div class="card dmRow"><div class="dmIcon" aria-hidden="true">⚙️</div><div><b>${esc(t("dmCoreT"))}</b><p>${esc(t("dmCoreD",{f:info.facts||0,d:info.docs||0}))}</p><button class="tinyBtn" type="button" id="clearCoreMemoryBtn">${esc(t("clear"))}</button></div></div>`})()+
+    return `<div class="card dmRow"><div class="dmIcon" aria-hidden="true">⚙️</div><div><b>${esc(t("dmCoreT"))}</b><p>${esc(t("dmCoreD",{f:info.facts||0,d:info.docs||0}))}</p><p>${esc(t("dmCoreD2",{q:info.qa||0,tq:info.taught||0,l:info.lists||0,k:info.knowledge||0}))}</p><button class="tinyBtn" type="button" id="clearCoreMemoryBtn">${esc(t("clear"))}</button> <button class="tinyBtn" type="button" id="coreLearnToggleBtn" aria-pressed="${coreLearningOn()?"true":"false"}">${esc(t(coreLearningOn()?"coreLearnOn":"coreLearnOff"))}</button> <button class="tinyBtn" type="button" id="coreTrainBtn">${esc(t("coreTrainBtn"))}</button></div></div>`})()+
   `<p class="dmFoot">${esc(t("dmFoot"))}</p>`;
   $("clearPromptHistBtn").onclick=()=>clearPromptHistory();
   $("clearCoreMemoryBtn").onclick=()=>{try{coreAssistant()?.forget("")}catch(e){}try{localStorage.removeItem(CORE_MEMORY_KEY)}catch(e){}renderDataMap();toast(t("dmCoreCleared"),"good")};
+  $("coreLearnToggleBtn").onclick=()=>{try{if(coreLearningOn())localStorage.setItem(CORE_LEARN_OFF_KEY,"1");else localStorage.removeItem(CORE_LEARN_OFF_KEY)}catch(e){}renderDataMap()};
+  $("coreTrainBtn").onclick=async()=>{const n=await coreTrainFromHistory(true);renderDataMap();toast(n>0?t("coreTrainedToast",{n}):t("coreTrainNone"),n>0?"good":"")};
   // Оновити статус, щойно прийде відповідь storage.persist().
   ensureStoragePersist().then(()=>{const s=$("persistStatusLine");if(s)s.textContent=persistStatusText()});
 }
@@ -2945,13 +2947,52 @@ function saveCoreMemory(){
   catch(e){toast(t("coreMemoryFull"),"bad")}
 }
 /* Наміри, які Ядро закриває саме й точно — їх не варто відправляти в хмару. */
-const CORE_INSTANT_INTENTS=new Set(["math","units","date","time","name","help","identity","memory.remember","memory.forget","memory.list","memory.learn"]);
+const CORE_INSTANT_INTENTS=new Set(["math","units","date","time","name","help","identity","memory.remember","memory.forget","memory.list","memory.learn","teach","feedback","list","stats","multi"]);
 function coreCanHandleAlone(r){
   if(!r||r.error||!r.handled||r.escalate)return false;
   if(CORE_INSTANT_INTENTS.has(r.intent))return true;
   /* відповідь із власної пам'яті/нотаток/вивченого документа — лише коли Ядро впевнене */
-  return r.intent==="answer"&&Number(r.confidence)>=0.8&&["facts","notes","doc"].includes(r.sources?.[0]?.type);
+  /* v5.11.99: те, чого людина навчила прямо («коли я питаю…, відповідай…»), — теж одразу.
+     Вбудовані знання й вивчене з відповідей хмари хмару НЕ випереджають: вона може знати свіжіше. */
+  return r.intent==="answer"&&Number(r.confidence)>=0.8&&["facts","notes","doc","taught"].includes(r.sources?.[0]?.type);
 }
+/* v5.11.99: САМОНАВЧАННЯ ЯДРА. Після кожної вдалої відповіді хмарної моделі Ядро запам'ятовує
+   пару «питання → відповідь» у localStorage ЦЬОГО пристрою (нікуди не надсилається) і наступного
+   разу — офлайн або коли хмара відмовила — відповідає саме, з позначкою, звідки це знає.
+   Не вчиться з: інкогніто, помилок, файлів/зображень, агента, відповідей із контекстом іншого чату. */
+const CORE_LEARN_OFF_KEY="ai_bridge_core_learn_off",CORE_TRAINED_KEY="ai_bridge_core_trained_v1";
+function coreLearningOn(){try{return localStorage.getItem(CORE_LEARN_OFF_KEY)!=="1"}catch(e){return true}}
+function saveCoreMemoryQuiet(){if(!_coreAssistant)return false;try{localStorage.setItem(CORE_MEMORY_KEY,_coreAssistant.exportMemory());return true}catch(e){return false}}
+function coreLearnFromRun(run,opts){
+  try{
+    if(!run||(!opts?.force&&!coreLearningOn()))return false;
+    const m=run.meta||{};
+    if(m.error||m.temporary||m.localResponder||m.truncated||m.imported)return false;
+    if((run.attachments||[]).length||(run.ctxChats||[]).length||run.continueRoot)return false;
+    if(["agent","deep-scan"].includes(run.mode))return false;
+    const q=String(run.prompt||"").trim(),a=String(run.final||"").trim();
+    if(!q||!a)return false;
+    const A=coreAssistant();if(!A||typeof A.learnQA!=="function")return false;
+    const pid=run.judge||(run.results||[]).find(r=>r.ok)?.provider||(run.providers||[])[0];
+    const r=A.learnQA(q,a,{source:PROVIDERS[pid]?.name||"AI",ts:run.created});
+    if(!r)return false;
+    if(!opts?.noSave)saveCoreMemoryQuiet();
+    return true;
+  }catch(e){return false}
+}
+/* Одноразово (або кнопкою в «Карті даних») — вивчити відповіді з уже наявної історії чатів. */
+async function coreTrainFromHistory(force){
+  if(!force){try{if(localStorage.getItem(CORE_TRAINED_KEY)||!coreLearningOn())return 0}catch(e){return 0}}
+  let n=0;
+  try{
+    const runs=await getRuns(1000);
+    for(const run of runs.slice().reverse())if(coreLearnFromRun(run,{noSave:true,force}))n++;
+    if(n)saveCoreMemoryQuiet();
+    try{localStorage.setItem(CORE_TRAINED_KEY,String(Date.now()))}catch(e){}
+  }catch(e){}
+  return n;
+}
+setTimeout(()=>{coreTrainFromHistory(false).then(n=>{if(n>0)toast(t("coreTrainedToast",{n}),"good")}).catch(()=>{})},5000);
 /* Запитати Ядро. Повертає результат асистента або null (ядро недоступне). Не малює. */
 function askCore(rawPrompt,context,title){
   const A=coreAssistant();if(!A)return null;
@@ -2963,7 +3004,7 @@ function renderCoreReply(prompt,r,noteKey){
   let final=r.text;
   if(!r.handled&&r.escalate&&Object.values(status.providers||{}).some(Boolean))final+=`\n\n${t("coreAskCloud")}`;
   final+=`\n\n_${t(noteKey||"coreLocalNote")}_`;
-  const run={uid:"core-"+Date.now(),created:Date.now(),prompt,final,selectedProviders:["core"],results:[],meta:{localResponder:true,coreCard:true,coreIntent:r.intent,coreEscalate:!!r.escalate},mode:"single"};
+  const run={uid:"core-"+Date.now(),created:Date.now(),prompt,final,selectedProviders:["core"],results:[],meta:{localResponder:true,coreCard:true,coreIntent:r.intent,coreEscalate:!!r.escalate,coreQaId:r.qaId||null},mode:"single"};
   currentRun=run; /* щоб «Інша модель» і «Змінити питання» працювали з цим питанням */
   renderAnswer(run);
 }
@@ -3267,6 +3308,8 @@ async function sendTask(options={}){
     if((j.budgetDowngraded||j.meta?.budgetDowngraded)&&!budgetDowngradedToasted){budgetDowngradedToasted=true;toast(t("budgetDowngraded"),"bad")}
     maybeRefreshBudget();
     await saveRun(currentRun);
+    /* v5.11.99: Ядро вчиться з цієї відповіді (лише звичайний чат без файлів і зображень) */
+    if(source==="chat"&&!submittedImages.length&&!continueFrom)coreLearnFromRun(currentRun);
     clearPendingJob();
     sweepPasteStore(); // v5.11.28: вставки відправлено — чистимо сховище
     markDoneHidden(); // v5.11.23: бейдж PWA, якщо завдання фінішувало у фоні
@@ -4061,6 +4104,10 @@ async function postFeedback(body){
 }
 async function sendFeedback(rating,reason=null){
   const run=currentRun;if(!run)return;
+  /* v5.11.99: 👎 на вивченій відповіді Ядра — Ядро її забуває */
+  if(rating==="down"&&!reason&&run.meta?.coreQaId){
+    try{if(coreAssistant()?.forgetQA(run.meta.coreQaId)){saveCoreMemoryQuiet();run.meta.coreQaId=null;toast(t("coreForgotAnswer"),"good")}}catch(e){}
+  }
   const previous=feedbackState.rating,st=$("feedbackStatus");
   if(!reason&&previous===rating)return;
   if(!reason){

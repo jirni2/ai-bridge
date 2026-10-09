@@ -1,0 +1,15 @@
+AI Bridge v5.11.100 — production honesty hotfix (2026-10-06)
+
+FIXED
+- Muse and Core are built-in capabilities, not API keys. They no longer make the UI claim that two API keys are configured when cloud-provider count is zero.
+- A supported deterministic question (math, units, date, memory and other Core-safe intents) can be answered by local Core even if Auto, Agent or God mode was left selected and no cloud API key is available.
+- The live activity summary no longer says “answer received” after HTTP/provider failures.
+
+VERIFIED BEFORE PATCH
+- Production was v5.11.99.
+- A real Chat request returned HTTP 503 while the activity summary incorrectly reported success.
+- The attached 425-entry ZIP was accepted in production; 417 text/code files were read and Deep Scan offered full coverage in 10 parts.
+
+SECURITY
+- ZIP entry, decompression-size and compression-ratio protections remain unchanged.
+- Local Core fallback is limited to intents `coreCanHandleAlone()` marks deterministic and safe; it does not fabricate an answer for unsupported requests.
