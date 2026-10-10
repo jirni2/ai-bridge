@@ -36,10 +36,11 @@ function grabAppFn(name){
 const prelude=[
   grabConst(worker,"LOTTO_GAMES"),
   grabConst(worker,"LOTTO_MON"),
+  grabConst(worker,"LOTTO_TIERS"), /* v5.11.109: рівні виграшу для lottoCheckCombos */
   "const LOTTO_MAX_DRAWS=400;",
   'const LOTTO_DISCLAIMER="Описова статистика.";'
 ].join("\n");
-(0,eval)(prelude+"\n"+grabFn(worker,"lottoValidDraw")+"\n"+grabFn(worker,"lottoParseWclc")+"\n"+grabFn(worker,"lottoMergeDraws")+"\n"+grabFn(worker,"lottoBaseline")+"\n"+grabFn(worker,"lottoComb")+"\n"+grabFn(worker,"lottoOdds")+"\n"+grabFn(worker,"lottoRandomness")+"\n"+grabFn(worker,"erfcApprox")+"\n"+grabFn(worker,"lottoAnalyze")+"\n"+grabFn(worker,"lottoCheckCombos"));
+(0,eval)(prelude+"\n"+grabFn(worker,"lottoLimitsFor")+"\n"+grabFn(worker,"lottoPrizeTier")+"\n"+grabFn(worker,"lottoScoreLine")+"\n"+grabFn(worker,"lottoValidDraw")+"\n"+grabFn(worker,"lottoParseWclc")+"\n"+grabFn(worker,"lottoMergeDraws")+"\n"+grabFn(worker,"lottoBaseline")+"\n"+grabFn(worker,"lottoComb")+"\n"+grabFn(worker,"lottoOdds")+"\n"+grabFn(worker,"lottoRandomness")+"\n"+grabFn(worker,"erfcApprox")+"\n"+grabFn(worker,"lottoAnalyze")+"\n"+grabFn(worker,"lottoCheckCombos"));
 
 /* --- 1. парсер --- */
 const maxHtml=`<div class="pastWinNumGroup"><div class="pastWinNumDate"><strong>Tuesday, September 29, 2026</strong></div><ul class="pastWinNumbers"><li class="pastWinNumber">6</li><li class="pastWinNumber">10</li><li class="pastWinNumber">13</li><li class="pastWinNumber">22</li><li class="pastWinNumber">23</li><li class="pastWinNumber">43</li><li class="pastWinNumber">49</li><li class="pastWinNumberBonus"><span class="pastWinNumberBonusText">Bonus</span>17</li></ul></div>`;
@@ -155,9 +156,13 @@ const dgHtml=`<div class="pastWinNumGroup"><div class="pastWinNumDate"><strong>M
 {
   const goodMax={d:"2026-09-29",n:[6,10,13,22,23,43,49],b:17};
   ok(lottoValidDraw("lottomax",goodMax),"валідний тираж Lotto Max проходить");
-  ok(!lottoValidDraw("lottomax",{d:"2026-09-25",n:[8,24,38,41,43,50,52],b:7}),"Lotto Max: число 52 → відхилено");
-  ok(!lottoValidDraw("lottomax",{d:"2026-09-11",n:[1,38,41,44,45,49,51],b:47}),"Lotto Max: число 51 → відхилено");
-  ok(!lottoValidDraw("lottomax",{d:"2026-06-02",n:[6,7,23,28,34,40,43],b:52}),"Lotto Max: бонус 52 → відхилено");
+  /* v5.11.109: «баг сіда 51/52» насправді був зміною правил — з квітня 2026 Lotto Max = 7 з 52.
+     Ці тиражі справжні; відкидати їх — означало втратити 19 з 49 тиражів нової гри. */
+  ok(lottoValidDraw("lottomax",{d:"2026-09-25",n:[8,24,38,41,43,50,52],b:7}),"Lotto Max 7/52: число 52 після квітня 2026 — валідне");
+  ok(lottoValidDraw("lottomax",{d:"2026-09-11",n:[1,38,41,44,45,49,51],b:47}),"Lotto Max 7/52: число 51 — валідне");
+  ok(lottoValidDraw("lottomax",{d:"2026-06-02",n:[6,7,23,28,34,40,43],b:52}),"Lotto Max 7/52: бонус 52 — валідний");
+  ok(!lottoValidDraw("lottomax",{d:"2026-01-16",n:[1,2,3,4,5,6,52],b:7}),"Lotto Max до квітня 2026 (7/50): число 52 → відхилено");
+  ok(!lottoValidDraw("lottomax",{d:"2026-09-25",n:[1,2,3,4,5,6,53],b:7}),"Lotto Max: число 53 → відхилено");
   ok(!lottoValidDraw("lotto649",{d:"2026-09-30",n:[4,9,12,39,43,46,50],b:28}),"6/49: 7 чисел замість 6 → відхилено");
   ok(!lottoValidDraw("lotto649",{d:"2026-09-30",n:[4,9,12,39,43,50],b:28}),"6/49: число 50 поза 1–49 → відхилено");
   ok(!lottoValidDraw("dailygrand",{d:"2026-09-28",n:[3,5,30,32,48],b:8}),"Daily Grand: Grand Number 8 поза 1–7 → відхилено");

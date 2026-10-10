@@ -20,7 +20,7 @@ const $=id=>document.getElementById(id);
 const I18N=globalThis.AIBridgeI18n||null;
 I18N?.init?.();
 const t=(key,vars)=>I18N?.t?.(key,vars)??key;
-const UI_VERSION="5.11.108";
+const UI_VERSION="5.11.109";
 // v5.9.0: storage can throw (Safari private mode, quota, blocked site data).
 // Every new read/write goes through these helpers so one failure can never
 // stop the whole interface from booting.
@@ -1787,7 +1787,23 @@ async function renderLotto(){
           `</article>`;
       }
       /* v5.11.55: розумний підбір — 5 комбінацій зі стратегіями; v5.11.57: точність з навчання + похідні */
-      if(an.smartCombos&&an.smartCombos.length){
+      /* v5.11.109: «Ядро лотереї» — перевірка кожної стратегії на кожному минулому тиражі «з закритими очима» */
+      if(an.engine&&an.engine.strategies&&an.engine.strategies.length){
+        const e=an.engine,pct=x=>(Math.round(x*1000)/10).toLocaleString()+"%";
+        const vLabel={better:t("lcBetter"),same:t("lcSame"),worse:t("lcWorse"),few:t("lcFew")};
+        const ballRow=l=>`<div class="lottoComboNums">${(l.nums||[]).map(x=>`<span class="lottoBall sm">${x}</span>`).join("")}${l.gn?`<span class="lottoBall sm bonus" title="${esc(g.bonusName||"")}">${l.gn}</span>`:""}</div>`;
+        h+=`<article class="card lottoCard lottoEngine"><h3>🧠 ${esc(t("lcTitle"))}</h3>`+
+          `<p class="lottoMeta">${esc(t("lcIntro",{n:e.tested,r:e.randomOneIn}))}</p>`+
+          (e.era?`<p class="lottoMeta">${esc(t("lcEra",{d:e.era,n:e.draws}))}</p>`:"")+
+          e.strategies.map(st=>`<div class="lcRow${st.id==="random"?" lcControl":""}"><div class="lcHead"><b>${esc(st.name)}</b><span class="lcBadge ${esc(st.verdict)}">${esc(vLabel[st.verdict]||st.verdict)}</span></div>`+
+            `<div class="lottoMeta">${esc(t("lcWins",{w:st.wins,n:st.tested,p:pct(st.winRate)}))}${st.recentN?` · ${esc(t("lcRecent",{w:st.recentWins,n:st.recentN}))}`:""}</div>`+
+            (Object.keys(st.tiers||{}).length?`<div class="lottoChips">${Object.entries(st.tiers).map(([k,v])=>`<span class="lottoChip">${esc(String(k).replace(/^(\d+)/,"$1/"+(g.mainCount||"")))} × ${v}</span>`).join("")}</div>`:"")+
+            `<div class="lottoMeta lcNext">${esc(t("lcNext"))}:</div>${ballRow(st.next||{})}</div>`).join("")+
+          `<div class="lottoDisc">${esc(e.anyBetter?t("lcVerdictMaybe"):t("lcVerdictNone"))}</div>`+
+          (an.autoRefresh?`<p class="lottoMeta">🔄 ${esc(an.autoRefresh.refreshed?t("lcAutoAdded",{n:an.autoRefresh.added||0}):t("lcAuto"))}</p>`:"")+
+          `</article>`;
+      }
+      else if(an.smartCombos&&an.smartCombos.length){
         const stratName={hot:t("lottoSmartHot"),ripe:t("lottoSmartRipe"),balance:t("lottoSmartBalance"),pairs:t("lottoSmartPairs"),anti:t("lottoSmartAnti")};
         const dispName=id=>{const evo=id.endsWith("+");const base=evo?id.slice(0,-1):id;
           return (stratName[base]||base)+(evo?"+":"");};
@@ -1824,7 +1840,7 @@ async function renderLotto(){
       try{
         const r=await fetch("/api/lotto/check",{method:"POST",headers:{"Content-Type":"application/json"},credentials:"same-origin",cache:"no-store",body:JSON.stringify({game:lottoGameSel,combos:a})});
         const j=await r.json().catch(()=>({}));
-        out.innerHTML=(j.results||[]).map(res=>res.error?`<div class="lottoMeta">⚠️ ${esc((res.combo||[]).join(", "))}</div>`:`<div class="lottoRes"><span class="lottoComboNums">${(res.combo||[]).map(x=>`<span class="lottoBall sm">${esc(x)}</span>`).join("")}</span><span class="lottoMeta">${esc(t("lottoBest"))}: <b>${Number(res.bestMain)||0}/${Number(g.mainCount)||0}</b>${res.bestMainDates&&res.bestMainDates.length?` (${esc(res.bestMainDates.slice(0,3).join(", "))})`:""}</span></div>`).join("")||`<div class="lottoMeta">${esc(t("lottoNoData"))}</div>`;
+        out.innerHTML=(j.results||[]).map(res=>res.error?`<div class="lottoMeta">⚠️ ${esc((res.combo||[]).join(", "))}</div>`:`<div class="lottoRes"><span class="lottoComboNums">${(res.combo||[]).map(x=>`<span class="lottoBall sm">${esc(x)}</span>`).join("")}</span><span class="lottoMeta">${esc(t("lottoBest"))}: <b>${Number(res.bestMain)||0}/${Number(g.mainCount)||0}</b>${res.bestMainDates&&res.bestMainDates.length?` (${esc(res.bestMainDates.slice(0,3).join(", "))})`:""}${typeof res.wins==="number"?` · ${esc(t("lcUserWins",{w:res.wins,n:res.drawsChecked||0}))}${Object.keys(res.tiers||{}).length?" ("+esc(Object.entries(res.tiers).map(([k,v])=>k+"×"+v).join(", "))+")":""}`:""}</span></div>`).join("")||`<div class="lottoMeta">${esc(t("lottoNoData"))}</div>`;
       }catch(e){out.innerHTML=`<div class="lottoMeta">${esc(t("lottoNoData"))}</div>`;}
     };
   }catch(e){recordDiag("lotto",e?.message||e);body.innerHTML=`<div class="empty">${esc(t("lottoNoData"))}</div>`;}

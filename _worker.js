@@ -8,8 +8,8 @@ const PROVIDER_META={
   openrouter:{key:"OPENROUTER_API_KEY",keys:["OPENROUTER_API_KEY"],modelKey:"OPENROUTER_MODEL",defaultModel:"openrouter/free",fallbackModels:[]}
 };
 const VAULT_TOKEN_IDS=[...Object.keys(PROVIDER_META),"fal","cloudflare_ai","cloudflare_account"];
-const VERSION="5.11.108";
-const BUILD_SHA256="b5481ff484907045e20fa68ff433eab7004490e7c154935bae0f743b4fae8579";
+const VERSION="5.11.109";
+const BUILD_SHA256="33d300db1acb58df7dfdbe117ee1f4ee2c75edce782517ab0f8b0609841bf9d4";
 const PUBLIC_SUPPORT_EMAIL="aibridge.support@gmail.com";
 const FREE_WORK_PROVIDERS=["gemini","groqfree","openrouter"];
 const MCP_VERSION="2025-11-25";
@@ -7626,7 +7626,11 @@ async function handleTeam(req,env,url){
    Аналітика — лише ОПИСОВІ статистики з історії. Жодних прогнозів:
    кожен тираж незалежний, минулі результати не впливають на майбутні. */
 const LOTTO_GAMES={
-  lottomax:{name:"Lotto Max",mainCount:7,mainMax:50,bonusMax:50,bonusName:"Бонус",drawDays:"Вт · Пт",
+  /* v5.11.109: з квітня 2026 Lotto Max — 7 з 52, квиток $6 = 4 лінії (було 7 з 50, $5 = 3 лінії).
+     Перевірка тиражів жорстко тримала 50 — і мовчки викидала кожен тираж, де випало 51 чи 52
+     (19 з 49 тиражів після зміни). Старі тиражі (з 50) — окрема «епоха», в аналіз нової гри не змішуються. */
+  lottomax:{name:"Lotto Max",mainCount:7,mainMax:52,bonusMax:52,bonusName:"Бонус",drawDays:"Вт · Пт",linesPerPlay:4,price:6,
+    eraFrom:"2026-04-14",eraTolerantFrom:"2026-04-10",legacy:{mainMax:50,bonusMax:50},
     src:"https://www.wclc.com/winning-numbers/lotto-max-extra.htm?channel=print&printMode=true&printFile=%2Flotto"},
   lotto649:{name:"Lotto 6/49",mainCount:6,mainMax:49,bonusMax:49,bonusName:"Бонус",drawDays:"Ср · Сб",
     src:"https://www.wclc.com/winning-numbers/lotto-649-extra.htm?channel=print&printMode=true&printFile=%2Flotto"},
@@ -7635,7 +7639,7 @@ const LOTTO_GAMES={
 };
 const LOTTO_MON={Jan:"01",Feb:"02",Mar:"03",Apr:"04",May:"05",Jun:"06",Jul:"07",Aug:"08",Sep:"09",Oct:"10",Nov:"11",Dec:"12"};
 const LOTTO_KV_PREFIX="lotto:history:";
-const LOTTO_KV_SUFFIX=":v2";
+const LOTTO_KV_SUFFIX=":v3"; /* v5.11.109: v2 містив Lotto Max без тиражів з 51/52 */
 const LOTTO_MAX_DRAWS=400;
 const LOTTO_DISCLAIMER="Описова статистика з історії тиражів. Кожен тираж незалежний: минулі результати не впливають на майбутні.";
 /* v5.11.57: цикл навчання — прогнози зберігаються, звіряються з новими тиражами,
@@ -7649,15 +7653,28 @@ const LOTTO_SEED={"lottomax":[{"d":"2026-09-29","n":[6,10,13,22,23,43,49],"b":17
 function lottoGameIds(){return Object.keys(LOTTO_GAMES)}
 function lottoKvKey(game){return LOTTO_KV_PREFIX+game+LOTTO_KV_SUFFIX}
 /* v5.11.16: строга валідація тиражу за правилами гри. Сід і парсер без неї пропустили неможливі числа (Lotto Max 51/52). */
+/* Межі чисел на дату тиражу (з урахуванням зміни правил гри). */
+function lottoLimitsFor(gameId,date){
+  const g=LOTTO_GAMES[gameId];if(!g)return {mainMax:0,bonusMax:0};
+  if(g.legacy&&g.eraTolerantFrom&&String(date)<g.eraTolerantFrom)return g.legacy;
+  return {mainMax:g.mainMax,bonusMax:g.bonusMax};
+}
+/* Лише тиражі поточних правил гри — інакше частоти змішують 50 і 52 числа. */
+function lottoEraDraws(gameId,draws){
+  const g=LOTTO_GAMES[gameId],ds=Array.isArray(draws)?draws:[];
+  if(!g||!g.eraFrom)return ds;
+  return ds.filter(d=>d&&String(d.d)>=g.eraFrom&&Array.isArray(d.n)&&d.n.every(x=>x<=g.mainMax));
+}
 function lottoValidDraw(gameId,d){
   const g=LOTTO_GAMES[gameId];
   if(!g||!d||typeof d!=="object")return false;
   const n=d.n,b=d.b;
   if(!Array.isArray(n)||n.length!==g.mainCount)return false;
-  if(!n.every(x=>Number.isInteger(x)&&x>=1&&x<=g.mainMax))return false;
-  if(new Set(n).size!==n.length)return false;
-  if(!Number.isInteger(b)||b<1||b>g.bonusMax)return false;
   if(typeof d.d!=="string"||!/^\d{4}-\d{2}-\d{2}$/.test(d.d))return false;
+  const lim=lottoLimitsFor(gameId,d.d);
+  if(!n.every(x=>Number.isInteger(x)&&x>=1&&x<=lim.mainMax))return false;
+  if(new Set(n).size!==n.length)return false;
+  if(!Number.isInteger(b)||b<1||b>lim.bonusMax)return false;
   return true;
 }
 /* Парсер офіційної print-сторінки WCLC: <div class="pastWinNumGroup"> → дата + основні + бонус. */
@@ -7678,8 +7695,7 @@ function lottoParseWclc(html,gameId){
     if(main.length!==g.mainCount||!bb)continue;
     const nums=[...main].sort((a,b2)=>a-b2);
     const bonus=+bb[1];
-    if(!nums.every(n=>n>=1&&n<=g.mainMax)||bonus<1||bonus>g.bonusMax)continue;
-    if(new Set(nums).size!==nums.length)continue;
+    if(!lottoValidDraw(gameId,{d:iso,n:nums,b:bonus}))continue; /* v5.11.109: межі за датою (7/52 з квітня 2026) */
     out.push({d:iso,n:nums,b:bonus});
   }
   return out;
@@ -7702,8 +7718,8 @@ function lottoOdds(gameId){
   const g=LOTTO_GAMES[gameId];if(!g)return null;
   const main=lottoComb(g.mainMax,g.mainCount);
   const jackpot=gameId==="dailygrand"?main*g.bonusMax:main;
-  /* Lotto Max: один квиток ($5) = 3 лінії, тому офіційний шанс на квиток — 1 до 33 294 800. */
-  const lines=gameId==="lottomax"?3:1;
+  /* Lotto Max (з квітня 2026): один квиток ($6) = 4 лінії, шанс на квиток — 1 до 33 446 140. */
+  const lines=g.linesPerPlay||1;
   return {jackpot,linesPerTicket:lines,jackpotPerTicket:Math.round(jackpot/lines),
     expectedMatches:+(g.mainCount*g.mainCount/g.mainMax).toFixed(2),mainCount:g.mainCount};
 }
@@ -7927,6 +7943,155 @@ function lottoAnalyze(draws,gameId,strategyStats){
     smartCombos:finalCombos,smallWinPairs,learning,note:LOTTO_DISCLAIMER,
     baseline:base,odds:lottoOdds(gameId),randomness:lottoRandomness(freq,ds.length,g)};
 }
+/* ================= v5.11.109: «Ядро лотереї» =================
+   Призові рівні: будь-яка лінія, що дала хоч щось (від безкоштовного квитка до джекпоту), — «виграш».
+   Офіційні таблиці WCLC/Wikipedia (жовтень 2026). Фіксовані суми — у CAD; пулові рівні — частка фонду. */
+const LOTTO_TIERS={
+  lottomax:[["7",7,0,"Джекпот"],["6+B",6,1,"Частка пулу"],["6",6,0,"Частка пулу"],["5+B",5,1,"Частка пулу"],["5",5,0,"Частка пулу"],["4+B",4,1,"Частка пулу"],["4",4,0,"$20"],["3+B",3,1,"$20"],["3",3,0,"Безкоштовний квиток"]],
+  lotto649:[["6",6,0,"Джекпот"],["5+B",5,1,"Частка пулу"],["5",5,0,"Частка пулу"],["4",4,0,"Частка пулу"],["3",3,0,"$10"],["2+B",2,1,"$5"],["2",2,0,"Безкоштовний квиток"]],
+  dailygrand:[["5+GN",5,1,"$1 000 щодня довічно"],["5",5,0,"$25 000 на рік довічно"],["4+GN",4,1,"$1 000"],["4",4,0,"$500"],["3+GN",3,1,"$100"],["3",3,0,"$20"],["2+GN",2,1,"$10"],["1+GN",1,1,"$4"],["0+GN",0,1,"Безкоштовний квиток"]]
+};
+/* Рівень виграшу лінії: m — збіги основних, bonusHit — бонус (Lotto Max/6/49: бонус серед твоїх чисел;
+   Daily Grand: твій Grand Number = випавшому). null — без виграшу. Рівні впорядковані від старшого. */
+function lottoPrizeTier(gameId,m,bonusHit){
+  const t=LOTTO_TIERS[gameId];if(!t)return null;
+  for(const [id,need,needB,prize] of t){
+    if(m===need&&(!needB||bonusHit))return {id,prize};
+  }
+  return null;
+}
+/* Точна ймовірність, що випадкова лінія виграє хоч щось (гіпергеометричний розподіл). */
+function lottoAnyPrizeProb(gameId){
+  const g=LOTTO_GAMES[gameId];if(!g)return 0;
+  const N=g.mainMax,k=g.mainCount,total=lottoComb(N,k);let p=0;
+  for(let m=0;m<=k;m++){
+    const pm=lottoComb(k,m)*lottoComb(N-k,k-m)/total;
+    if(gameId==="dailygrand"){
+      const pg=1/g.bonusMax;
+      if(lottoPrizeTier(gameId,m,true))p+=pm*pg;
+      if(lottoPrizeTier(gameId,m,false))p+=pm*(1-pg);
+    }else{
+      const pb=(k-m)/(N-k); /* бонус — одне з N-k невипавших; влучає, якщо воно серед твоїх k-m «промахів» */
+      if(lottoPrizeTier(gameId,m,true))p+=pm*pb;
+      if(lottoPrizeTier(gameId,m,false))p+=pm*(1-pb);
+    }
+  }
+  return p;
+}
+function lottoMulberry(seed){let a=seed>>>0;return()=>{a=(a+0x6D2B79F5)>>>0;let t=a;t=Math.imul(t^(t>>>15),t|1);t^=t+Math.imul(t^(t>>>7),t|61);return((t^(t>>>14))>>>0)/4294967296}}
+function lottoHash(str){let h=2166136261;for(let i=0;i<str.length;i++){h^=str.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0}
+/* Довірчий інтервал Вільсона (90%). */
+function lottoWilson(h,n,z){z=z||1.645;if(!n)return [0,1];const p=h/n,d=1+z*z/n,c=p+z*z/(2*n),r=z*Math.sqrt(p*(1-p)/n+z*z/(4*n*n));return [Math.max(0,(c-r)/d),Math.min(1,(c+r)/d)]}
+const LOTTO_STRATS=[
+  {id:"hot",name:"Гарячі",desc:"Найчастіші числа"},
+  {id:"ripe",name:"Дозрілі",desc:"Найдовше не випадали"},
+  {id:"pairs",name:"Парні",desc:"Навколо найчастіших пар"},
+  {id:"balance",name:"Баланс",desc:"Гарячі + дозрілі + середні"},
+  {id:"cold",name:"Холодні",desc:"Найрідші числа"},
+  {id:"random",name:"Випадкові (контроль)",desc:"Випадкова лінія — щоб було з чим порівнювати"}
+];
+/* Комбінація стратегії зі стану (частоти, паузи, пари) — без підглядання в майбутнє. */
+function lottoStratPick(sid,st,g,gameId,salt){
+  const N=g.mainMax,k=g.mainCount,nums=[];for(let n=1;n<=N;n++)nums.push(n);
+  const by=(f)=>[...nums].sort((a,b)=>f(b)-f(a)||a-b);
+  const gap=n=>st.t-(st.last[n]===undefined?-1:st.last[n]);
+  let pick;
+  if(sid==="hot")pick=by(n=>st.freq[n]).slice(0,k);
+  else if(sid==="cold")pick=by(n=>-st.freq[n]).slice(0,k);
+  else if(sid==="ripe")pick=by(n=>gap(n)).slice(0,k);
+  else if(sid==="balance"){const h=by(n=>st.freq[n]),r=by(n=>gap(n)),set=new Set();
+    for(const x of h){if(set.size>=Math.ceil(k*0.43))break;set.add(x)}
+    for(const x of r){if(set.size>=Math.ceil(k*0.43)+Math.floor(k*0.29))break;set.add(x)}
+    const mid=h.slice(Math.floor(N*0.35));for(const x of mid){if(set.size>=k)break;set.add(x)}
+    pick=[...set];}
+  else if(sid==="pairs"){const set=new Set();let best=null;for(const [key,c] of st.pairs){if(!best||c>best[1]||(c===best[1]&&key<best[0]))best=[key,c]}
+    if(best)best[0].split("-").forEach(x=>set.add(+x));
+    while(set.size<k){let bn=-1,bs=-1;for(const n of nums){if(set.has(n))continue;let sc=0;for(const m of set)sc+=st.pairs.get(Math.min(n,m)+"-"+Math.max(n,m))||0;sc=sc*1000+st.freq[n];if(sc>bs){bs=sc;bn=n}}if(bn<0)break;set.add(bn)}
+    pick=[...set];}
+  else{const rnd=lottoMulberry(lottoHash(gameId+"|"+salt+"|"+sid));const set=new Set();while(set.size<k)set.add(1+Math.floor(rnd()*N));pick=[...set];}
+  pick=pick.slice(0,k).sort((a,b)=>a-b);
+  let gn=null;
+  if(gameId==="dailygrand"){const G=g.bonusMax,gs=[];for(let i=1;i<=G;i++)gs.push(i);
+    if(sid==="random"){gn=1+Math.floor(lottoMulberry(lottoHash("gn|"+salt))()*G)}
+    else if(sid==="cold")gn=[...gs].sort((a,b)=>st.gfreq[a]-st.gfreq[b]||a-b)[0];
+    else if(sid==="ripe")gn=[...gs].sort((a,b)=>(st.t-(st.glast[b]??-1))-(st.t-(st.glast[a]??-1))||a-b)[0];
+    else gn=[...gs].sort((a,b)=>st.gfreq[b]-st.gfreq[a]||a-b)[0];}
+  return {nums:pick,gn};
+}
+function lottoScoreLine(gameId,line,dr){
+  const s=new Set(dr.n);let m=0;for(const x of line.nums)if(s.has(x))m++;
+  const bonusHit=gameId==="dailygrand"?(line.gn===dr.b):line.nums.includes(dr.b);
+  return {m,bonusHit,tier:lottoPrizeTier(gameId,m,bonusHit)};
+}
+/* Прохід «з закритими очима»: перед кожним тиражем кожна стратегія робить лінію лише з минулих даних,
+   потім тираж відкривається і рахується виграш. Кожен новий тираж додає ще одну чесну перевірку —
+   оцінки уточнюються; якщо стратегія не краща за випадкову, Ядро так і пише. */
+const LOTTO_WARMUP=8;
+function lottoEngine(draws,gameId){
+  const g=LOTTO_GAMES[gameId];if(!g)return null;
+  const ds=lottoEraDraws(gameId,draws).filter(d=>lottoValidDraw(gameId,d)).slice().sort((a,b)=>a.d.localeCompare(b.d));
+  const N=g.mainMax;
+  const st={t:0,freq:new Array(N+1).fill(0),last:[],pairs:new Map(),gfreq:new Array((g.bonusMax||0)+1).fill(0),glast:[]};
+  const res={};for(const s of LOTTO_STRATS)res[s.id]={tested:0,wins:0,matches:0,tiers:{},bestTier:null,recent:[]};
+  const p0=lottoAnyPrizeProb(gameId);
+  for(const dr of ds){
+    if(st.t>=LOTTO_WARMUP){
+      for(const s of LOTTO_STRATS){
+        const line=lottoStratPick(s.id,st,g,gameId,dr.d);
+        const sc=lottoScoreLine(gameId,line,dr),r=res[s.id];
+        r.tested++;r.matches+=sc.m;
+        if(sc.tier){r.wins++;r.tiers[sc.tier.id]=(r.tiers[sc.tier.id]||0)+1;
+          const order=LOTTO_TIERS[gameId].map(x=>x[0]);
+          if(!r.bestTier||order.indexOf(sc.tier.id)<order.indexOf(r.bestTier))r.bestTier=sc.tier.id;}
+        r.recent.push(sc.tier?1:0);if(r.recent.length>20)r.recent.shift();
+      }
+    }
+    for(const n of dr.n){st.freq[n]++;st.last[n]=st.t}
+    for(let i=0;i<dr.n.length;i++)for(let j=i+1;j<dr.n.length;j++){const a=Math.min(dr.n[i],dr.n[j]),b=Math.max(dr.n[i],dr.n[j]),key=a+"-"+b;st.pairs.set(key,(st.pairs.get(key)||0)+1)}
+    if(gameId==="dailygrand"&&dr.b>=1&&dr.b<=g.bonusMax){st.gfreq[dr.b]++;st.glast[dr.b]=st.t}
+    st.t++;
+  }
+  const strategies=LOTTO_STRATS.map(s=>{
+    const r=res[s.id],ci=lottoWilson(r.wins,r.tested);
+    const verdict=r.tested<20?"few":(ci[0]>p0?"better":(ci[1]<p0?"worse":"same"));
+    /* Байєсова оцінка (Beta з апріорним = випадковий рівень, сила 20 тиражів): мало даних → ближче до випадкового */
+    const post=(r.wins+p0*20)/(r.tested+20);
+    return {id:s.id,name:s.name,desc:s.desc,tested:r.tested,wins:r.wins,winRate:r.tested?+(r.wins/r.tested).toFixed(4):0,
+      ci90:[+ci[0].toFixed(4),+ci[1].toFixed(4)],posterior:+post.toFixed(4),avgMatches:r.tested?+(r.matches/r.tested).toFixed(2):0,
+      tiers:r.tiers,bestTier:r.bestTier,recentWins:r.recent.reduce((a,b)=>a+b,0),recentN:r.recent.length,verdict,
+      next:lottoStratPick(s.id,st,g,gameId,"next:"+(ds.length?ds[ds.length-1].d:""))};
+  });
+  const ranked=strategies.filter(s=>s.id!=="random").sort((a,b)=>b.posterior-a.posterior||a.id.localeCompare(b.id));
+  const best=ranked[0]||null;
+  const anyBetter=strategies.some(s=>s.verdict==="better"&&s.id!=="random");
+  return {game:gameId,era:g.eraFrom||null,draws:ds.length,tested:Math.max(0,ds.length-LOTTO_WARMUP),
+    randomWinRate:+p0.toFixed(4),randomOneIn:p0?+(1/p0).toFixed(1):null,
+    strategies,best:best?best.id:null,anyBetter,tiers:LOTTO_TIERS[gameId].map(([id,,,prize])=>({id,prize}))};
+}
+/* Остання дата, коли тираж уже мав би бути опублікований (тиражі ввечері за Східним часом). */
+function lottoLastExpectedDraw(gameId,now){
+  const g=LOTTO_GAMES[gameId];if(!g)return null;
+  const map={"Нд":0,"Пн":1,"Вт":2,"Ср":3,"Чт":4,"Пт":5,"Сб":6};
+  const days=String(g.drawDays||"").split(/[·,]/).map(x=>map[x.trim()]).filter(x=>x!==undefined);
+  const t=(now instanceof Date?now:new Date()).getTime();
+  for(let i=0;i<8;i++){const d=new Date(t-i*864e5);const day=new Date(Date.UTC(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate()));
+    if(!days.includes(day.getUTCDay()))continue;
+    if(t>=day.getTime()+864e5+6*3600e3)return day.toISOString().slice(0,10); /* наступного дня після 06:00 UTC */
+  }
+  return null;
+}
+/* Сам підтягує нові тиражі, коли вони вже мали вийти (не частіше, ніж раз на 20 хв). */
+async function lottoMaybeRefresh(env,gameId,rec,now){
+  const exp=lottoLastExpectedDraw(gameId,now||new Date());
+  const latest=(rec.draws[0]||{}).d||"";
+  const tried=Date.parse(rec.lastTryAt||0)||0;
+  if(!exp||(latest>=exp&&rec.source!=="seed"))return {rec,refreshed:false};
+  if(Date.now()-tried<20*60e3)return {rec,refreshed:false};
+  rec.lastTryAt=new Date().toISOString();try{await lottoSave(env,gameId,rec)}catch(e){}
+  const r=await lottoRefreshGame(env,gameId,8000);
+  if(r&&r.ok){const fresh=await lottoLoad(env,gameId);return {rec:fresh,refreshed:true,added:r.added}}
+  return {rec,refreshed:false,error:r&&r.error};
+}
 /* Звірка комбінацій користувача з історією: найкращий збіг основних чисел. */
 function lottoCheckCombos(draws,combos,gameId){
   const g=LOTTO_GAMES[gameId];
@@ -7944,7 +8109,10 @@ function lottoCheckCombos(draws,combos,gameId){
       if(m>best){best=m;bestDates.length=0;bestDates.push(dr.d);}
       else if(m===best&&m>0&&bestDates.length<10)bestDates.push(dr.d);
     }
-    return {combo,bestMain:best,bestMainDates:bestDates,drawsChecked:ds.length};
+    /* v5.11.109: скільки разів ця лінія виграла б хоч щось (без Grand Number для Daily Grand) */
+    let wins=0;const tiers={};
+    for(const dr of ds){if(!dr||!Array.isArray(dr.n))continue;const sc=lottoScoreLine(gameId,{nums:combo,gn:null},dr);if(sc.tier){wins++;tiers[sc.tier.id]=(tiers[sc.tier.id]||0)+1}}
+    return {combo,bestMain:best,bestMainDates:bestDates,drawsChecked:ds.length,wins,tiers};
   });
 }
 /* v5.11.57: оцінка дати наступного тиражу за днями розіграшу гри (напр. "Вт · Пт"). */
@@ -8029,12 +8197,12 @@ async function lottoSave(env,gameId,rec){
   if(!kv)return false;
   try{await kv.put(lottoKvKey(gameId),JSON.stringify(rec));return true;}catch(e){return false;}
 }
-async function lottoRefreshGame(env,gameId){
+async function lottoRefreshGame(env,gameId,timeoutMs){
   const g=LOTTO_GAMES[gameId];
   if(!g)return {game:gameId,ok:false,error:"unknown game"};
   let html=null;
   try{
-    const ctl=new AbortController(),tm=setTimeout(()=>ctl.abort(),25000);
+    const ctl=new AbortController(),tm=setTimeout(()=>ctl.abort(),timeoutMs||25000);
     try{
       const r=await fetch(g.src,{headers:{"User-Agent":"Mozilla/5.0 (compatible; AIBridge/1.0)"},signal:ctl.signal});
       if(!r.ok)return {game:gameId,ok:false,error:"HTTP "+r.status};
@@ -8047,7 +8215,7 @@ async function lottoRefreshGame(env,gameId){
   const have=new Set(cur.draws.map(d=>d.d));
   const added=fresh.filter(d=>!have.has(d.d)).length;
   const merged=lottoMergeDraws(cur.draws,fresh,LOTTO_MAX_DRAWS);
-  const rec={updatedAt:new Date().toISOString(),source:"wclc",draws:merged};
+  const rec={updatedAt:new Date().toISOString(),lastTryAt:new Date().toISOString(),source:"wclc",draws:merged};
   const saved=await lottoSave(env,gameId,rec);
   /* v5.11.57: новий тираж — звірити збережені прогнози, оновити навчання стратегій. */
   let predChecked=0;
@@ -8691,22 +8859,27 @@ async function handleLotto(req,env,url){
   {const a=await authOK(req,env);if(a.setup)return json({version:VERSION,error:"BRIDGE_ACCESS_TOKEN is not configured."},503);if(!a.ok)return json({version:VERSION,error:"Unauthorized"},401)}
   if(p==="/api/lotto/games"&&m==="GET")
     return json({version:VERSION,games:Object.fromEntries(Object.entries(LOTTO_GAMES)
-      .map(([id,g])=>[id,{name:g.name,mainCount:g.mainCount,mainMax:g.mainMax,bonusMax:g.bonusMax,bonusName:g.bonusName,drawDays:g.drawDays}]))});
+      .map(([id,g])=>[id,{name:g.name,mainCount:g.mainCount,mainMax:g.mainMax,bonusMax:g.bonusMax,bonusName:g.bonusName,drawDays:g.drawDays,linesPerPlay:g.linesPerPlay||1,price:g.price||null,eraFrom:g.eraFrom||null}]))});
   if(p==="/api/lotto/draws"&&m==="GET"){
     const game=url.searchParams.get("game")||"lottomax";
     if(!Object.prototype.hasOwnProperty.call(LOTTO_GAMES,game))return json({version:VERSION,error:"unknown game"},400); /* v5.11.93: game=__proto__/constructor валило обробник */
     const limit=Math.min(200,Math.max(1,parseInt(url.searchParams.get("limit")||"50",10)||50));
-    const rec=await lottoLoad(env,game);
+    let rec=await lottoLoad(env,game);
+    try{rec=(await lottoMaybeRefresh(env,game,rec)).rec}catch(e){} /* v5.11.109: сам підтягує нові тиражі */
     return json({version:VERSION,game,updatedAt:rec.updatedAt,source:rec.source,total:rec.draws.length,draws:rec.draws.slice(0,limit)});
   }
   if(p==="/api/lotto/analyze"&&m==="GET"){
     const game=url.searchParams.get("game")||"lottomax";
     if(!Object.prototype.hasOwnProperty.call(LOTTO_GAMES,game))return json({version:VERSION,error:"unknown game"},400); /* v5.11.93: game=__proto__/constructor валило обробник */
-    const rec=await lottoLoad(env,game);
+    let rec=await lottoLoad(env,game),auto={refreshed:false};
+    try{auto=await lottoMaybeRefresh(env,game,rec);rec=auto.rec}catch(e){} /* v5.11.109 */
     /* v5.11.57: завантажити статистику навчання стратегій для точності комбо. */
     let stratStats=null;
     try{const kv=jobsKV(env);if(kv){const raw=await kv.get(LOTTO_STAT_PREFIX+game+":v1");if(raw)stratStats=JSON.parse(raw);}}catch(e){}
-    const analysis=lottoAnalyze(rec.draws,game,stratStats);
+    const eraDraws=lottoEraDraws(game,rec.draws); /* v5.11.109: Lotto Max — лише 7/52 */
+    const analysis=lottoAnalyze(eraDraws,game,stratStats);
+    analysis.engine=lottoEngine(rec.draws,game);
+    analysis.autoRefresh={refreshed:!!auto.refreshed,added:auto.added||0,source:rec.source,lastExpected:lottoLastExpectedDraw(game,new Date())};
     /* v5.11.57: зберегти згенеровані комбо як прогноз до наступного тиражу.
        v5.11.94: лише коли змінився останній тираж (економія KV). */
     try{await lottoSavePrediction(env,game,analysis.smartCombos,(rec.draws[0]||{}).d);}catch(e){}
@@ -8717,7 +8890,7 @@ async function handleLotto(req,env,url){
     const game=body.game||"lottomax";
     if(!Object.prototype.hasOwnProperty.call(LOTTO_GAMES,game))return json({version:VERSION,error:"unknown game"},400); /* v5.11.93: game=__proto__/constructor валило обробник */
     const rec=await lottoLoad(env,game);
-    return json({version:VERSION,game,results:lottoCheckCombos(rec.draws,body.combos,game),latest:rec.draws[0]||null});
+    return json({version:VERSION,game,results:lottoCheckCombos(lottoEraDraws(game,rec.draws),body.combos,game),latest:rec.draws[0]||null});
   }
   if(p==="/api/lotto/refresh"&&m==="POST"){
     const out={};

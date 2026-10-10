@@ -128,11 +128,11 @@ function mkDraws(){
   const r=await lottoCheckPredictions(env,"lottomax",draw);
   ok(r.checked===1,"lottoCheckPredictions: 1 прогноз перевірено");
   const stats=JSON.parse(env.store.get("lotto:strategy-stats:lottomax:v1"));
-  const B=7/50; /* v5.11.108: старт EMA — випадковий рівень mainCount/mainMax, а не 0.5 */
+  const B=+(7/52).toFixed(4); /* v5.11.109: Lotto Max 7/52; v5.11.108: старт EMA — випадковий рівень mainCount/mainMax, а не 0.5 */
   const expHot=+(B*0.75+(3/7)*0.25).toFixed(4);
   ok(Math.abs(stats.hot.ema-expHot)<1e-9,`lottoCheckPredictions: EMA hot=${stats.hot.ema} (очікувалось ${expHot})`);
   ok(stats.hot.count===1&&stats.anti.count===1,"lottoCheckPredictions: лічильники");
-  ok(stats.anti.ema===+(B*0.75).toFixed(4),"lottoCheckPredictions: EMA anti=0.105 при 0 збігів (від випадкового рівня)");
+  ok(stats.anti.ema===+(B*0.75).toFixed(4),"lottoCheckPredictions: EMA anti=0.75×випадкового рівня при 0 збігів");
   ok(stats.__totalChecked===1,"lottoCheckPredictions: __totalChecked=1");
   const arr2=JSON.parse(env.store.get("lotto:predictions:lottomax:v1"));
   ok(arr2[0].checked===true&&arr2[0].checkedAgainst==="2026-10-02","lottoCheckPredictions: прогноз позначено checked");
@@ -157,8 +157,8 @@ function mkDraws(){
   ok(an.learning.totalChecked===2&&an.learning.bestStrategy==="hot","lottoAnalyze: learning {2, hot}");
   /* без статистики — нейтрально */
   const an2=lottoAnalyze(draws,"lottomax");
-  ok(an2.smartCombos.every(c=>c.accuracy===0.14),"lottoAnalyze: без stats accuracy = випадковий рівень 7/50 (v5.11.108, було завищене 0.5)");
-  ok(an2.baseline===0.14&&an2.odds&&an2.odds.jackpot===99884400&&an2.odds.jackpotPerTicket===33294800&&an2.odds.expectedMatches===0.98,"lottoAnalyze: baseline і чесні шанси Lotto Max (лінія 1 до 99 884 400, квиток з 3 ліній 1 до 33 294 800)");
+  ok(an2.smartCombos.every(c=>c.accuracy===0.1346),"lottoAnalyze: без stats accuracy = випадковий рівень 7/52 (v5.11.109; v5.11.108 — замість завищеного 0.5)");
+  ok(an2.baseline===0.1346&&an2.odds&&an2.odds.jackpot===133784560&&an2.odds.jackpotPerTicket===33446140&&an2.odds.expectedMatches===0.94,"lottoAnalyze: чесні шанси Lotto Max 7/52 (лінія 1 до 133 784 560, квиток $6 з 4 ліній 1 до 33 446 140)");
   ok(an2.learning.totalChecked===0&&an2.learning.bestStrategy===null,"lottoAnalyze: без stats learning порожній");
   ok(an2.smartCombos.length===5,"lottoAnalyze: 5 комбо як і раніше");
 }

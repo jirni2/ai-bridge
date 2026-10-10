@@ -2056,6 +2056,15 @@ body.pageChat{overscroll-behavior-y:contain}
 .lottoDisc{margin-top:12px;font-size:12.5px;color:var(--muted);line-height:1.5}
 .lottoOddsBig{font-size:17px;font-weight:700;margin:4px 0 8px;font-variant-numeric:tabular-nums}
 .lottoOdds .lottoMeta{margin:6px 0;line-height:1.5}
+/* v5.11.109: Ядро лотереї */
+.lcRow{border-top:1px solid var(--line);padding:10px 0}
+.lcRow:first-of-type{border-top:0}
+.lcControl{opacity:.8}
+.lcHead{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.lcBadge{font-size:11.5px;font-weight:700;padding:3px 10px;border-radius:99px;background:var(--surface-2);color:var(--muted);white-space:nowrap}
+.lcBadge.better{background:var(--accent-soft);color:var(--accent-text)}
+.lcBadge.worse{background:var(--red-soft);color:var(--red)}
+.lcNext{margin-top:6px}
 .lottoAddRow{display:flex;gap:8px;margin-top:10px}
 .lottoAddRow input{flex:1;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-md);padding:10px 12px;font-size:16px; /* v5.11.98 */color:var(--text);min-height:44px;font-variant-numeric:tabular-nums}
 .lottoComboRow{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 0}

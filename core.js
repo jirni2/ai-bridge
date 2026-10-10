@@ -30,7 +30,7 @@
    НІЯКИХ мережевих викликів. */
 const BridgeCore=(()=>{
 "use strict";
-const VERSION="5.11.108";
+const VERSION="5.11.109";
 
 /* === v5.11.75 «Захист Ядра» — чистий JS, zero dependencies. ===
    1. DoS-захист: ліміт вхідного тексту (MAX_INPUT_CHARS) + бюджет часу (TIME_BUDGET_MS).
