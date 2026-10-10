@@ -39,7 +39,7 @@ const prelude=[
   "const LOTTO_MAX_DRAWS=400;",
   'const LOTTO_DISCLAIMER="Описова статистика.";'
 ].join("\n");
-(0,eval)(prelude+"\n"+grabFn(worker,"lottoValidDraw")+"\n"+grabFn(worker,"lottoParseWclc")+"\n"+grabFn(worker,"lottoMergeDraws")+"\n"+grabFn(worker,"lottoAnalyze")+"\n"+grabFn(worker,"lottoCheckCombos"));
+(0,eval)(prelude+"\n"+grabFn(worker,"lottoValidDraw")+"\n"+grabFn(worker,"lottoParseWclc")+"\n"+grabFn(worker,"lottoMergeDraws")+"\n"+grabFn(worker,"lottoBaseline")+"\n"+grabFn(worker,"lottoComb")+"\n"+grabFn(worker,"lottoOdds")+"\n"+grabFn(worker,"lottoRandomness")+"\n"+grabFn(worker,"erfcApprox")+"\n"+grabFn(worker,"lottoAnalyze")+"\n"+grabFn(worker,"lottoCheckCombos"));
 
 /* --- 1. парсер --- */
 const maxHtml=`<div class="pastWinNumGroup"><div class="pastWinNumDate"><strong>Tuesday, September 29, 2026</strong></div><ul class="pastWinNumbers"><li class="pastWinNumber">6</li><li class="pastWinNumber">10</li><li class="pastWinNumber">13</li><li class="pastWinNumber">22</li><li class="pastWinNumber">23</li><li class="pastWinNumber">43</li><li class="pastWinNumber">49</li><li class="pastWinNumberBonus"><span class="pastWinNumberBonusText">Bonus</span>17</li></ul></div>`;

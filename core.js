@@ -30,7 +30,7 @@
    НІЯКИХ мережевих викликів. */
 const BridgeCore=(()=>{
 "use strict";
-const VERSION="5.11.107";
+const VERSION="5.11.108";
 
 /* === v5.11.75 «Захист Ядра» — чистий JS, zero dependencies. ===
    1. DoS-захист: ліміт вхідного тексту (MAX_INPUT_CHARS) + бюджет часу (TIME_BUDGET_MS).
@@ -4702,6 +4702,11 @@ uk:{
   memHead:"Ось що я пам'ятаю:",
   memFacts:"Факти ({n})",memDocs:"Документи ({n})",memName:"Тебе звати {name}.",
   math:"**{expr} = {res}**",
+  /* v5.11.108: нова математика і календар */
+  factors:"**{n} = {f}**",prime:"**{n}** — просте число (ділиться лише на 1 і на себе).",notPrime:"**{n}** — не просте: {f}.",notPrimeSmall:"**{n}** — не просте число (прості числа починаються з 2).",
+  gcd:"**НСД({a}, {b}) = {r}**",lcm:"**НСК({a}, {b}) = {r}**",frac:"**{expr} = {res}** (точно: **{fr}**)",
+  daysInMonth:"У {m} {y} року — **{n} днів**.",leapYes:"**{y}** — високосний рік (366 днів, у лютому 29).",leapNo:"**{y}** — не високосний рік (365 днів, у лютому 28).",
+  year:"Зараз **{y}** рік.",bigNum:"Число завелике для точного розкладу (до 1 000 000 000 000).",
   mathErr:"Не зміг порахувати цей вираз. Спробуй простіше, наприклад «(12+8)*3» або «15% від 240».",
   divZero:"На нуль ділити не можна.",
   unit:"**{a} {ua} = {b} {ub}**",
@@ -4746,6 +4751,11 @@ ru:{
   memHead:"Вот что я помню:",
   memFacts:"Факты ({n})",memDocs:"Документы ({n})",memName:"Тебя зовут {name}.",
   math:"**{expr} = {res}**",
+  /* v5.11.108: новая математика и календарь */
+  factors:"**{n} = {f}**",prime:"**{n}** — простое число (делится только на 1 и на себя).",notPrime:"**{n}** — не простое: {f}.",notPrimeSmall:"**{n}** — не простое число (простые числа начинаются с 2).",
+  gcd:"**НОД({a}, {b}) = {r}**",lcm:"**НОК({a}, {b}) = {r}**",frac:"**{expr} = {res}** (точно: **{fr}**)",
+  daysInMonth:"В {m} {y} года — **{n} дней**.",leapYes:"**{y}** — високосный год (366 дней, в феврале 29).",leapNo:"**{y}** — не високосный год (365 дней, в феврале 28).",
+  year:"Сейчас **{y}** год.",bigNum:"Число слишком большое для точного разложения (до 1 000 000 000 000).",
   mathErr:"Не смог посчитать это выражение. Попробуй проще, например «(12+8)*3» или «15% от 240».",
   divZero:"На ноль делить нельзя.",
   unit:"**{a} {ua} = {b} {ub}**",
@@ -4790,6 +4800,11 @@ en:{
   memHead:"Here is what I remember:",
   memFacts:"Facts ({n})",memDocs:"Documents ({n})",memName:"Your name is {name}.",
   math:"**{expr} = {res}**",
+  /* v5.11.108: new maths and calendar */
+  factors:"**{n} = {f}**",prime:"**{n}** is a prime number (divisible only by 1 and itself).",notPrime:"**{n}** is not prime: {f}.",notPrimeSmall:"**{n}** is not a prime number (primes start at 2).",
+  gcd:"**GCD({a}, {b}) = {r}**",lcm:"**LCM({a}, {b}) = {r}**",frac:"**{expr} = {res}** (exactly: **{fr}**)",
+  daysInMonth:"{m} {y} has **{n} days**.",leapYes:"**{y}** is a leap year (366 days, February has 29).",leapNo:"**{y}** is not a leap year (365 days, February has 28).",
+  year:"It is **{y}** now.",bigNum:"The number is too large to factor exactly (up to 1,000,000,000,000).",
   mathErr:"I couldn't compute that expression. Try something simpler, like \"(12+8)*3\" or \"15% of 240\".",
   divZero:"Division by zero is not possible.",
   unit:"**{a} {ua} = {b} {ub}**",
@@ -4886,6 +4901,40 @@ function __aFmtNum(x){
   return f?ii+"."+f.slice(0,8).replace(/0+$/,"").replace(/^$/,"0"):ii;
 }
 /* ---- Безпечний калькулятор (рекурсивний спуск, без eval) ---- */
+/* v5.11.108: точна арифметика, прості числа, НСД/НСК, календар. Детерміновано, без мережі. */
+const __A_MONTH_RE=[
+  /^(?:січ|январ|jan)/u,/^(?:лют|феврал|feb)/u,/^(?:берез|март|mar)/u,/^(?:квіт|апрел|apr)/u,/^(?:трав|ма[йяе]|may)/u,/^(?:черв|июн|jun)/u,
+  /^(?:лип|июл|jul)/u,/^(?:серп|август|aug)/u,/^(?:верес|сентябр|sep)/u,/^(?:жовт|октябр|oct)/u,/^(?:листопад|ноябр|nov)/u,/^(?:груд|декабр|dec)/u];
+const __A_MONTH_LOC={
+  uk:["січні","лютому","березні","квітні","травні","червні","липні","серпні","вересні","жовтні","листопаді","грудні"],
+  ru:["январе","феврале","марте","апреле","мае","июне","июле","августе","сентябре","октябре","ноябре","декабре"],
+  en:["January","February","March","April","May","June","July","August","September","October","November","December"]};
+function __aMonthIdx(w){w=String(w||"").toLowerCase();for(let i=0;i<12;i++)if(__A_MONTH_RE[i].test(w))return i;return -1}
+function __aLeap(y){return (y%4===0&&y%100!==0)||y%400===0}
+function __aFactor(n){
+  const f=[];let x=n;
+  for(const p of [2,3,5]){while(x%p===0){f.push(p);x/=p}}
+  for(let d=7,i=0,inc=[4,2,4,2,4,6,2,6];d*d<=x;d+=inc[i++&7]){while(x%d===0){f.push(d);x/=d}}
+  if(x>1)f.push(x);
+  return f;
+}
+function __aFactorStr(f){
+  const c=new Map();for(const p of f)c.set(p,(c.get(p)||0)+1);
+  return [...c].map(([p,k])=>k>1?p+"^"+k:String(p)).join(" × ");
+}
+function __aGcd(a,b){while(b){[a,b]=[b,a%b]}return a}
+/* Точний дріб для виразів лише з цілих чисел і + − × ÷ ( ). null — якщо вираз не такий. */
+function __aExactFrac(src){
+  const s=String(src).replace(/×/g,"*").replace(/÷|:/g,"/").replace(/[−–]/g,"-").replace(/\s+/g,"");
+  if(!/^[\d+\-*/()]+$/.test(s)||!/\//.test(s)||s.length>80)return null;
+  let i=0;
+  const norm=([n,d])=>{if(d===0)throw 0;if(d<0){n=-n;d=-d}const g=__aGcd(Math.abs(n),d)||1;return [n/g,d/g]};
+  const num=()=>{let st=i;while(i<s.length&&/\d/.test(s[i]))i++;if(st===i)throw 0;const v=Number(s.slice(st,i));if(!Number.isSafeInteger(v))throw 0;return [v,1]};
+  const atom=()=>{if(s[i]==="-"){i++;const [n,d]=atom();return [-n,d]}if(s[i]==="("){i++;const v=expr();if(s[i]!==")")throw 0;i++;return v}return num()};
+  const term=()=>{let v=atom();while(s[i]==="*"||s[i]==="/"){const op=s[i++],w=atom();v=op==="*"?norm([v[0]*w[0],v[1]*w[1]]):norm([v[0]*w[1],v[1]*w[0]]);if(!Number.isSafeInteger(v[0])||!Number.isSafeInteger(v[1]))throw 0}return v};
+  const expr=()=>{let v=term();while(s[i]==="+"||s[i]==="-"){const op=s[i++],w=term();v=norm([op==="+"?v[0]*w[1]+w[0]*v[1]:v[0]*w[1]-w[0]*v[1],v[1]*w[1]]);if(!Number.isSafeInteger(v[0])||!Number.isSafeInteger(v[1]))throw 0}return v};
+  try{const v=expr();if(i!==s.length)return null;return norm(v)}catch(e){return null}
+}
 function __aCalc(src){
   let s=String(src).toLowerCase().slice(0,200);
   s=s.replace(/помножити\s+на|умножить\s+на|множити\s+на|times|multiplied\s+by/g,"*")
@@ -6194,15 +6243,43 @@ function createAssistant(opts){
 
     /* 5. рахунок */
     {
-      const stripped=low.replace(/^(?:скільки\s+буде|скільки\s+це|порахуй|обчисли|розрахуй|calculate|compute|what\s+is|what['’]s|how\s+much\s+is|сколько\s+будет|сколько\s+это|посчитай|вычисли)\s*/u,"").replace(/[?=\s]+$/,"");
+      const stripped=low.replace(/^(?:що\s+таке|чому\s+дорівнює|чему\s+равно|скільки\s+буде|скільки\s+це|порахуй|обчисли|розрахуй|calculate|compute|what\s+is|what['’]s|how\s+much\s+is|сколько\s+будет|сколько\s+это|посчитай|вычисли)\s*/u,"").replace(/[?=\s]+$/,"");
       const looksMath=/\d/.test(stripped)&&(/^[\d\s.,+\-*/×÷^()%√:x−–]+$/.test(stripped)||/(?:%|відсотк|процент|percent)\s*(?:від|от|of)\s*\d|плюс|мінус|минус|помножити|умножить|поділити|разделить|корінь|корень|sqrt|square\s+root|в\s+степен|times|plus|minus|divided/.test(stripped));
       if(/\d:\d/.test(stripped)){/* 10:30 — це час, а не ділення */}
       else if(looksMath&&!/\d{1,2}[:.]\d{2}\s*$/.test(stripped.replace(/\s/g,""))||(/^[\d\s.,+\-*/×÷^()%√x−–]+$/.test(stripped)&&/[+\-*/×÷^%√]/.test(stripped))){
         const r=__aCalc(stripped);
-        if(r.ok)return ret("math",__aFill(T.math,{expr:r.expr,res:__aFmtNum(r.value)}),{value:r.value});
+        if(r.ok){
+          const fr=Number.isInteger(r.value)?null:__aExactFrac(stripped); /* v5.11.108: 1/3+1/4 → 7/12 */
+          if(fr&&fr[1]>1&&fr[1]<=100000&&!/^(?:2|5)*$/.test(__aFactor(fr[1]).join("")))return ret("math",__aFill(T.frac,{expr:r.expr,res:__aFmtNum(r.value),fr:fr[0]+"/"+fr[1]}),{value:r.value});
+          return ret("math",__aFill(T.math,{expr:r.expr,res:__aFmtNum(r.value)}),{value:r.value});
+        }
         if(r.div0)return ret("math",T.divZero);
         if(/^[\d\s.,+\-*/×÷^()%√:x−–]+$/.test(stripped))return ret("math",T.mathErr,{handled:false});
       }
+    }
+    /* 5b. v5.11.108: прості числа, розклад, НСД/НСК, точні дроби, календар */
+    {
+      const big=n=>n>1e12;
+      let mm=low.match(/(?:розклад[иі]?|розкласти|разлож(?:и|ить)|factori[sz]e|prime\s+factori[sz]ation\s+of|prime\s+factors?\s+of)\s*(?:на\s+)?(?:прост(?:і|ые)\s+)?(?:множники|множители)?\s*(?:числа\s+|число\s+)?(\d{1,15})/u);
+      if(mm){const n=+mm[1];if(big(n))return ret("math",T.bigNum,{handled:false});if(n<2)return ret("math",__aFill(T.notPrimeSmall,{n:__aFmtNum(n)}));
+        const f=__aFactor(n);return ret("math",f.length===1?__aFill(T.prime,{n:__aFmtNum(n)}):__aFill(T.factors,{n:__aFmtNum(n),f:__aFactorStr(f)}),{value:n})}
+      mm=low.match(/(?:чи\s+(?:є\s+)?(?:число\s+)?(\d{1,15})\s+прост)|(?:(\d{1,15})\s*[—–-]?\s*(?:це\s+)?просте\s+число\s*\?)|(?:is\s+(\d{1,15})\s+(?:a\s+)?prime)|(?:явля[ея]тся\s+ли\s+(?:число\s+)?(\d{1,15})\s+прост)|(?:(\d{1,15})\s+простое\s+число\s*\?)/u);
+      if(mm){const n=+(mm[1]||mm[2]||mm[3]||mm[4]||mm[5]);if(big(n))return ret("math",T.bigNum,{handled:false});
+        if(n<2)return ret("math",__aFill(T.notPrimeSmall,{n:__aFmtNum(n)}));
+        const f=__aFactor(n);return ret("math",f.length===1?__aFill(T.prime,{n:__aFmtNum(n)}):__aFill(T.notPrime,{n:__aFmtNum(n),f:__aFmtNum(n)+" = "+__aFactorStr(f)}),{value:f.length===1?1:0})}
+      mm=low.match(/(?:нсд|нод|gcd|gcf|hcf|найбільш(?:ий|ого)\s+спільн(?:ий|ого)\s+дільник(?:а)?|наибольш(?:ий|его)\s+общ(?:ий|его)\s+делител[ья]|greatest\s+common\s+(?:divisor|factor))\s*(?:of\s+|для\s+|чисел\s+)?\(?\s*(\d{1,12})\s*(?:,|і|и|та|and|&|\s)\s*(\d{1,12})/u);
+      if(mm){const a=+mm[1],b=+mm[2];return ret("math",__aFill(T.gcd,{a:__aFmtNum(a),b:__aFmtNum(b),r:__aFmtNum(__aGcd(a,b))}),{value:__aGcd(a,b)})}
+      mm=low.match(/(?:нск|нок|lcm|найменш(?:е|ого)\s+спільн(?:е|ого)\s+кратн(?:е|ого)|наименьш(?:ее|его)\s+общ(?:ее|его)\s+кратн(?:ое|ого)|least\s+common\s+multiple)\s*(?:of\s+|для\s+|чисел\s+)?\(?\s*(\d{1,12})\s*(?:,|і|и|та|and|&|\s)\s*(\d{1,12})/u);
+      if(mm){const a=+mm[1],b=+mm[2],g=__aGcd(a,b)||1,r=a/g*b;if(Number.isSafeInteger(r))return ret("math",__aFill(T.lcm,{a:__aFmtNum(a),b:__aFmtNum(b),r:__aFmtNum(r)}),{value:r})}
+      mm=low.match(/(?:високосн\p{L}*\s+(?:(?:є|ли)\s+)?(\d{4}))|(?:чи\s+(?:є\s+)?(\d{4})\s*(?:рік\s+)?високосн)|(?:(\d{4})\s*(?:рік|год)?\s*[—–-]?\s*високосн)|(?:is\s+(\d{4})\s+a\s+leap\s+year)|(?:(?:явля[ея]тся\s+ли\s+)?(\d{4})\s*(?:год\s+)?високосн)/u);
+      if(mm){const y=+(mm[1]||mm[2]||mm[3]||mm[4]||mm[5]);return ret("date",__aFill(__aLeap(y)?T.leapYes:T.leapNo,{y}),{value:__aLeap(y)?366:365})}
+      mm=low.match(/(?:скільки|сколько|how\s+many)\s+(?:днів|дней|days)\s+(?:у|в|во|in)\s+(?:місяці\s+|месяце\s+|(?:the\s+)?month\s+of\s+)?([\p{L}]{3,12})(?:\s+(\d{4}))?/u);
+      if(mm){const mi=__aMonthIdx(mm[1]);if(mi>=0){const y=mm[2]?+mm[2]:nowFn().getFullYear();const n=new Date(y,mi+1,0).getDate();
+        return ret("date",__aFill(T.daysInMonth,{m:__A_MONTH_LOC[lang][mi],y,n}),{value:n})}}
+      if(words<=6&&/(?:який|котрий)\s+(?:зараз\s+|сьогодні\s+|нині\s+)?рік|what\s+year\s+is\s+it|(?:какой|который)\s+(?:сейчас\s+|сегодня\s+)?год/u.test(low))
+        return ret("date",__aFill(T.year,{y:nowFn().getFullYear()}),{value:nowFn().getFullYear()});
+      if(words<=6&&/як\s+тебе\s+(?:звати|кличуть)|як\s+твоє\s+ім['’ʼ]?я|what(?:['’]s|\s+is)\s+your\s+name|как\s+тебя\s+зовут|как\s+твоё\s+имя|как\s+твое\s+имя/u.test(low))
+        return ret("identity",T.who);
     }
     /* 6. одиниці */
     m=qi.match(/(-?\d+(?:[.,]\d+)?)\s*(°?[a-zа-яіїє]+(?:\/[a-zа-яіїє]+)?)\.?\s+(?:в|у|до|to|in|into|=|→|->)\s+(°?[a-zа-яіїє]+(?:\/[a-zа-яіїє]+)?)/iu);
@@ -6260,7 +6337,7 @@ function createAssistant(opts){
     const want={
       sum:/підсум|резюм|стисло|коротк(?:о|ий)\s+(?:зміст|виклад|переказ)|скороти|перекажи|tl;?dr|summar|суммир|подытож|кратк(?:о|ое|ий)\s+(?:содерж|излож|переск)|перескажи|про\s+що\s+(?:цей|текст|документ|йдеться)|о\s+ч[её]м\s+(?:этот|текст|документ|речь)|what\s+is\s+(?:this|the\s+text|it)\s+about/u.test(low),
       kw:/ключов|keyword|key\s+words|головні\s+слова|основні\s+теми|ключев|главные\s+слова/u.test(low),
-      stats:/статистик|скільки\s+(?:слів|речень|символів)|word\s+count|how\s+many\s+(?:words|sentences)|сколько\s+(?:слов|предложений|символов)|читабельн|читаемост|readab/u.test(low),
+      stats:/статистик|порахуй\s+слова|count\s+(?:the\s+)?words|посчитай\s+слова|скільки\s+(?:слів|речень|символів)|word\s+count|how\s+many\s+(?:words|sentences)|сколько\s+(?:слов|предложений|символов)|читабельн|читаемост|readab/u.test(low),
       dates:/(?:^|[^\p{L}])(?:дати|дату|дат|терміни|дедлайн[и]?|dates?|deadlines?|даты|сроки)(?![\p{L}])/u.test(low)&&!/сьогодні|today|сегодня/u.test(low),
       nums:/(?:^|[^\p{L}])(?:числа|цифри|суми|numbers|amounts|figures|цифры|суммы)(?![\p{L}])/u.test(low),
       acts:/що\s+(?:треба|потрібно)\s+зробити|(?:^|[^\p{L}])(?:завдання|список\s+справ)(?![\p{L}])|action\s+items|to-?do|(?:^|[^\p{L}])tasks(?![\p{L}])|что\s+(?:нужно|надо)\s+сделать|(?:^|[^\p{L}])задачи(?![\p{L}])/u.test(low),
@@ -6276,6 +6353,7 @@ function createAssistant(opts){
       const tailText=idx>=0?q.slice(idx+1).trim():"";
       if(ctxText)body=ctxText;
       else if(anyTool&&tailText.length>=120&&idx<120)body=tailText;
+      else if(want.stats&&!want.sum&&tailText.length>0&&idx>=0&&idx<60)body=tailText; /* v5.11.108: «порахуй слова: короткий текст» */
       else if(q.length>=400)body=q;
     }
     const commandOnly=anyTool&&words<=14&&!body;

@@ -64,6 +64,7 @@ const prelude=[
   grabFn(worker,"lottoSavePrediction"),
   grabFn(worker,"lottoCheckPredictions"),
   grabFn(worker,"lottoAnalyze"),
+  grabFn(worker,"lottoBaseline"),grabFn(worker,"lottoComb"),grabFn(worker,"lottoOdds"),grabFn(worker,"lottoRandomness"),grabFn(worker,"erfcApprox"),
 ].join("\n");
 (0,eval)(prelude);
 
@@ -127,10 +128,11 @@ function mkDraws(){
   const r=await lottoCheckPredictions(env,"lottomax",draw);
   ok(r.checked===1,"lottoCheckPredictions: 1 прогноз перевірено");
   const stats=JSON.parse(env.store.get("lotto:strategy-stats:lottomax:v1"));
-  const expHot=+(0.5*0.75+(3/7)*0.25).toFixed(4);
+  const B=7/50; /* v5.11.108: старт EMA — випадковий рівень mainCount/mainMax, а не 0.5 */
+  const expHot=+(B*0.75+(3/7)*0.25).toFixed(4);
   ok(Math.abs(stats.hot.ema-expHot)<1e-9,`lottoCheckPredictions: EMA hot=${stats.hot.ema} (очікувалось ${expHot})`);
   ok(stats.hot.count===1&&stats.anti.count===1,"lottoCheckPredictions: лічильники");
-  ok(stats.anti.ema===0.375,"lottoCheckPredictions: EMA anti=0.375 при 0 збігів");
+  ok(stats.anti.ema===+(B*0.75).toFixed(4),"lottoCheckPredictions: EMA anti=0.105 при 0 збігів (від випадкового рівня)");
   ok(stats.__totalChecked===1,"lottoCheckPredictions: __totalChecked=1");
   const arr2=JSON.parse(env.store.get("lotto:predictions:lottomax:v1"));
   ok(arr2[0].checked===true&&arr2[0].checkedAgainst==="2026-10-02","lottoCheckPredictions: прогноз позначено checked");
@@ -155,7 +157,8 @@ function mkDraws(){
   ok(an.learning.totalChecked===2&&an.learning.bestStrategy==="hot","lottoAnalyze: learning {2, hot}");
   /* без статистики — нейтрально */
   const an2=lottoAnalyze(draws,"lottomax");
-  ok(an2.smartCombos.every(c=>c.accuracy===0.5),"lottoAnalyze: без stats accuracy=0.5");
+  ok(an2.smartCombos.every(c=>c.accuracy===0.14),"lottoAnalyze: без stats accuracy = випадковий рівень 7/50 (v5.11.108, було завищене 0.5)");
+  ok(an2.baseline===0.14&&an2.odds&&an2.odds.jackpot===99884400&&an2.odds.jackpotPerTicket===33294800&&an2.odds.expectedMatches===0.98,"lottoAnalyze: baseline і чесні шанси Lotto Max (лінія 1 до 99 884 400, квиток з 3 ліній 1 до 33 294 800)");
   ok(an2.learning.totalChecked===0&&an2.learning.bestStrategy===null,"lottoAnalyze: без stats learning порожній");
   ok(an2.smartCombos.length===5,"lottoAnalyze: 5 комбо як і раніше");
 }
@@ -177,12 +180,12 @@ function mkDraws(){
 {
   const draws=mkDraws();
   /* hot ema 0.8, pairs ema 0.65 → обидві кваліфікуються; ripe ema 0.5 → ні */
-  const stats={hot:{ema:0.8,count:5},pairs:{ema:0.65,count:4},ripe:{ema:0.5,count:2},__totalChecked:3};
+  const stats={hot:{ema:0.8,count:12},pairs:{ema:0.65,count:11},ripe:{ema:0.5,count:2},__totalChecked:12}; /* v5.11.108: потрібно ≥10 перевірок */
   const an=lottoAnalyze(draws,"lottomax",stats);
   const ids=an.smartCombos.map(c=>c.id);
-  ok(ids.includes("hot+"),"evolution: похідне hot+ згенеровано (ema 0.8 ≥ 0.6)");
-  ok(ids.includes("pairs+"),"evolution: похідне pairs+ згенеровано (ema 0.65 ≥ 0.6)");
-  ok(!ids.includes("ripe+"),"evolution: ripe+ НЕ згенеровано (ema 0.5 < 0.6)");
+  ok(ids.includes("hot+"),"evolution: похідне hot+ згенеровано (ema 0.8 ≥ 1.5×випадкового, 12 перевірок)");
+  ok(ids.includes("pairs+"),"evolution: похідне pairs+ згенеровано (11 перевірок)");
+  ok(!ids.includes("ripe+"),"evolution: ripe+ НЕ згенеровано (лише 2 перевірки — це шум)");
   ok(an.smartCombos.length<=8,"evolution: максимум 8 комбо");
   const hp=an.smartCombos.find(c=>c.id==="hot+");
   ok(hp&&hp.nums.length===7&&new Set(hp.nums).size===7,"evolution: hot+ — 7 унікальних чисел");
@@ -194,14 +197,14 @@ function mkDraws(){
   const h0=an.smartCombos.find(c=>c.id==="hot");
   ok(hp.nums.join(",")!==h0.nums.join(","),"evolution: hot+ відрізняється від hot");
   /* ліміт 3 похідних: 4 кваліфіковані → тільки 3 */
-  const stats2={hot:{ema:0.9,count:1},ripe:{ema:0.8,count:1},balance:{ema:0.7,count:1},pairs:{ema:0.65,count:1},anti:{ema:0.61,count:1},__totalChecked:5};
+  const stats2={hot:{ema:0.9,count:12},ripe:{ema:0.8,count:12},balance:{ema:0.7,count:12},pairs:{ema:0.65,count:12},anti:{ema:0.61,count:12},__totalChecked:12};
   const an2=lottoAnalyze(draws,"lottomax",stats2);
   const derived2=an2.smartCombos.filter(c=>c.id.endsWith("+"));
   ok(derived2.length===3,"evolution: максимум 3 похідні при 5 кваліфікованих");
   ok(an2.smartCombos.length===8,"evolution: 5 базових + 3 похідні = 8");
   /* без кваліфікованих — тільки 5 базових */
   const an3=lottoAnalyze(draws,"lottomax",{__totalChecked:1});
-  ok(an3.smartCombos.length===5&&!an3.smartCombos.some(c=>c.id.endsWith("+")),"evolution: без ema ≥ 0.6 похідних немає");
+  ok(an3.smartCombos.length===5&&!an3.smartCombos.some(c=>c.id.endsWith("+")),"evolution: без перевіреної переваги над випадковим похідних немає");
   /* похідні зберігаються в прогнози з окремою стратегією */
   const env=mkEnv();
   await lottoSavePrediction(env,"lottomax",an.smartCombos);

@@ -28,7 +28,7 @@ const prelude=[
   grabConst(worker,"LOTTO_GAMES"),
   'const LOTTO_DISCLAIMER="Тест.";'
 ].join("\n");
-(0,eval)(prelude+"\n"+grabFn(worker,"lottoAnalyze"));
+(0,eval)(prelude+"\n"+grabFn(worker,"lottoBaseline")+"\n"+grabFn(worker,"lottoComb")+"\n"+grabFn(worker,"lottoOdds")+"\n"+grabFn(worker,"lottoRandomness")+"\n"+grabFn(worker,"erfcApprox")+"\n"+grabFn(worker,"lottoAnalyze"));
 
 /* --- детермінований набір тиражів --- */
 function mkDraws(){

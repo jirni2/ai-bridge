@@ -20,7 +20,7 @@ const $=id=>document.getElementById(id);
 const I18N=globalThis.AIBridgeI18n||null;
 I18N?.init?.();
 const t=(key,vars)=>I18N?.t?.(key,vars)??key;
-const UI_VERSION="5.11.107";
+const UI_VERSION="5.11.108";
 // v5.9.0: storage can throw (Safari private mode, quota, blocked site data).
 // Every new read/write goes through these helpers so one failure can never
 // stop the whole interface from booting.
@@ -1775,6 +1775,17 @@ async function renderLotto(){
       if(an.partialOverlaps&&an.partialOverlaps.length){h+=`<h4>${esc(t("lottoPartial"))}</h4>`+an.partialOverlaps.slice(0,5).map(p=>`<div class="lottoMeta">≈ ${p.d1} ↔ ${p.d2}: ${p.common}/${g.mainCount}</div>`).join("");}
       if(an.longestGaps&&an.longestGaps.length){h+=`<h4>${esc(t("lottoGaps"))}</h4><div class="lottoChips">${an.longestGaps.slice(0,10).map(x=>`<span class="lottoChip">${x.n} · ${x.gap===null?esc(t("lottoNever")):(x.gap===0?esc(t("lottoInLatest")):t("lottoDrawsAgo",{n:x.gap}))}</span>`).join("")}</div>`;}
       h+=`<div class="lottoDisc">⚠️ ${esc(an.note||t("lottoDisclaimer"))}</div></article>`;
+      /* v5.11.108: чесні шанси — щоб «розумні комбінації» було з чим порівняти */
+      if(an.odds){
+        const ul=(I18N?.getLanguage?.()||"uk"),nf=x=>Number(x).toLocaleString(ul==="en"?"en-CA":ul==="ru"?"ru-RU":"uk-UA");
+        const rnd=an.randomness;
+        h+=`<article class="card lottoCard lottoOdds"><h3>🎲 ${esc(t("lottoOddsTitle"))}</h3>`+
+          `<p class="lottoOddsBig">${esc(t("lottoOddsJackpot",{n:nf(an.odds.jackpot)}))}</p>`+
+          (an.odds.linesPerTicket>1?`<p class="lottoMeta">${esc(t("lottoOddsTicket",{l:an.odds.linesPerTicket,n:nf(an.odds.jackpotPerTicket)}))}</p>`:"")+
+          `<p class="lottoMeta">${esc(t("lottoOddsRandom",{m:String(an.odds.expectedMatches),k:an.odds.mainCount}))}</p>`+
+          (rnd?`<p class="lottoMeta">${esc(t(rnd.looksRandom?"lottoRandOk":"lottoRandOdd",{p:String(rnd.p)}))}</p>`:"")+
+          `</article>`;
+      }
       /* v5.11.55: розумний підбір — 5 комбінацій зі стратегіями; v5.11.57: точність з навчання + похідні */
       if(an.smartCombos&&an.smartCombos.length){
         const stratName={hot:t("lottoSmartHot"),ripe:t("lottoSmartRipe"),balance:t("lottoSmartBalance"),pairs:t("lottoSmartPairs"),anti:t("lottoSmartAnti")};
@@ -1782,8 +1793,8 @@ async function renderLotto(){
           return (stratName[base]||base)+(evo?"+":"");};
         const mc=g.mainCount||7;
         h+=`<article class="card lottoCard"><h3>${esc(t("lottoSmart"))}</h3>`+
-          an.smartCombos.map(c=>{const acc=(typeof c.accuracy==="number"?c.accuracy:0.5)*mc;
-            return `<div class="lottoSmartRow"><div class="lottoSmartHead"><b>${esc(dispName(c.id))}</b></div><div class="lottoComboNums">${(c.nums||[]).map(x=>`<span class="lottoBall sm">${x}</span>`).join("")}</div><div class="lottoMeta">${esc(c.reason||"")}</div><div class="lottoMeta lottoAcc">🎯 ${esc(t("lottoAccuracy"))}: ${acc.toFixed(1)} ${esc(t("lottoAvgMatches"))}</div></div>`;}).join("")+
+          an.smartCombos.map(c=>{const acc=(typeof c.accuracy==="number"?c.accuracy:(an.baseline||0))*mc;
+            return `<div class="lottoSmartRow"><div class="lottoSmartHead"><b>${esc(dispName(c.id))}</b></div><div class="lottoComboNums">${(c.nums||[]).map(x=>`<span class="lottoBall sm">${x}</span>`).join("")}</div><div class="lottoMeta">${esc(c.reason||"")}</div><div class="lottoMeta lottoAcc">🎯 ${esc(t("lottoAccuracy"))}: ${acc.toFixed(2)} ${esc(t("lottoAvgMatches"))}${typeof an.baseline==="number"?` · ${esc(t("lottoRandomLevel"))}: ${(an.baseline*mc).toFixed(2)}`:""}${c.checks?` · ${esc(t("lottoChecks",{n:c.checks}))}`:""}</div></div>`;}).join("")+
           (an.learning?`<div class="lottoMeta lottoLearn">📊 ${esc(t("lottoCheckedN"))}: ${an.learning.totalChecked||0}`+(an.learning.bestStrategy?` · ${esc(t("lottoBestStrategy"))}: ${esc(dispName(an.learning.bestStrategy))}`:"")+`</div>`:"")+
           `</article>`;
       }
@@ -1823,11 +1834,23 @@ let dtcTabSel="code";
 function dtcSevLabel(sv){
   return sv==="critical"?t("dtcSevCritical"):sv==="warning"?t("dtcSevWarning"):t("dtcSevInfo");
 }
+/* v5.11.108: код виробника — показуємо всі марки (раніше лише першу); невідомий код — чесний розбір структури. */
+let dtcLastMake="";
+function dtcCodeBody(r){
+  return `<h4>${esc(r.title_uk)}</h4><p>${esc(r.desc_uk)}</p>`
+    +(r.causes_uk&&r.causes_uk.length?`<h4>${esc(t("dtcCauses"))}</h4><ul class="dtcCauses">${r.causes_uk.map(c=>`<li>${esc(c)}</li>`).join("")}</ul>`:"");
+}
 function dtcCodeCard(r){
-  return `<div class="card dtcCard"><div><span class="dtcCode">${esc(r.code)}</span><span class="dtcSev ${esc(r.severity)}">${esc(dtcSevLabel(r.severity))}</span></div>`
-    +`<h4>${esc(r.title_uk)}</h4><p>${esc(r.desc_uk)}</p>`
-    +(r.causes_uk&&r.causes_uk.length?`<h4>${esc(t("dtcCauses"))}</h4><ul class="dtcCauses">${r.causes_uk.map(c=>`<li>${esc(c)}</li>`).join("")}</ul>`:"")
-    +`</div>`;
+  const multi=Array.isArray(r.variants)&&r.variants.length>1;
+  /* серйозність показуємо в заголовку лише коли значення однозначне; для кодів виробника — у кожної марки окремо */
+  const head=`<div><span class="dtcCode">${esc(r.code)}</span>`+(r.known===false||multi?"":`<span class="dtcSev ${esc(r.severity)}">${esc(dtcSevLabel(r.severity))}</span>`)+`</div>`;
+  if(Array.isArray(r.variants)&&r.variants.length>1){
+    return `<div class="card dtcCard">${head}<p class="dtcNote">${esc(t("dtcByMake",{n:r.variants.length}))}</p>`
+      +r.variants.map(v=>`<div class="dtcVariant"><div class="dtcVariantHead"><b>${esc(v.make||"—")}</b><span class="dtcSev ${esc(v.severity)}">${esc(dtcSevLabel(v.severity))}</span></div>${dtcCodeBody(v)}</div>`).join("")
+      +`</div>`;
+  }
+  return `<div class="card dtcCard">${head}`+(r.make?`<p class="dtcNote">${esc(t("dtcMakeOnly",{m:r.make}))}</p>`:"")+dtcCodeBody(r)
+    +(r.known===false?`<p class="dtcNote">${esc(t("dtcUnknownHint"))}</p>`:"")+`</div>`;
 }
 async function dtcDoLookup(){
   const inp=$("dtcCodeInput"),out=$("dtcCodeResult");if(!inp||!out)return;
@@ -1835,7 +1858,7 @@ async function dtcDoLookup(){
   if(!code){out.innerHTML="";return;}
   out.innerHTML=`<div class="dtcErr">${esc(t("dtcLoading"))}…</div>`;
   try{
-    const r=await fetch("/api/dtc/lookup?code="+encodeURIComponent(code),{cache:"no-store",credentials:"same-origin"});
+    const r=await fetch("/api/dtc/lookup?code="+encodeURIComponent(code)+(dtcLastMake?"&make="+encodeURIComponent(dtcLastMake):""),{cache:"no-store",credentials:"same-origin"});
     const j=await r.json();
     if(!r.ok||j.error){out.innerHTML=`<div class="dtcErr">⚠️ ${esc(j.error||t("dtcNotFound"))}${j.hint?`<br><small>${esc(j.hint)}</small>`:""}</div>`;return;}
     out.innerHTML=dtcCodeCard(j);
@@ -1850,6 +1873,7 @@ async function dtcDoVin(){
     const r=await fetch("/api/dtc/vin?vin="+encodeURIComponent(vin),{cache:"no-store",credentials:"same-origin"});
     const j=await r.json();
     if(!r.ok||!j.valid){out.innerHTML=`<div class="dtcErr">⚠️ ${esc(j.error||t("dtcVinBad"))}</div>`;return;}
+    dtcLastMake=String(j.make||"").split(/[\s/]/)[0]; /* v5.11.108: марка з VIN — перша в списку для кодів виробника */
     out.innerHTML=`<div class="card dtcCard">`
       +`<div class="dtcVinRow"><span class="k">VIN</span><span class="v" style="font-family:ui-monospace,monospace">${esc(j.vin)}</span></div>`
       +`<div class="dtcVinRow"><span class="k">${esc(t("dtcMake"))}</span><span class="v">${esc(j.make)}</span></div>`
@@ -6721,7 +6745,8 @@ async function runResearch(query){
   const depth=$("researchDepth")?.value||"standard";
   $("chatEmpty")?.classList.add("hidden");
   const ans=$("answerArea");ans.classList.remove("hidden");
-  const html=$("answerHtml");
+  /* v5.11.108: елемента #answerHtml у розмітці немає — Дослідження падало з TypeError. Відповідь — у #finalAnswer. */
+  const html=$("finalAnswer");
   html.innerHTML=`
     <div class="researchCard">
       <div class="researchHead"><b>🔬 ${esc(t("researchTitle"))}</b><span class="smallMuted">${esc(query.slice(0,140))}</span></div>

@@ -15,7 +15,8 @@ const PLACEHOLDER = "/*__DTC_DATA__*/";
 const data = fs.readFileSync(dataPath, "utf8");
 let worker = fs.readFileSync(workerPath, "utf8");
 
-if (!worker.includes(PLACEHOLDER)) {
+/* v5.11.108: після першої вставки плейсхолдера вже немає — є маркери START/END; раніше скрипт тут падав. */
+if (!worker.includes(PLACEHOLDER) && !worker.includes("/*__DTC_DATA_START__*/")) {
   console.error("inject-dtc: placeholder not found in _worker.js");
   process.exit(1);
 }

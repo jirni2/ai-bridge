@@ -66,6 +66,7 @@ function grabConst(src,name){
 const evalSrc=dataBlock
   +"\n"+grabConst(worker,"DTC_VIN_WEIGHTS")
   +"\n"+grabConst(worker,"DTC_VIN_VALUES")
+  +"\n"+grabConst(worker,"DTC_SYS")+"\n"+grabConst(worker,"DTC_P_SUB")+"\n"+grabFn(worker,"dtcEntry")+"\n"+grabFn(worker,"dtcDecodeStructure") /* v5.11.108 */
   +"\n"+grabFn(worker,"dtcLookup")
   +"\n"+grabFn(worker,"dtcSearch")
   +"\n"+grabFn(worker,"dtcDecodeVin")
